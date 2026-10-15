@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linkedia.web.app/contracts/tag_catalog.schema.json",
+  "title": "Linkedia Public Tag Catalog",
+  "description": "content/tags/catalog.json. Contains only tags referenced by published articles. Aliases stay private.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tags"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "label", "kind"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^(topic|theme|region|risk|reason|source):[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "kind": { "enum": ["topic", "theme", "region", "risk", "reason", "source"] },
+          "description": { "type": "string", "maxLength": 300 }
+        }
+      }
+    }
+  }
+}

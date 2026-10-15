@@ -1,0 +1,14 @@
+node_modules/
+.astro/
+dist/
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+playwright-report/
+test-results/
+.firebase/
+firebase-debug.log*
+.reviews/
+.claude/settings.local.json

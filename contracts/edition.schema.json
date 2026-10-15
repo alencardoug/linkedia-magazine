@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linkedia.web.app/contracts/edition.schema.json",
+  "title": "Linkedia Daily Edition",
+  "description": "One file per published date: content/editions/YYYY-MM-DD.json. article_ids order is display order; the first article is the lead story.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "edition_date",
+    "title",
+    "article_ids",
+    "published_at",
+    "timezone"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "edition_date": { "type": "string", "format": "date" },
+    "title": { "type": "string", "minLength": 6, "maxLength": 120 },
+    "summary": { "type": "string", "maxLength": 400 },
+    "article_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "format": "uuid" }
+    },
+    "published_at": {
+      "description": "Export timestamp declared by the engine (deployment may happen later).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "timezone": { "const": "America/Sao_Paulo" },
+    "visual_theme_id": {
+      "description": "Current theme id read from the magazine's themes manifest at export time (D-025).",
+      "type": ["string", "null"]
+    }
+  }
+}
