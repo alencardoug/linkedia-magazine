@@ -1,0 +1,78 @@
+# Validate, test and build on every PR and push; deploy to Firebase Hosting (site `linkedia`) only on
+# push to `main`. Keyless: GitHub OIDC -> Workload Identity Federation (provider accepts only this repo,
+# ref main, push events) -> service account with roles/firebasehosting.admin. No secrets in the repo.
+# Actions are pinned to commit SHAs (tag in the comment); bump them deliberately.
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run validate
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+          if-no-files-found: error
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://linkedia.web.app
+    permissions:
+      contents: read
+      id-token: write # OIDC token for Workload Identity Federation; only this job gets it
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            firebase.json
+            .firebaserc
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: projects/991312603178/locations/global/workloadIdentityPools/github/providers/linkedia-magazine
+          service_account: github-deploy@linked-ia.iam.gserviceaccount.com
+      - run: npx --yes firebase-tools@15.34.0 deploy --only hosting --project linked-ia --non-interactive
+      - name: Smoke test
+        run: |
+          curl -fsS --retry 5 --retry-delay 5 https://linkedia.web.app/ -o home.html
+          grep -q '<html lang="pt-BR"' home.html

@@ -6,7 +6,12 @@ Use **classic Firebase Hosting**, not Firebase App Hosting. Astro outputs static
 ## Name / project binding
 The requested canonical URL is `https://linkedia.web.app`. It works **only after** an authenticated `linkedia` Hosting site ID is successfully reserved (globally unique). Failure to fetch a URL or a missing DNS record is not proof of availability. Since 2026-10-15 new Firebase projects get no default Hosting site and the first site created becomes the permanent default: create `linkedia` with `firebase hosting:sites:create linkedia` as the very first step in a new project, before enabling any other Firebase product (enabling Auth auto-creates a project-named default site), and bind the correct Firebase target/site in the checked-out public repo. The default project ID and site ID may differ, so do not assume they are identical. Domain `linkedia.com.br` is separate and may incur registrar charges.
 
-## Initial setup (after real Astro app exists)
+## Current binding (2026-10-15)
+Project `linked-ia` (the project ID `linkedia` was taken). `firebase projects:create` auto-created a default site `linked-ia` (unused), so the claim above about no default site did not hold for CLI-created projects; site `linkedia` was created next. `firebase.json` pins `hosting.site: "linkedia"` and `.firebaserc` sets the project, so a deploy can never land on the default site.
+
+CI (`.github/workflows/deploy.yml`) deploys without any stored credential: the `deploy` job (push to `main` only) exchanges its GitHub OIDC token through Workload Identity Federation (pool `github`, provider `linkedia-magazine`, condition: this repository, `refs/heads/main`, `push`) for the service account `github-deploy@linked-ia.iam.gserviceaccount.com`, whose only project role is `roles/firebasehosting.admin`. This replaces `firebase init hosting:github`, which would store a long-lived JSON key as a repository secret. The `build` job (PRs and pushes) has `contents: read` only and is the required status check on `main`.
+
+## Initial setup (historical checklist)
 1. Create/select Firebase project with Spark plan; verify classic Hosting and exact site ID.
 2. Install/authenticate Firebase CLI (`firebase login`) on the owner's machine.
 3. `firebase init hosting` in public repo; configure `dist` as public directory, with build producing static pages. Use multi-site targets if project's default ID differs.
