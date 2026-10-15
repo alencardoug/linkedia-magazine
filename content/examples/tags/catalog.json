@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "tags": [
+    {
+      "key": "reason:learning-value",
+      "kind": "reason",
+      "label": "Valor de aprendizado"
+    },
+    {
+      "key": "topic:example",
+      "kind": "topic",
+      "label": "Exemplo"
+    }
+  ]
+}
