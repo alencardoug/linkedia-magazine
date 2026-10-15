@@ -1,0 +1,14 @@
+Content license
+
+Editorial content in `content/` (articles, editions and tag catalogs) is
+licensed under the Creative Commons Attribution 4.0 International License
+(CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+Full legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+
+Copyright (c) 2026 alencardoug
+
+Quoted material and the third-party sources cited in each article remain
+under their own licenses; CC BY 4.0 covers only the original Linkedia text.
+
+Everything else in this repository (code, styles, themes, schemas and
+configuration) is licensed under the MIT License; see LICENSE.

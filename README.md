@@ -5,3 +5,6 @@ Static site of Linkedia, a Brazilian Portuguese daily magazine about AI engineer
 Built with Astro and deployed to Firebase Hosting. Content lives in `content/` as JSON validated against `contracts/` at build time; there is no backend. Each week the site also hosts one visual-interface experiment next to a permanent minimal dark theme.
 
 **Status:** under construction — no edition published yet.
+
+## License
+Code: MIT (`LICENSE`). Editorial content in `content/`: CC BY 4.0 (`LICENSE-CONTENT`).
