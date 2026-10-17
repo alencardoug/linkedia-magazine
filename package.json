@@ -14,6 +14,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
+    "e2e": "LINKEDIA_CONTENT_DIR=content/examples npm run build && playwright test",
     "gen:types": "node scripts/gen-types.mjs"
   },
   "dependencies": {
@@ -21,6 +22,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
     "@types/node": "24.19.2",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",

@@ -4,6 +4,7 @@
 - API contracts: JSON schema fixtures validate; incompatible changes require `schema_version` increment.
 - Engine: Python static checks, unit tests for dedup/tags/prompt versioning, integration test with local Postgres, deterministic mock CLI adapter and HITL resume test.
 - Magazine: Astro build, article/edition direct-route smoke tests, clipboard interaction, missing-source and malformed-image tests, accessibility and responsive theme fallback.
+  - As built (1B-04): `npm test` (Vitest: contracts, content validation, themes, firebase.json, static build with hostile content) and `npm run e2e` (Playwright + axe in Chromium against the Hosting emulator on `content/examples`: every route 200 with no redirect, CSP header and no console/CSP errors, 404 page, one-hop redirects of `.html`/trailing slash, copy button with clipboard permission, full article and prompt without JS, no horizontal scroll at 320 px, no serious/critical axe violation). CI runs both; `deploy` needs `build` and `e2e`.
 - Publish: exported files contain no secrets, local absolute paths, raw prompts or unapproved candidates; git diff review shows only expected public paths; Firebase production action runs from authorized branch only.
 
 ## Editorial gates
