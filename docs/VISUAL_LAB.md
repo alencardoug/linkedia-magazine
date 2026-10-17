@@ -25,7 +25,7 @@ Permanent: `themes/minimal-dark` (dark, readable, unchanged except bug/security 
 - **Experiments so far.** `lab-2026-w42` "Broadsheet" (2026-W42): light newsprint, serif masthead, drop caps, CSS scroll-driven reading-progress rule; CSS only.
 
 ## Free creative brief
-One new theme per ISO week maximum. The weekly concept may redesign the whole site or one element; experiments can be minimalist, vibrant, light, dark, procedural, 3D, shader-rich, WebGL or text-led. Search external inspiration, attribute sources and use original implementation. Avoid visual novelty that makes articles inaccessible.
+One new theme per ISO week maximum, made on the **Friday** of that week (owner's rhythm): it becomes the current slot that Friday and stays there until the next Friday's theme. The weekly concept may redesign the whole site or one element; experiments can be minimalist, vibrant, light, dark, procedural, 3D, shader-rich, WebGL or text-led. Search external inspiration, attribute sources and use original implementation. Avoid visual novelty that makes articles inaccessible.
 
 ## Quality gates
 Keyboard, touch, screen readers, reduced motion, forced colors/high contrast where possible, small viewport, loading/fallback when 3D unsupported, Core Web Vitals budget, responsive reading contrast and no layout shift. A theme that fails gates must not replace baseline: keep new theme disabled until fixed.
