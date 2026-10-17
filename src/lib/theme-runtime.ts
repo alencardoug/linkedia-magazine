@@ -90,13 +90,23 @@ export interface ControllerOptions {
   allows?: (requirement: string) => boolean;
   /** Called after a theme failed and the baseline was applied instead. */
   onFallback?: (failedThemeId: string, reason: unknown) => void;
+  /** Where uncaught errors surface (`window`); null disables the safety net. */
+  errors?: EventTarget | null;
 }
 
 /**
  * Applies slots one at a time. A later `apply` supersedes an earlier one still loading (its module never runs,
- * or its cleanup runs at once); `fail()` from a superseded enhancement is ignored.
+ * or its cleanup runs at once); `fail()` from a superseded enhancement is ignored. While an enhancement runs,
+ * any uncaught error or unhandled rejection on the page (a throwing timer, frame or event handler included)
+ * counts as its failure: the site's own scripts are tiny, so the enhancement is the likely cause.
  */
-export function themeController({ root, enhancements, allows = deviceAllows, onFallback }: ControllerOptions) {
+export function themeController({
+  root,
+  enhancements,
+  allows = deviceAllows,
+  onFallback,
+  errors = typeof addEventListener === 'function' ? globalThis : null,
+}: ControllerOptions) {
   let generation = 0;
   let running: { abort: AbortController; cleanup: Cleanup | null } | null = null;
 
@@ -151,6 +161,9 @@ export function themeController({ root, enhancements, allows = deviceAllows, onF
     try {
       const module = await entry.load();
       if (mine !== generation) return failed ? 'fallback' : 'stale';
+      const uncaught = (event: Event) => fail('error' in event ? event.error : 'reason' in event ? event.reason : event);
+      errors?.addEventListener('error', uncaught, { signal: abort.signal });
+      errors?.addEventListener('unhandledrejection', uncaught, { signal: abort.signal });
       const cleanup = await module.default({ root, signal: abort.signal, fail });
       if (failed || mine !== generation) {
         dispose(cleanup);
@@ -185,7 +198,7 @@ export function startThemes(enhancements: Readonly<Record<string, EnhancementEnt
       const failed = SLOTS.find((s) => slotTheme(root, s) === id);
       const baseline = radio('baseline');
       if (baseline) baseline.checked = true;
-      say(`O tema ${failed ? title(failed) : id} não carregou; voltamos ao ${title('baseline')}.`);
+      say(`O tema ${failed ? title(failed) : id} falhou; voltamos ao ${title('baseline')}.`);
     },
   });
 

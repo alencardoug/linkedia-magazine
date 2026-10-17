@@ -210,6 +210,43 @@ describe('themeController', () => {
     expect(root.getAttribute('data-theme')).toBe('lab-2099-w01');
   });
 
+  it('falls back on an uncaught error or rejection after the enhancement started, and stops listening', async () => {
+    for (const [type, field] of [['error', 'error'], ['unhandledrejection', 'reason']]) {
+      const root = fakeRoot();
+      const errors = new EventTarget();
+      const cleanup = vi.fn();
+      const onFallback = vi.fn();
+      const themes = themeController({
+        root,
+        enhancements: { 'lab-2099-w02': { requires: [], load: async () => ({ default: () => cleanup }) } },
+        allows: () => true,
+        onFallback,
+        errors,
+      });
+      expect(await themes.apply('current')).toBe('enhanced');
+      const boom = new Error('in a timer');
+      errors.dispatchEvent(Object.assign(new Event(type), { [field]: boom }));
+      expect(root.getAttribute('data-theme')).toBe('minimal-dark');
+      expect(root.getAttribute('data-theme-fallback')).toBe('lab-2099-w02');
+      expect(cleanup).toHaveBeenCalledOnce();
+      expect(onFallback).toHaveBeenCalledWith('lab-2099-w02', boom);
+      // After the fallback (and after any later switch) page errors no longer touch the theme.
+      await themes.apply('previous');
+      errors.dispatchEvent(Object.assign(new Event(type), { [field]: boom }));
+      expect(root.getAttribute('data-theme')).toBe('lab-2099-w01');
+      expect(onFallback).toHaveBeenCalledOnce();
+    }
+  });
+
+  it('ignores page errors while no enhancement runs', async () => {
+    const root = fakeRoot();
+    const errors = new EventTarget();
+    const themes = themeController({ root, enhancements: {}, errors });
+    await themes.apply('current');
+    errors.dispatchEvent(Object.assign(new Event('error'), { error: new Error('x') }));
+    expect(root.getAttribute('data-theme')).toBe('lab-2099-w02');
+  });
+
   it('reports an empty slot as unavailable and changes nothing', async () => {
     const root = fakeRoot({ 'data-theme-previous': null });
     const themes = themeController({ root, enhancements: {} });

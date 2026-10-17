@@ -23,6 +23,7 @@ const radio = (page, name) => page.getByRole('radio', { name });
 const status = (page) => page.locator('[data-theme-status]');
 const background = (page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 const stored = (page) => page.evaluate((k) => localStorage.getItem(k), KEY);
+const content = (page) => page.locator('main').innerHTML();
 // Sets the stored slot before every navigation of this page.
 const preset = (page, value) => page.addInitScript(([k, v]) => localStorage.setItem(k, v), [KEY, value]);
 
@@ -67,6 +68,21 @@ test('switches by keyboard, announces, persists and cleans up the enhancement', 
   await expect(radio(page, 'Base: Minimal Dark')).toBeChecked();
   await expect(status(page)).toHaveText(''); // nothing announced on load
   expect(errors).toEqual([]);
+});
+
+test('never changes the article content across switches and a fallback', async ({ page }) => {
+  await page.goto(ARTICLE);
+  await expect(theme(page)).toHaveAttribute('data-theme-enhanced', THEMES.current);
+  const before = await content(page);
+  for (const name of ['Anterior: Fixture Light', 'Base: Minimal Dark', 'Atual: Fixture Motion']) {
+    await radio(page, name).check();
+    await expect(radio(page, name)).toBeChecked();
+    expect(await content(page), name).toBe(before);
+  }
+  await expect(theme(page)).toHaveAttribute('data-theme-enhanced', THEMES.current);
+  await page.evaluate(() => setTimeout(() => { throw new Error('late'); }));
+  await expect(theme(page)).toHaveAttribute('data-theme-fallback', THEMES.current);
+  expect(await content(page)).toBe(before);
 });
 
 test('the inline script alone applies the stored slot before the body is parsed', async ({ page }) => {
@@ -117,9 +133,30 @@ test.describe('fallback to the baseline', () => {
     await expect(theme(page)).toHaveAttribute('data-theme', THEMES.baseline);
     await expect(theme(page)).toHaveAttribute('data-theme-fallback', THEMES.current);
     await expect(radio(page, 'Base: Minimal Dark')).toBeChecked();
-    await expect(status(page)).toHaveText('O tema Fixture Motion não carregou; voltamos ao Minimal Dark.');
+    await expect(status(page)).toHaveText('O tema Fixture Motion falhou; voltamos ao Minimal Dark.');
     await expect(page.locator('h1')).toHaveText('Exemplo ilustrativo de matéria');
     expect(await stored(page)).toBeNull(); // the reader's choice is not overwritten
+  });
+
+  test('when the enhancement throws later, in a timer', async ({ page }) => {
+    await page.route(ENHANCE, (route) =>
+      route.fulfill({
+        contentType: 'text/javascript',
+        body: `export default () => {
+          const bar = document.createElement('div');
+          bar.setAttribute('data-theme-decor', '');
+          document.body.append(bar);
+          setTimeout(() => { throw new Error('late'); }, 100);
+          return () => bar.remove();
+        };`,
+      }),
+    );
+    await page.goto(ARTICLE);
+    await expect(theme(page)).toHaveAttribute('data-theme-fallback', THEMES.current);
+    await expect(theme(page)).toHaveAttribute('data-theme', THEMES.baseline);
+    await expect(page.locator('[data-theme-decor]')).toHaveCount(0); // its cleanup ran
+    await expect(radio(page, 'Base: Minimal Dark')).toBeChecked();
+    await expect(status(page)).toHaveText('O tema Fixture Motion falhou; voltamos ao Minimal Dark.');
   });
 
   test('when the enhancement throws', async ({ page }) => {

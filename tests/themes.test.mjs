@@ -93,13 +93,14 @@ describe('lab stylesheet isolation', () => {
     const css = `
       :root[data-theme='${ID}'] { --bg: #000; }
       :root[data-theme="${ID}"] body, :root[data-theme='${ID}']:has(main) [data-card] { color: red }
-      :root[data-theme='${ID}'] [data-card] { & h2 { color: blue } }
+      :root[data-theme='${ID}'] [data-card] { & h2 { color: blue } &:hover, > p { color: red } }
+      :root[data-theme='${ID}'] main { @media (min-width: 1px) { & a { color: red } } }
       @media (min-width: 40rem) { :root[data-theme='${ID}'] main { max-width: 80ch } }
       @supports (display: grid) { @container (min-width: 1px) { :root[data-theme='${ID}'] main { display: grid } } }
       @layer lab { :root[data-theme='${ID}'] a { color: red } }
       @keyframes ${ID}-spin { to { rotate: 1turn } }
       @property --${ID}-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-      @font-face { font-family: Lab; src: url(./lab.woff2) format('woff2'); }
+      @font-face { font-family: '${ID}-serif'; src: url(./lab.woff2) format('woff2'); }
       :root[data-theme='${ID}'] [data-site-header] { background: url('./noise.svg') }
     `;
     expect(errors(css)).toEqual([]);
@@ -113,6 +114,12 @@ describe('lab stylesheet isolation', () => {
     ['the bare :root', ':root { --bg: #fff }', 'fora do escopo'],
     ['a scope that does not lead', `main :root[data-theme='${ID}'] { color: red }`, 'fora do escopo'],
     ['an unscoped rule inside @media', '@media print { body { color: red } }', 'fora do escopo'],
+    ['a nested selector that widens the scope', `:root[data-theme='${ID}'] { :is(&, body) { display: none } }`, 'só pode usar & no início'],
+    ['a nested selector with a second &', `:root[data-theme='${ID}'] { & + & { color: red } }`, 'só pode usar & no início'],
+    ['a widening selector nested in @media', `:root[data-theme='${ID}'] { @media print { body:has(&) { display: none } } }`, 'só pode usar & no início'],
+    ['an at-rule nested in a rule', `:root[data-theme='${ID}'] { @keyframes spin { to { rotate: 1turn } } }`, 'não é permitido dentro de uma regra'],
+    ['an unprefixed @font-face family', "@font-face { font-family: Lab; src: url(./lab.woff2) }", '@font-face deve declarar font-family'],
+    ['a @font-face without a family', '@font-face { src: url(./lab.woff2) }', '@font-face deve declarar font-family'],
     ['@import', "@import url('./x.css');", '@import não é permitido'],
     ['an unprefixed @keyframes', '@keyframes spin { to { rotate: 1turn } }', `@keyframes deve começar com "${ID}-"`],
     ['an unprefixed @property', "@property --bg { syntax: '<color>'; inherits: true; initial-value: red; }", '@property deve começar'],
@@ -120,7 +127,7 @@ describe('lab stylesheet isolation', () => {
     ['an external URL', `:root[data-theme='${ID}'] body { background: url(https://example.com/x.png) }`, 'url() deve apontar'],
     ['a data: URL', `:root[data-theme='${ID}'] body { background: url("data:image/png;base64,AAAA") }`, 'url() deve apontar'],
     ['a root-relative URL', `:root[data-theme='${ID}'] body { background: url(/x.png) }`, 'url() deve apontar'],
-    ['a protocol-relative URL', `@font-face { font-family: X; src: url(//cdn.example/x.woff2) }`, 'url() deve apontar'],
+    ['a protocol-relative URL', `@font-face { font-family: ${ID}-x; src: url(//cdn.example/x.woff2) }`, 'url() deve apontar'],
     ['broken CSS', `:root[data-theme='${ID}'] { color: red`, 'CSS inválido'],
   ])('rejects %s', (_, css, message) => {
     expect(errors(css)).toEqual(expect.arrayContaining([expect.stringContaining(message)]));

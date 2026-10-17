@@ -61,8 +61,9 @@ export function themeFiles(dir, id) {
 
 /**
  * Isolation of a lab stylesheet: every top-level rule (also inside @media/@supports/…) must start with the
- * theme's own `:root[data-theme="<id>"]`, global names (@keyframes, @property) carry the id, and nothing is
- * fetched (@import, external or data: URLs). Nested rules inherit the parent's scope.
+ * theme's own `:root[data-theme="<id>"]`; a nested rule may use `&` only as its first character (without `&` it
+ * is implicitly `& …`), so `:is(&, body)` cannot widen the scope; global names (@keyframes, @property,
+ * @font-face families) carry the id, and nothing is fetched (@import, external or data: URLs).
  * @returns {string[]} errors (pt-BR)
  */
 export function checkThemeCss(id, css, where = `${id}/theme.css`) {
@@ -78,26 +79,39 @@ export function checkThemeCss(id, css, where = `${id}/theme.css`) {
   }
   const scope = new RegExp(`^:root\\[data-theme=(["'])${id}\\1\\]`);
   const line = (node) => `${where}:${node.source?.start?.line ?? '?'}`;
-  const walk = (container) =>
+  const unquote = (value) => value.trim().replace(/^(['"])(.*)\1$/, '$2');
+  const walk = (container, nested) =>
     container.each((node) => {
       if (node.type === 'rule') {
-        for (const selector of node.selectors) {
-          if (!scope.test(selector.trim())) errors.push(`${line(node)}: seletor fora do escopo do tema: ${selector.trim()}`);
+        for (const raw of node.selectors) {
+          const selector = raw.trim();
+          if (!nested && !scope.test(selector)) errors.push(`${line(node)}: seletor fora do escopo do tema: ${selector}`);
+          if (nested && selector.slice(1).includes('&')) {
+            errors.push(`${line(node)}: seletor aninhado só pode usar & no início: ${selector}`);
+          }
         }
+        walk(node, true);
       } else if (node.type === 'atrule') {
         const name = node.name.toLowerCase();
         if (CONTAINER_AT_RULES.has(name)) {
-          if (node.nodes) walk(node);
+          if (node.nodes) walk(node, nested);
+        } else if (nested) {
+          errors.push(`${line(node)}: @${node.name} não é permitido dentro de uma regra`);
         } else if (name === 'keyframes') {
           if (!node.params.trim().startsWith(`${id}-`)) errors.push(`${line(node)}: @keyframes deve começar com "${id}-"`);
         } else if (name === 'property') {
           if (!node.params.trim().startsWith(`--${id}-`)) errors.push(`${line(node)}: @property deve começar com "--${id}-"`);
-        } else if (name !== 'font-face') {
+        } else if (name === 'font-face') {
+          const families = node.nodes?.filter((d) => d.type === 'decl' && d.prop.toLowerCase() === 'font-family') ?? [];
+          if (families.length === 0 || families.some((d) => !unquote(d.value).startsWith(`${id}-`))) {
+            errors.push(`${line(node)}: @font-face deve declarar font-family começando com "${id}-"`);
+          }
+        } else {
           errors.push(`${line(node)}: @${node.name} não é permitido em um tema`);
         }
       }
     });
-  walk(root);
+  walk(root, false);
   root.walkDecls((decl) => {
     for (const [, raw] of decl.value.matchAll(/url\(\s*([^)]*?)\s*\)/gi)) {
       const target = raw.replace(/^['"]|['"]$/g, '');
