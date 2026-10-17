@@ -185,6 +185,10 @@ describe('static build', () => {
       // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
       expect(html, page).not.toMatch(/<script(?![^>]*\ssrc="\/_astro\/)[^>]*>/);
       expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
+      // Astro drops the line break between text and a link on the next line: "licençaCC BY 4.0".
+      expect(html, page).not.toMatch(/[\p{L}.,;:]<a\s/u);
+      // A scrollable code block must be reachable by keyboard (axe scrollable-region-focusable).
+      expect(html, page).not.toMatch(/<pre(?![^>]*\stabindex="0")/);
     }
     const notFound = readFileSync(join(out, '404.html'), 'utf8');
     expect(notFound).toContain('Página não encontrada');
@@ -218,6 +222,9 @@ describe('static build', () => {
     const article = readFileSync(join(out, 'materias/materia-hostil-1.html'), 'utf8');
     // title, summary, 8 blocks' texts, source fields, tag label, prompt: each appears escaped
     expect(article.split('&lt;script&gt;alert').length - 1).toBeGreaterThanOrEqual(20);
+    // Code and diagram blocks: every <pre> is focusable (axe scrollable-region-focusable).
+    expect(article.match(/<pre tabindex="0">/g)).toHaveLength(2);
+    expect(article).not.toMatch(/<pre(?![^>]*\stabindex="0")/);
     expect(escaped).toBeGreaterThan(30);
     expect(existsSync(join(out, 'materias/materia-hostil-2.html'))).toBe(true);
   }, 120_000);

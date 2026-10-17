@@ -1,7 +1,7 @@
 ---
 // One article block, rendered as escaped text only (Astro escapes every {expression}); model output is never
-// injected as HTML. Code and diagram specs are text in <pre><code> (D-027); images load only from allowed
-// hosts, else their text fallback.
+// injected as HTML. Code and diagram specs are text in <pre><code> (D-027), focusable so a keyboard can scroll a
+// long line; images load only from allowed hosts, else their text fallback.
 import type { Block } from '../types/contracts';
 import { CALLOUT_LABELS, imageAllowed } from '../lib/labels';
 import Cites from './Cites.astro';
@@ -58,7 +58,7 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
 {
   block.type === 'code' && (
     <figure data-block="code">
-      <pre><code data-language={block.language}>{block.code}</code></pre>
+      <pre tabindex="0"><code data-language={block.language}>{block.code}</code></pre>
       {block.caption && <figcaption>{block.caption}</figcaption>}
     </figure>
   )
@@ -69,7 +69,7 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
       <p>{block.long_description}</p>
       <details>
         <summary>Ver a especificação do diagrama ({block.diagram_format})</summary>
-        <pre><code>{block.diagram_spec}</code></pre>
+        <pre tabindex="0"><code>{block.diagram_spec}</code></pre>
       </details>
       {(block.caption || (block.source_ids?.length ?? 0) > 0) && (
         <figcaption>
