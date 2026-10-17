@@ -1,5 +1,7 @@
 ---
 // Links from a block to its sources in the list at the end of the article.
+import { sourceNumber } from '../lib/labels';
+
 interface Props {
   ids?: string[] | undefined;
 }
@@ -12,8 +14,8 @@ const ids = Astro.props.ids ?? [];
       {ids.map((id, i) => (
         <>
           {i > 0 && ', '}
-          <a href={`#fonte-${id}`} aria-label={`Fonte ${id.slice(1)}`}>
-            {id.slice(1)}
+          <a href={`#fonte-${id}`} aria-label={`Fonte ${sourceNumber(id)}`}>
+            {sourceNumber(id)}
           </a>
         </>
       ))}

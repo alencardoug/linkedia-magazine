@@ -37,6 +37,11 @@ export function longDate(isoDate: string): string {
   );
 }
 
+// Number shown for a source (`s7` → `7`), in citations and in the source list alike.
+export function sourceNumber(id: string): string {
+  return String(Number(id.slice(1)));
+}
+
 // Image hosts allowed to load (D-026: none in the MVP). Others render their text fallback.
 export const IMAGE_HOSTS: readonly string[] = [];
 

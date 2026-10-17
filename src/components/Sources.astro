@@ -1,6 +1,6 @@
 ---
 import type { Source } from '../types/contracts';
-import { longDate } from '../lib/labels';
+import { longDate, sourceNumber } from '../lib/labels';
 
 interface Props {
   sources: Source[];
@@ -13,7 +13,7 @@ const { sources } = Astro.props;
   <ol>
     {
       sources.map((s) => (
-        <li id={`fonte-${s.source_id}`}>
+        <li id={`fonte-${s.source_id}`} value={sourceNumber(s.source_id)}>
           <a href={s.url} rel="noopener noreferrer nofollow">{s.title}</a>
           <span class="meta">
             {' — '}

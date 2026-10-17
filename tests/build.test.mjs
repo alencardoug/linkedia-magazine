@@ -196,6 +196,38 @@ describe('static build', () => {
     expect(existsSync(join(out, 'materias/materia-hostil-2.html'))).toBe(true);
   }, 120_000);
 
+  it('numbers sources by id and cites a captionless diagram', async () => {
+    const dir = temp('linkedia-sources-');
+    const a = hostileArticle(1);
+    const [base] = a.sources;
+    a.sources = [
+      { ...base, source_id: 's7', title: 'Fonte sete' },
+      { ...base, source_id: 's2', title: 'Fonte dois' },
+    ];
+    a.blocks = [
+      { type: 'paragraph', text: 'Parágrafo.', source_ids: ['s2', 's7'] },
+      { type: 'diagram', diagram_format: 'mermaid', diagram_spec: 'graph TD; A-->B', alt: 'Diagrama',
+        long_description: 'Descrição longa do diagrama sem legenda.', source_ids: ['s7'] },
+    ];
+    const write = (path, doc) => {
+      mkdirSync(join(dir, path, '..'), { recursive: true });
+      writeFileSync(join(dir, path), JSON.stringify(doc));
+    };
+    write(`articles/${a.article_id}.json`, a);
+    write('editions/2026-10-15.json', {
+      schema_version: '1.0.0', edition_date: '2026-10-15', title: 'Edição', article_ids: [a.article_id],
+      published_at: '2026-10-15T19:00:00-03:00', timezone: 'America/Sao_Paulo',
+    });
+    write('tags/catalog.json', { schema_version: '1.0.0', tags: [{ key: 'topic:hostil', kind: 'topic', label: 'Tag' }] });
+    expect(validateContent(dir).errors).toEqual([]);
+    const html = readFileSync(join(await buildSite(dir), 'materias/materia-hostil-1.html'), 'utf8');
+    expect(html).toContain('<li id="fonte-s7" value="7">');
+    expect(html).toContain('<li id="fonte-s2" value="2">');
+    expect(html).toMatch(/<a href="#fonte-s2" aria-label="Fonte 2">2<\/a>/);
+    const diagram = html.slice(html.indexOf('data-block="diagram"'));
+    expect(diagram.slice(0, diagram.indexOf('</figure>'))).toMatch(/<figcaption>[\s\S]*href="#fonte-s7"/);
+  }, 120_000);
+
   it('renders an empty magazine without editions', async () => {
     const out = await buildSite(temp('linkedia-empty-'));
     expect(htmlFiles(out).sort()).toEqual(
