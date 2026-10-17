@@ -68,7 +68,7 @@ describe('lab theme packages', () => {
     const s = slots(JSON.parse(readFileSync(join(FIXTURES, 'manifest.json'), 'utf8')));
     expect(s.baseline).toEqual({ id: 'minimal-dark', title: 'Minimal Dark', requires: null });
     expect(s.previous).toEqual({ id: 'lab-2099-w01', title: 'Fixture Light', requires: null });
-    expect(s.current).toEqual({ id: 'lab-2099-w02', title: 'Fixture Motion', requires: ['motion'] });
+    expect(s.current).toEqual({ id: 'lab-2099-w02', title: 'Fixture Motion', requires: ['motion', 'webgl'] });
   });
 
   it.each([

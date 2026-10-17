@@ -6,4 +6,6 @@ Develop at most ONE new public-site UI experiment for the current ISO week. Sear
 
 Deliver a concise concept brief: unique interaction, visual identity, complexity, tech choices (prefer existing Astro/React stack), performance budget, accessibility/reduced-motion fallback, mobile experience, plan for retaining reading clarity, implementation file boundaries, reusable export components, and links to inspirations. A baseline minimal dark theme MUST remain unchanged. The public switcher has exactly three slots: baseline, previous week, current week (default). Every older theme is archived and reconstructable by code and Git ref.
 
+Start with `npm run theme:rollover -- --week <this ISO week> --title "<name>"` (it moves the slots, archives the theme leaving them with its Git ref and scaffolds the package; `docs/VISUAL_LAB.md`), and finish with `npm run e2e`, reviewing the screenshots in `test-results/screenshots/<id>/`.
+
 Codex may provide a single independent concept critique and alternative. Claude makes final implementation decisions only within quality gates. Do not add a new theme if one for the week already exists.

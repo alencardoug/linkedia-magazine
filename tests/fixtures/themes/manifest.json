@@ -30,8 +30,8 @@
       "title": "Fixture Motion",
       "status": "active",
       "git_ref": null,
-      "summary": "Test fixture: dark theme with an enhancement module that needs motion.",
-      "enhancement": { "requires": ["motion"] }
+      "summary": "Test fixture: dark theme with an enhancement module that needs motion and WebGL.",
+      "enhancement": { "requires": ["motion", "webgl"] }
     }
   ]
 }

@@ -14,8 +14,11 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
-    "e2e": "LINKEDIA_CONTENT_DIR=content/examples LINKEDIA_THEMES_DIR=tests/fixtures/themes npm run build && playwright test",
-    "gen:types": "node scripts/gen-types.mjs"
+    "e2e": "npm run e2e:fixtures && npm run e2e:themes",
+    "e2e:fixtures": "LINKEDIA_CONTENT_DIR=content/examples LINKEDIA_THEMES_DIR=tests/fixtures/themes npm run build && playwright test",
+    "e2e:themes": "npm run build && LINKEDIA_E2E=themes playwright test",
+    "gen:types": "node scripts/gen-types.mjs",
+    "theme:rollover": "node scripts/theme-rollover.mjs"
   },
   "dependencies": {
     "astro": "7.4.0"
