@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "tags": [
+    {
+      "key": "reason:career-utility",
+      "kind": "reason",
+      "label": "Utilidade para a carreira"
+    },
+    {
+      "key": "reason:learning-value",
+      "kind": "reason",
+      "label": "Valor de aprendizado"
+    },
+    {
+      "key": "reason:novelty",
+      "kind": "reason",
+      "label": "Novidade"
+    },
+    {
+      "key": "region:brazil",
+      "kind": "region",
+      "label": "Brasil"
+    },
+    {
+      "key": "risk:bias",
+      "kind": "risk",
+      "label": "Viés e discriminação"
+    },
+    {
+      "key": "risk:misinformation",
+      "kind": "risk",
+      "label": "Desinformação"
+    },
+    {
+      "key": "risk:misuse",
+      "kind": "risk",
+      "label": "Uso indevido"
+    },
+    {
+      "key": "source:google-cloud",
+      "kind": "source",
+      "label": "Google Cloud Blog"
+    },
+    {
+      "key": "source:mit-technology-review",
+      "kind": "source",
+      "label": "MIT Technology Review"
+    },
+    {
+      "key": "source:mit-technology-review-brasil",
+      "kind": "source",
+      "label": "MIT Technology Review Brasil"
+    },
+    {
+      "key": "source:nucleo",
+      "kind": "source",
+      "label": "Núcleo Jornalismo"
+    },
+    {
+      "key": "theme:governance",
+      "kind": "theme",
+      "label": "Governança"
+    },
+    {
+      "key": "theme:multimodal",
+      "kind": "theme",
+      "label": "Multimodalidade"
+    },
+    {
+      "key": "theme:regulation",
+      "kind": "theme",
+      "label": "Regulação"
+    },
+    {
+      "key": "theme:roi",
+      "kind": "theme",
+      "label": "Retorno sobre investimento"
+    },
+    {
+      "key": "theme:safety",
+      "kind": "theme",
+      "label": "Segurança de IA"
+    },
+    {
+      "key": "topic:agents",
+      "kind": "topic",
+      "label": "Agentes de IA"
+    },
+    {
+      "key": "topic:gcp",
+      "kind": "topic",
+      "label": "Google Cloud"
+    },
+    {
+      "key": "topic:guardrails",
+      "kind": "topic",
+      "label": "Guardrails"
+    },
+    {
+      "key": "topic:inference",
+      "kind": "topic",
+      "label": "Inferência e serving"
+    },
+    {
+      "key": "topic:llm-security",
+      "kind": "topic",
+      "label": "Segurança de aplicações com LLM"
+    },
+    {
+      "key": "topic:token-efficiency",
+      "kind": "topic",
+      "label": "Eficiência de tokens"
+    }
+  ]
+}

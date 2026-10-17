@@ -1,0 +1,222 @@
+{
+  "article_id": "4f2f6955-76a7-4385-8f5a-841030cc510d",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O Google Cloud anunciou a disponibilidade geral (GA) de gestão de custo baseada em tokens para as funções de IA generativa do BigQuery. São cotas diárias que permitem a administradores definir limites de consumo de tokens, para que uma consulta SQL que chama um LLM sobre milhões de linhas não estoure o orçamento. Depois deste texto, você saberá o que cada função faz e como transformar um orçamento em dólares em limites de tokens.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que mudou",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o blog do Google Cloud, as funções generativas do BigQuery trazem LLMs diretamente para o SQL: uma única consulta pode classificar milhões de tickets de suporte ou pontuar o sentimento de cada avaliação de produto. Como a cobrança é por token, escalar isso em tabelas enormes exige controle de orçamento proativo.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "São quatro cotas diárias, geridas pelo sistema de cotas do IAM (controle de acesso do Google Cloud), com limites por projeto e por usuário dentro de um projeto (não por organização). Dois detalhes importantes: as cotas são globais, somando o uso de todas as regiões; e os tokens de saída incluem os tokens de raciocínio (\"thinking\"), como na fatura do Gemini.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "O que são as funções",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Uma função SQL recebe valores de uma coluna e devolve um resultado por linha. Aqui, por trás da função há um LLM: o texto da linha vira um prompt e a resposta volta como valor SQL. Cada token enviado (entrada) e gerado (saída) é cobrado. O artigo cita estas funções cobertas pelas cotas. As descrições abaixo são uma explicação dos editores sobre o propósito de cada uma:",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "AI.GENERATE: geração livre de texto a partir de um prompt, linha a linha. É a função de uso geral.",
+        "AI.IF: faz uma pergunta de sim ou não sobre o texto e devolve verdadeiro ou falso; útil para filtrar linhas por significado.",
+        "AI.CLASSIFY: coloca cada texto em uma categoria de uma lista que você fornece (por exemplo, tipo de ticket).",
+        "AI.SCORE: atribui uma pontuação numérica ao texto segundo um critério (por exemplo, sentimento de uma avaliação).",
+        "Também cobertas: AI.GENERATE_TABLE, AI.GENERATE_TEXT (e o alias ML.GENERATE_TEXT) e AI.AGG."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Ficam de fora as funções de embeddings (AI.GENERATE_EMBEDDING, ML.GENERATE_EMBEDDING e AI.EMBED), porque rodam em modelos diferentes e bem mais baratos.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Como o limite é aplicado",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A cota interrompe o trabalho em vez de deixar a consulta passar do limite. Se uma cota necessária já estiver esgotada, a consulta é rejeitada de início com erro QuotaExceeded. Caso contrário, ela começa, e se a cota acabar no meio, o BigQuery para de enviar novas chamadas ao LLM. Funções com max_error_ratio (como AI.IF) devolvem resultado parcial se as linhas não processadas ficarem dentro da razão, e falham se não ficarem. Funções gerais (como AI.GENERATE) terminam com sucesso, mas as linhas puladas ficam sem valor, com o erro de cota no campo status.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O Google também compara com os tetos de gasto do Cloud Billing: as cotas de token são preventivas e específicas de IA; os tetos operam em dólares por projeto e serviço, podem bloquear automaticamente, mas a aplicação não é instantânea, então pode haver excesso. A recomendação é cota de token como primeira linha de defesa e teto de gasto como rede de segurança.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A fonte é um único post do próprio fornecedor. Preços e nome de modelo do exemplo são os \"de hoje\" no post e podem mudar; confirme na documentação oficial do BigQuery e na página de preços do Gemini.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: do orçamento ao limite de tokens",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral e não nas fontes citadas, exceto onde indicado.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Raciocínio geral: o custo de um lote é aproximadamente tokens de entrada vezes preço de entrada, mais tokens de saída vezes preço de saída. Você não controla o preço, mas controla o volume. Por isso o fluxo é medir, estimar, limitar e observar. O roteiro abaixo segue as boas práticas do post.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Meça a entrada com AI.COUNT_TOKENS sobre a coluna de texto. Ele conta tokens sem fazer chamada de geração cobrada, mas é só um limite inferior: não inclui saída, raciocínio, as instruções que a função adiciona nem imagens.",
+        "Rode uma amostra pequena e veja o consumo real de entrada e saída no gráfico de uso da página Quotas & System Limits.",
+        "Calcule a razão entrada:saída da amostra e converta em dólares com os preços publicados do seu modelo.",
+        "Defina as cotas por usuário primeiro, para que um experimento descontrolado não consuma o projeto inteiro.",
+        "Limite a saída: onde a função aceitar max_output_tokens, defina-o, pois tokens de saída custam mais.",
+        "Acompanhe o histórico (7, 14, 30 dias ou intervalo próprio) e ajuste."
+      ],
+      "ordered": true,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O exemplo do post: manter cerca de 100 dólares por dia com o Gemini 3.1 Flash-Lite, a 0,125 dólar por milhão de tokens de entrada e 0,75 dólar por milhão de saída (preços em lote, com 50% de desconto, segundo o post). Com razão de 100:1 entre entrada e saída na amostra, o resultado é cerca de 754 milhões de tokens de entrada e 7,54 milhões de saída por dia. Conferindo a conta: 754 × 0,125 ≈ 94,25 dólares e 7,54 × 0,75 ≈ 5,66 dólares, somando cerca de 100.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Ideia de uso do AI.COUNT_TOKENS; os argumentos são ilustrativos e podem diferir da assinatura real.",
+      "code": "-- Esboço ilustrativo (confira a assinatura exata na documentação oficial):\n-- medir o tamanho de entrada sem custo de geração\nSELECT SUM(AI.COUNT_TOKENS(<modelo_ou_endpoint>, texto_ticket)) AS tokens_entrada\nFROM meu_dataset.tickets;",
+      "language": "sql",
+      "type": "code"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Se a cota estourar no meio de uma consulta com AI.GENERATE, a consulta ainda termina com sucesso. Linhas ficam sem valor e o erro vai para a coluna status. Verifique esse campo antes de usar o resultado em um pipeline, para não gravar vazios como se fossem respostas.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 3,
+      "text": "Quem pode mexer e como automatizar",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "No console: IAM & Admin, Quotas & System Limits, filtro pelo serviço BigQuery API, ordenar por Name para ver as quatro cotas de IA, menu de três pontos e Edit quota. Reduzir vale na hora, sem aprovação; aumentar é um pedido, e muitos são aprovados automaticamente. É preciso ser Owner, Editor, Quota Administrator ou Service Usage Admin. Também dá para gerir via Cloud Quotas API, gcloud CLI e Terraform.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Antes de qualquer classificação em lote: conte tokens de entrada, rode uma amostra, calcule a razão entrada:saída, converta em dólares, defina cotas por usuário e por projeto e limite max_output_tokens. Use um teto de gasto do Billing como rede de segurança.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Faça o exercício no papel: imagine uma tabela de 1 milhão de linhas com 200 tokens cada, estime a saída por linha e calcule o custo com os preços do exemplo acima. Se tiver um projeto Google Cloud, abra Quotas & System Limits e apenas olhe as cotas de IA. O raciocínio vale para qualquer API de LLM cobrada por token.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-15",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-15T23:06:58Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "4a10e079-d2c2-4239-bca7-d91d0c3e70bc",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como funcionam as funções de IA generativa do BigQuery (AI.GENERATE, AI.IF, AI.CLASSIFY, AI.SCORE, AI.AGG) e como controlar custo por token: cotas diárias por projeto e por usuário, AI.COUNT_TOKENS, max_output_tokens, tetos de gasto do Cloud Billing. Dê exemplos de estimativa de custo para classificar um milhão de linhas e aponte o que verificar na documentação oficial."
+    },
+    {
+      "kind": "lab",
+      "label": "Exercício de estimativa",
+      "prompt": "Monte um exercício prático de estimativa de custo de LLM em lote: dada uma tabela de 2 milhões de avaliações de produtos com tamanho médio de texto conhecido, ajude-me a estimar tokens de entrada e saída, definir a razão entrada:saída por amostra, converter em dólares com preços hipotéticos e definir cotas diárias com margem de segurança."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "controlando-o-custo-de-llm-dentro-do-sql-cotas-de-tokens-no-bigquery",
+  "sources": [
+    {
+      "accessed_at": "2026-10-15T23:06:10Z",
+      "language": "en",
+      "published_at": "2026-10-14T16:00:00Z",
+      "publisher": "Google Cloud Blog",
+      "source_id": "s1",
+      "title": "Predictable AI spend in BigQuery: Introducing cost management for generative AI functions",
+      "url": "https://cloud.google.com/blog/products/data-analytics/using-bigquerys-generative-ai-cost-management-features"
+    }
+  ],
+  "summary": "O BigQuery lançou cotas diárias de tokens para suas funções de IA generativa (AI.GENERATE, AI.IF, AI.CLASSIFY, AI.SCORE). Explicamos o que cada função faz, como as cotas funcionam e como converter um orçamento em dólares em limites de tokens.",
+  "tags": [
+    "topic:gcp",
+    "topic:token-efficiency",
+    "theme:roi",
+    "topic:inference",
+    "reason:career-utility",
+    "reason:learning-value",
+    "source:google-cloud"
+  ],
+  "title": "Controlando o custo de LLM dentro do SQL: cotas de tokens no BigQuery"
+}

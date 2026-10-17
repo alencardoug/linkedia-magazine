@@ -1,0 +1,157 @@
+{
+  "article_id": "191c33b6-0009-4454-98a2-b0cecf5281d4",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Desde a noite de 13 de outubro de 2026, usuários do WhatsApp relataram que o chatbot de IA da Meta recusava pedidos de imagens ligadas a Lula, mas atendia pedidos equivalentes sobre Flávio Bolsonaro. O Núcleo Jornalismo reproduziu o comportamento em testes próprios. Depois da notícia, você vai ver como montar um teste simples de simetria para qualquer gerador de imagem.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "O que aconteceu",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O primeiro caso veio de leitores: pedir uma estampa de camiseta com 'Lula, PT e o número 13' era recusado, enquanto 'Flavio, PL e o numero 22' gerava a imagem. Com nome e sobrenome, 'Flavio Bolsonaro', a ferramenta na maioria dos testes recusava, mas uma pessoa do Núcleo conseguiu uma imagem com 'Bolsonaro 22'. O Núcleo lembra que o candidato costuma ser chamado só pelo primeiro nome na campanha, então o bloqueio por nome completo reduz pouco o efeito.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Outros testes: 'Lula Corrupto' e 'Flavio Bolsonaro Corrupto' foram recusados para ambos, mas a IA sugeriu estampas neutras e, ao aceitar, gerou só a de Flávio. Apenas 'Lula' bloqueava tudo, até 'uma Lula' (só liberava quando o pedido dizia ser o animal). 'Bolsonaro' ainda bloqueava, mas 'Flavio' sozinho não.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Resposta da Meta e denúncia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Por e-mail, a Meta disse que, para cumprir as regras eleitorais brasileiras, proíbe temporariamente recomendar candidatos ou gerar imagens deles, e que tomou medidas adicionais para que comandos só com o primeiro nome e o número na urna também não gerem imagens. O Núcleo avalia que a empresa reconheceu implicitamente o problema. A ONG CTRL+Z apresentou representação à Corregedoria da Justiça Eleitoral, argumentando que o desequilíbrio afeta um candidato do segundo turno, em período imediatamente anterior à votação.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O pacote é uma nota curta. Não detalha a metodologia dos testes (quantas tentativas, que taxa de sucesso), não diz se a assimetria era intencional, e as seis perguntas do Núcleo à Meta (listas de bloqueio, diálogo com o TSE, prazos) não tinham resposta publicada. A causa técnica é desconhecida.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Como testar simetria em geradores de imagem",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Intuição: guardrails (barreiras de segurança) de geradores costumam combinar filtros de texto no pedido, filtros na imagem produzida e regras do modelo. Filtros por lista de nomes são frágeis: pegam 'Lula' mas deixam passar apelido, primeiro nome, número ou grafia sem acento. Isso é uma hipótese geral sobre esse tipo de filtro, não uma explicação confirmada do caso da Meta.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Você já domina testes com agentes de código, então a técnica é a mesma de um teste de regressão: pares de pedidos que diferem só em uma variável (o candidato) e um registro do resultado.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Defina pares espelhados: mesmo texto, trocando apenas nome, partido e número.",
+        "Varie a forma do nome: completo, só primeiro nome, sobrenome, apelido, número, sem acento.",
+        "Rode cada pedido várias vezes (resultados variam) e registre: pedido, data, versão do app, recusou ou gerou, print.",
+        "Calcule a taxa de recusa por lado. Uma diferença consistente é mais informativa que um caso isolado.",
+        "Teste também o caminho de sugestão do assistente (como as estampas 'neutras'), pois o fluxo de duas etapas pode contornar a regra da primeira.",
+        "Re-teste depois de correções: bloqueios novos podem ser apenas listas ampliadas."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Planilha mínima para um teste de simetria.",
+      "code": "pedido | variante | lado A (recusou/gerou) | lado B (recusou/gerou) | n tentativas\n\"estampa com X, partido, número\" | primeiro nome | ... | ... | 5\n\"estampa com X, partido, número\" | nome completo | ... | ... | 5\n\"imagem da vitória de X\" | cenário hipotético | ... | ... | 5",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "source_ids": [],
+      "text": "Simetria se mede com pares espelhados, várias variantes de nome e repetição. Um único print prova pouco; uma tabela de taxas prova muito mais.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Ressalva ética: use isso para auditar, sem divulgar imagens eleitorais enganosas, e respeite os termos de uso da ferramenta e a legislação eleitoral vigente (confira as regras do TSE).",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha um gerador gratuito de imagens, monte dez pares espelhados com personagens ou marcas fictícias (não políticos reais) e meça a taxa de recusa. Em cerca de uma hora você terá a base para auditar qualquer ferramenta. Depois, acompanhe se a Meta responde às perguntas do Núcleo e como a Corregedoria trata a representação.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_knowledge",
+  "edition_date": "2026-10-15",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-15T23:08:34Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "4a10e079-d2c2-4239-bca7-d91d0c3e70bc",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como funcionam guardrails em geradores de imagem por IA (filtros de prompt, filtros de saída, listas de bloqueio) e por que podem gerar assimetrias entre nomes de políticos. Cite como auditar viés com pares de prompts espelhados, e discuta o contexto de eleições brasileiras e regras da Justiça Eleitoral sobre IA. Use linguagem acessível para quem usa LLMs de texto, mas é iniciante em modelos de imagem."
+    }
+  ],
+  "read_minutes": 7,
+  "schema_version": "1.0.0",
+  "slug": "ia-da-meta-no-whatsapp-gerava-imagens-de-flavio-bolsonaro-mas-nao-de-lula-o-que",
+  "sources": [
+    {
+      "accessed_at": "2026-10-15T23:08:03Z",
+      "language": "pt",
+      "published_at": "2026-10-14T13:49:27Z",
+      "publisher": "Núcleo Jornalismo",
+      "source_id": "s1",
+      "title": "IA da Meta favorece criação de imagens de Flávio Bolsonaro",
+      "url": "https://nucleo.jor.br/curtas/2026/10/14/ia-da-meta-favorece-criacao-de-imagens-de-flavio-bolsonaro"
+    }
+  ],
+  "summary": "Testes do Núcleo mostraram assimetria no chatbot da Meta às vésperas do 2º turno. A Meta diz ter reforçado bloqueios. Entenda o caso e aprenda a testar guardrails de geradores de imagem de forma sistemática.",
+  "tags": [
+    "region:brazil",
+    "risk:bias",
+    "risk:misinformation",
+    "topic:guardrails",
+    "theme:regulation",
+    "theme:multimodal",
+    "reason:novelty",
+    "source:nucleo"
+  ],
+  "title": "IA da Meta no WhatsApp gerava imagens de Flávio Bolsonaro, mas não de Lula: o que o caso ensina"
+}
