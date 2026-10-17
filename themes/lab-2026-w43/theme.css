@@ -1,0 +1,285 @@
+/* lab-2026-w43 "Singularidade": the reading pages dressed like the cover pre-page of the same name (3-01). A navy
+   night page under the cover's dot grid, a heavy sans masthead whose "ia" takes the cover's pink-to-amber "IA"
+   gradient, uppercase tracked labels like the cover's kicker, pale-blue hairline rules, amber links, monospace fine
+   print in the footer, and a reading-progress rule in the same gradient (CSS scroll-driven animation, no JS). The
+   reading column sits on a plain field so the dots never run under the text. CSS only; the markup is the baseline's.
+   Contrast on --bg: --fg 15.4:1, --muted 9.6:1, --accent 10.6:1, --accent-strong 13.4:1, --warning 5.7:1, --focus
+   13.3:1, headings 17.7:1; on --surface 13.4, 8.4, 9.2, 11.7, 5.0, 11.6. Skip-link text (--bg) on --focus 13.3:1.
+   --border and the dots are decorative and never carry meaning. */
+:root[data-theme='lab-2026-w43'] {
+  color-scheme: dark;
+  --bg: #0a0d26;
+  --surface: #121a44;
+  --border: #5c6894;
+  --fg: #dfe6ff;
+  --muted: #a9b8dc;
+  --accent: #ffb13d;
+  --accent-strong: #ffd27d;
+  --warning: #ff3d7f;
+  --focus: #ffd166;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --radius: 0;
+  --text-xl: clamp(1.9rem, 1.3rem + 3vw, 2.9rem);
+  --lab-2026-w43-ink: #f4f6ff;
+  --lab-2026-w43-rule: rgba(200, 230, 255, 0.45);
+  --lab-2026-w43-dot: rgba(120, 170, 255, 0.28);
+  --lab-2026-w43-ia: linear-gradient(90deg, #ff3d7f, #ffb13d);
+}
+
+/* The cover's dot grid behind the page; the reading column is a plain field over it. */
+:root[data-theme='lab-2026-w43'] body {
+  background-color: var(--bg);
+  background-image: radial-gradient(circle, var(--lab-2026-w43-dot) 1.1px, transparent 1.6px);
+  background-size: 24px 24px;
+}
+
+:root[data-theme='lab-2026-w43'] main {
+  background: var(--bg);
+  box-shadow: 0 0 32px 24px var(--bg);
+}
+
+/* Masthead: heavy sans brand, its "ia" in the cover's gradient, kicker-style links under a pale rule. */
+:root[data-theme='lab-2026-w43'] [data-site-header] {
+  padding-top: var(--space-4);
+  border-bottom: 1px solid var(--lab-2026-w43-rule);
+}
+
+:root[data-theme='lab-2026-w43'] [data-site-header] nav {
+  gap: var(--space-2) var(--space-4);
+}
+
+:root[data-theme='lab-2026-w43'] [data-brand] {
+  flex-basis: 100%;
+  margin-right: 0;
+  font-size: clamp(2.4rem, 1.5rem + 4.5vw, 3.8rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--lab-2026-w43-ink);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  :root[data-theme='lab-2026-w43'] [data-brand] strong {
+    background: linear-gradient(90deg, var(--lab-2026-w43-ink) 0 77%, #ff3d7f 80%, #ffb13d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+:root[data-theme='lab-2026-w43'] [data-brand] strong {
+  font-weight: 900;
+}
+
+:root[data-theme='lab-2026-w43'] [data-site-header] nav a:not([data-brand]) {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--lab-2026-w43-ink);
+}
+
+:root[data-theme='lab-2026-w43'] [data-site-header] nav a:not([data-brand]):hover {
+  color: var(--accent);
+}
+
+/* Headlines: heavy and tight, like the cover's masthead. */
+:root[data-theme='lab-2026-w43'] :is(h1, h2, h3, h4) {
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--lab-2026-w43-ink);
+}
+
+:root[data-theme='lab-2026-w43'] h1 {
+  font-weight: 900;
+  letter-spacing: -0.025em;
+}
+
+:root[data-theme='lab-2026-w43'] p {
+  text-wrap: pretty;
+}
+
+:root[data-theme='lab-2026-w43'] a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+:root[data-theme='lab-2026-w43'] a:hover {
+  color: var(--accent-strong);
+}
+
+/* Labels that open a card, an edition or an article: the cover's kicker (uppercase, tracked, semibold). */
+:root[data-theme='lab-2026-w43'] :is([data-card] > .meta:first-child, [data-article] > header > .meta, [data-edition] > .meta) {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* The baseline markup has no space between the channel link and its "·"; tracked caps make that visible. */
+:root[data-theme='lab-2026-w43'] :is([data-card] > .meta:first-child, [data-article] > header > .meta) a {
+  margin-right: 0.35em;
+}
+
+:root[data-theme='lab-2026-w43'] [data-edition] > .meta {
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--lab-2026-w43-rule);
+}
+
+/* Cards: between pale rules, like the cover's headline list; the lead under a gradient rule. */
+:root[data-theme='lab-2026-w43'] [data-card] {
+  padding: var(--space-3) 0;
+  border: 0;
+  border-top: 1px solid var(--lab-2026-w43-rule);
+  border-radius: 0;
+  background: transparent;
+}
+
+:root[data-theme='lab-2026-w43'] [data-card][data-lead] {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 0;
+  background: linear-gradient(90deg, #ff3d7f, #ffb13d) top left / 100% 3px no-repeat;
+}
+
+:root[data-theme='lab-2026-w43'] [data-card][data-lead] h2 {
+  font-size: clamp(1.8rem, 1.3rem + 2.2vw, 2.5rem);
+  line-height: 1.08;
+}
+
+:root[data-theme='lab-2026-w43'] [data-card] :is(h2, h3) a {
+  color: var(--lab-2026-w43-ink);
+}
+
+:root[data-theme='lab-2026-w43'] [data-card] :is(h2, h3) a:hover {
+  color: var(--accent);
+}
+
+/* Article */
+:root[data-theme='lab-2026-w43'] [data-article] > header {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--lab-2026-w43-rule);
+}
+
+:root[data-theme='lab-2026-w43'] [data-article] > header h1 {
+  font-size: var(--text-xl);
+  line-height: 1.06;
+}
+
+:root[data-theme='lab-2026-w43'] [data-summary] {
+  color: var(--lab-2026-w43-ink);
+  font-size: var(--text-lg);
+}
+
+:root[data-theme='lab-2026-w43'] [data-block='heading'] {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--lab-2026-w43-rule);
+}
+
+:root[data-theme='lab-2026-w43'] [data-block='quote'] blockquote {
+  border-left: 3px solid #ff3d7f;
+  border-image: var(--lab-2026-w43-ia) 1;
+  color: var(--lab-2026-w43-ink);
+  font-size: var(--text-lg);
+}
+
+:root[data-theme='lab-2026-w43'] [data-block='callout'] {
+  border-left-color: var(--accent);
+  background: var(--surface);
+}
+
+:root[data-theme='lab-2026-w43'] :is(pre, [data-block='diagram'], [data-block='image'], [data-prompt-action]) {
+  border-color: var(--border);
+  border-radius: 0;
+}
+
+:root[data-theme='lab-2026-w43'] pre {
+  background: #060818;
+}
+
+:root[data-theme='lab-2026-w43'] [data-tags] li {
+  border-color: var(--lab-2026-w43-rule);
+  border-radius: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lab-2026-w43-ink);
+}
+
+:root[data-theme='lab-2026-w43'] button {
+  border-color: var(--accent);
+  border-radius: 0;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+:root[data-theme='lab-2026-w43'] button:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+:root[data-theme='lab-2026-w43'] .pular {
+  color: var(--bg);
+}
+
+/* Footer: the cover's fine print — monospace, under a pale rule, amber links. Its column is sized in body text
+   (the measure is in `ch`); the small type moves to its children. */
+:root[data-theme='lab-2026-w43'] [data-site-footer] {
+  border-top: 1px solid var(--lab-2026-w43-rule);
+  font-size: var(--text-base);
+}
+
+:root[data-theme='lab-2026-w43'] [data-site-footer] > * {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+:root[data-theme='lab-2026-w43'] [data-theme-switcher] {
+  border-color: var(--lab-2026-w43-rule);
+  border-radius: 0;
+}
+
+/* Reading progress: a thin pink-to-amber rule along the top of the window, scaled by the page's scroll. Only where
+   the browser has scroll timelines and the reader has not asked for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    :root[data-theme='lab-2026-w43'] body::before {
+      content: '';
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 20;
+      height: 3px;
+      background: var(--lab-2026-w43-ia);
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      pointer-events: none;
+      /* Longhands on purpose: the minifier folds `animation` + `animation-timeline` into a shorthand browsers drop. */
+      animation-name: lab-2026-w43-progress;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes lab-2026-w43-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (forced-colors: active) {
+  :root[data-theme='lab-2026-w43'] body::before {
+    display: none;
+  }
+
+  :root[data-theme='lab-2026-w43'] [data-brand] strong {
+    color: LinkText;
+  }
+}

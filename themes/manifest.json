@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
   "baseline_theme_id": "minimal-dark",
-  "previous_theme_id": null,
-  "current_theme_id": "lab-2026-w42",
-  "week_id": "2026-W42",
+  "previous_theme_id": "lab-2026-w42",
+  "current_theme_id": "lab-2026-w43",
+  "week_id": "2026-W43",
   "themes": [
     {
       "id": "minimal-dark",
@@ -22,6 +22,15 @@
       "status": "active",
       "git_ref": null,
       "summary": "Light newsprint page: serif masthead, ink and red accent, hairline rules, drop caps and a CSS scroll-driven reading-progress rule. CSS only."
+    },
+    {
+      "id": "lab-2026-w43",
+      "kind": "lab",
+      "week_id": "2026-W43",
+      "title": "Singularidade",
+      "status": "active",
+      "git_ref": null,
+      "summary": "Dark navy page with the cover's dot grid, heavy sans masthead with the IA pink-to-amber gradient, uppercase tracked labels, pale-blue rules and amber links. CSS only."
     }
   ]
 }
