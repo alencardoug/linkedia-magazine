@@ -1,0 +1,27 @@
+---
+// `/edicoes/YYYY-MM-DD`: a fixed daily edition.
+import type { EditionWithArticles } from '../../lib/content';
+import Base from '../../layouts/Base.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { loadContent } from '../../lib/content';
+import { longDate } from '../../lib/labels';
+
+export function getStaticPaths() {
+  return loadContent().editions.map((entry) => ({ params: { date: entry.edition.edition_date }, props: { entry } }));
+}
+
+interface Props {
+  entry: EditionWithArticles;
+}
+const { edition, articles } = Astro.props.entry;
+const [lead, ...rest] = articles;
+---
+
+<Base title={edition.title}>
+  <h1>{edition.title}</h1>
+  <p class="meta">Edição de <time datetime={edition.edition_date}>{longDate(edition.edition_date)}</time></p>
+  {edition.summary && <p>{edition.summary}</p>}
+  {lead && <ArticleCard article={lead} lead />}
+  {rest.map((a) => <ArticleCard article={a} />)}
+  <p><a href="/edicoes">Todas as edições</a></p>
+</Base>

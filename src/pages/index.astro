@@ -1,51 +1,36 @@
 ---
-const title = 'Linkedia';
+// `/`: the most recent edition (PUBLIC_EXPERIENCE), lead story first; a day without edition shows the last one.
+import Base from '../layouts/Base.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { loadContent } from '../lib/content';
+import { longDate } from '../lib/labels';
+
+const latest = loadContent().editions[0];
+const [lead, ...rest] = latest?.articles ?? [];
 ---
 
-<!doctype html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="description" content="Revista diária sobre engenharia de IA, liderança em IA e conhecimento em IA." />
-    <title>{title}</title>
-    <style>
-      :root {
-        color-scheme: dark;
-        --bg: #111214;
-        --fg: #e8e6e3;
-        --muted: #a7a39d;
-      }
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        background: var(--bg);
-        color: var(--fg);
-        font-family: system-ui, sans-serif;
-        line-height: 1.6;
-      }
-      main {
-        max-width: 36rem;
-        padding: 2rem 1rem;
-      }
-      h1 {
-        font-size: clamp(2rem, 8vw, 3.5rem);
-        margin: 0 0 0.5rem;
-        letter-spacing: -0.02em;
-      }
-      p {
-        color: var(--muted);
-        margin: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>{title}</h1>
-      <p>Revista diária sobre engenharia de IA, liderança em IA e conhecimento em IA. Em construção: nenhuma edição publicada ainda.</p>
-    </main>
-  </body>
-</html>
+<Base title="Linkedia">
+  {
+    latest ? (
+      <section aria-labelledby="edicao" data-edition={latest.edition.edition_date}>
+        <h1 id="edicao">{latest.edition.title}</h1>
+        <p class="meta">
+          Edição de <time datetime={latest.edition.edition_date}>{longDate(latest.edition.edition_date)}</time>
+        </p>
+        {latest.edition.summary && <p>{latest.edition.summary}</p>}
+        {lead && <ArticleCard article={lead} lead />}
+        {rest.map((a) => <ArticleCard article={a} />)}
+        <p>
+          <a href="/edicoes">Edições anteriores</a>
+        </p>
+      </section>
+    ) : (
+      <section data-empty>
+        <h1>Linkedia</h1>
+        <p class="meta">
+          Revista diária sobre engenharia de IA, liderança em IA e conhecimento em IA. Nenhuma edição publicada ainda.
+        </p>
+      </section>
+    )
+  }
+</Base>

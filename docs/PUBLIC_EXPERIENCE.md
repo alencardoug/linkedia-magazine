@@ -8,7 +8,10 @@ On opening the homepage, lead with one extraordinary presentation of **today's p
 - `/edicoes`: simple archive by date, with filters for channels/tags when useful.
 - `/edicoes/YYYY-MM-DD`: fixed daily edition.
 - `/materias/{slug}`: article permalink.
-- `/tags/{tag}` and `/categorias/{channel}` may be added when useful; avoid complexity in phase 1B.
+- `/categorias/{canal}`: published articles of one channel, pt-BR slugs `engenharia-de-ia`, `lideranca-de-ia`, `conhecimento-de-ia` (1B-01).
+- `/tags/{tag}` may be added when useful; avoid complexity in phase 1B.
+
+As built (1B-01): content comes from `LINKEDIA_CONTENT_DIR` (default `content`; tests build `content/examples` and a hostile fixture) through `src/lib/content.ts`; an article page exists for every article listed in some edition. Blocks render as escaped text (`src/components/Block.astro`): code and diagram specs in `<pre><code>`, a diagram as a `<figure>` with its long description and the spec in `<details>` (D-027), an image only from a host in `IMAGE_HOSTS` (empty, D-026) else its text fallback. Each article ends with its prompts (`<details>` with selectable text; a copy button appears only with JS and reports in `aria-live`), the AI note and the numbered source list that block citations link to.
 
 ## Page layout
 Dynamic visual hero/artwork + compact article discovery, with graceful fallback. Article reading layout prioritizes line length, excellent typography, source list, jump-back navigation and small prompt-copy controls. Avoid weighty client-side search index at the outset. A site with no edition for a day simply shows the last published edition.

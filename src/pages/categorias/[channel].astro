@@ -1,0 +1,27 @@
+---
+// `/categorias/{canal}`: published articles of one channel, newest edition first.
+import type { Article, Channel } from '../../types/contracts';
+import Base from '../../layouts/Base.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { CHANNELS, loadContent, publishedArticles } from '../../lib/content';
+import { CHANNEL_LABELS, CHANNEL_SLUGS } from '../../lib/labels';
+
+export function getStaticPaths() {
+  const all = publishedArticles(loadContent());
+  return CHANNELS.map((channel) => ({
+    params: { channel: CHANNEL_SLUGS[channel] },
+    props: { channel, articles: all.filter((a) => a.channel === channel) },
+  }));
+}
+
+interface Props {
+  channel: Channel;
+  articles: Article[];
+}
+const { channel, articles } = Astro.props;
+---
+
+<Base title={CHANNEL_LABELS[channel]}>
+  <h1>{CHANNEL_LABELS[channel]}</h1>
+  {articles.length === 0 ? <p class="meta">Nenhuma matéria publicada nesta categoria ainda.</p> : articles.map((a) => <ArticleCard article={a} />)}
+</Base>

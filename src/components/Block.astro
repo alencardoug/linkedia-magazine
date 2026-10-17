@@ -1,0 +1,96 @@
+---
+// One article block, rendered as escaped text only (Astro escapes every {expression}); model output is never
+// injected as HTML. Code and diagram specs are text in <pre><code> (D-027); images load only from allowed
+// hosts, else their text fallback.
+import type { Block } from '../types/contracts';
+import { CALLOUT_LABELS, imageAllowed } from '../lib/labels';
+import Cites from './Cites.astro';
+
+interface Props {
+  block: Block;
+}
+const { block } = Astro.props;
+const headingLevel = block.type === 'heading' ? Math.min(Math.max(block.level, 2), 4) : 2;
+const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
+---
+
+{block.type === 'paragraph' && <p data-block="paragraph">{block.text}<Cites ids={block.source_ids} /></p>}
+{block.type === 'heading' && <Heading data-block="heading">{block.text}</Heading>}
+{
+  block.type === 'list' && (
+    <div data-block="list">
+      {block.ordered ? (
+        <ol>
+          {block.items.map((item) => <li>{item}</li>)}
+        </ol>
+      ) : (
+        <ul>
+          {block.items.map((item) => <li>{item}</li>)}
+        </ul>
+      )}
+      <Cites ids={block.source_ids} />
+    </div>
+  )
+}
+{
+  block.type === 'quote' && (
+    <figure data-block="quote">
+      <blockquote>
+        <p>{block.text}</p>
+      </blockquote>
+      <figcaption>
+        {block.attribution && <span>{block.attribution}</span>}
+        <Cites ids={block.source_ids} />
+      </figcaption>
+    </figure>
+  )
+}
+{
+  block.type === 'callout' && (
+    <aside data-block="callout" data-variant={block.variant ?? 'note'}>
+      <p>
+        <strong>{CALLOUT_LABELS[block.variant ?? 'note'] ?? 'Nota'}:</strong> {block.text}
+        <Cites ids={block.source_ids} />
+      </p>
+    </aside>
+  )
+}
+{
+  block.type === 'code' && (
+    <figure data-block="code">
+      <pre><code data-language={block.language}>{block.code}</code></pre>
+      {block.caption && <figcaption>{block.caption}</figcaption>}
+    </figure>
+  )
+}
+{
+  block.type === 'diagram' && (
+    <figure data-block="diagram" role="group" aria-label={block.alt}>
+      <p>{block.long_description}</p>
+      <details>
+        <summary>Ver a especificação do diagrama ({block.diagram_format})</summary>
+        <pre><code>{block.diagram_spec}</code></pre>
+      </details>
+      {block.caption && <figcaption>{block.caption}<Cites ids={block.source_ids} /></figcaption>}
+    </figure>
+  )
+}
+{
+  block.type === 'image' && (
+    <figure data-block="image">
+      {imageAllowed(block.image_url) ? (
+        <img src={block.image_url} alt={block.alt} loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+      ) : (
+        <p data-image-fallback>
+          <strong>Imagem:</strong> {block.alt}
+        </p>
+      )}
+      <p class="meta">{block.long_description}</p>
+      <figcaption>
+        {block.caption && <span>{block.caption} </span>}
+        <span class="meta">Crédito: {block.credit}</span>
+        <Cites ids={block.source_ids} />
+      </figcaption>
+    </figure>
+  )
+}

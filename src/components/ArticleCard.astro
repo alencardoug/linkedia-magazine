@@ -1,0 +1,20 @@
+---
+import type { Article } from '../types/contracts';
+import { CHANNEL_LABELS, CHANNEL_SLUGS } from '../lib/labels';
+
+interface Props {
+  article: Article;
+  lead?: boolean;
+}
+const { article, lead = false } = Astro.props;
+const Title = lead ? 'h2' : 'h3';
+---
+
+<article data-card data-lead={lead ? 'true' : undefined} data-channel={article.channel}>
+  <p class="meta">
+    <a href={`/categorias/${CHANNEL_SLUGS[article.channel]}`}>{CHANNEL_LABELS[article.channel]}</a>
+    · {article.read_minutes} min de leitura
+  </p>
+  <Title><a href={`/materias/${article.slug}`}>{article.title}</a></Title>
+  <p>{article.summary}</p>
+</article>

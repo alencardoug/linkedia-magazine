@@ -1,0 +1,53 @@
+---
+// "Saber mais" and other prompts the reader can copy (PUBLIC_EXPERIENCE: accessible prompts). Without JS the
+// prompt is selectable text inside <details>; with JS a copy button appears and announces the result.
+import type { PromptAction } from '../types/contracts';
+import { PROMPT_KIND_LABELS } from '../lib/labels';
+
+interface Props {
+  actions: PromptAction[];
+}
+const { actions } = Astro.props;
+---
+
+<section aria-labelledby="prompts" data-prompts>
+  <h2 id="prompts">Para continuar aprendendo</h2>
+  <p class="meta">Copie um prompt e cole no assistente de IA que você usa.</p>
+  {
+    actions.map((a, i) => (
+      <div data-prompt-action data-kind={a.kind}>
+        <details>
+          <summary>
+            {a.label} <span class="meta">({PROMPT_KIND_LABELS[a.kind] ?? 'Prompt'})</span>
+          </summary>
+          <p id={`prompt-${i}`} data-prompt-text>
+            {a.prompt}
+          </p>
+        </details>
+        <button type="button" hidden data-copy={`prompt-${i}`}>
+          Copiar: {a.label}
+        </button>
+      </div>
+    ))
+  }
+  <p aria-live="polite" data-copy-status class="meta"></p>
+</section>
+
+<script>
+  // Vanilla TS: the only client JS of the site (1B-01). Buttons stay hidden without JS.
+  const status = document.querySelector<HTMLElement>('[data-copy-status]');
+  for (const button of document.querySelectorAll<HTMLButtonElement>('button[data-copy]')) {
+    button.hidden = false;
+    button.addEventListener('click', async () => {
+      const text = document.getElementById(button.dataset.copy ?? '')?.textContent?.trim() ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        if (status) status.textContent = 'Prompt copiado.';
+      } catch {
+        const details = button.closest('[data-prompt-action]')?.querySelector('details');
+        if (details) details.open = true;
+        if (status) status.textContent = 'Não foi possível copiar: selecione o texto do prompt aberto acima.';
+      }
+    });
+  }
+</script>

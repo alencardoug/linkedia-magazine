@@ -1,0 +1,29 @@
+---
+// `/edicoes`: archive by date, newest first.
+import Base from '../layouts/Base.astro';
+import { loadContent } from '../lib/content';
+import { longDate } from '../lib/labels';
+
+const { editions } = loadContent();
+---
+
+<Base title="Edições">
+  <h1>Edições</h1>
+  {
+    editions.length === 0 ? (
+      <p class="meta">Nenhuma edição publicada ainda.</p>
+    ) : (
+      <ol data-archive reversed>
+        {editions.map(({ edition, articles }) => (
+          <li>
+            <a href={`/edicoes/${edition.edition_date}`}>
+              <time datetime={edition.edition_date}>{longDate(edition.edition_date)}</time>
+            </a>
+            {' — '}
+            {edition.title} <span class="meta">({articles.length} matéria(s))</span>
+          </li>
+        ))}
+      </ol>
+    )
+  }
+</Base>

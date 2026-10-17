@@ -1,0 +1,22 @@
+---
+// Links from a block to its sources in the list at the end of the article.
+interface Props {
+  ids?: string[] | undefined;
+}
+const ids = Astro.props.ids ?? [];
+---
+
+{
+  ids.length > 0 && (
+    <sup data-cites>
+      {ids.map((id, i) => (
+        <>
+          {i > 0 && ', '}
+          <a href={`#fonte-${id}`} aria-label={`Fonte ${id.slice(1)}`}>
+            {id.slice(1)}
+          </a>
+        </>
+      ))}
+    </sup>
+  )
+}

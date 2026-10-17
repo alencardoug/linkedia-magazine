@@ -1,0 +1,50 @@
+---
+// `/materias/{slug}`: article permalink (D-034). Every field is escaped text; AI disclosure + sources (D-028).
+import type { Article } from '../../types/contracts';
+import Base from '../../layouts/Base.astro';
+import Block from '../../components/Block.astro';
+import PromptActions from '../../components/PromptActions.astro';
+import Sources from '../../components/Sources.astro';
+import { loadContent, publishedArticles } from '../../lib/content';
+import { CHANNEL_LABELS, CHANNEL_SLUGS, longDate } from '../../lib/labels';
+
+export function getStaticPaths() {
+  return publishedArticles(loadContent()).map((article) => ({ params: { slug: article.slug }, props: { article } }));
+}
+
+interface Props {
+  article: Article;
+}
+const { article } = Astro.props;
+const tags = loadContent().tags;
+---
+
+<Base title={article.title} description={article.summary}>
+  <article data-article={article.article_id} data-channel={article.channel}>
+    <header>
+      <p class="meta">
+        <a href={`/categorias/${CHANNEL_SLUGS[article.channel]}`}>{CHANNEL_LABELS[article.channel]}</a>
+        · <a href={`/edicoes/${article.edition_date}`}><time datetime={article.edition_date}>{longDate(article.edition_date)}</time></a>
+        · {article.read_minutes} min de leitura
+      </p>
+      <h1>{article.title}</h1>
+      <p data-summary>{article.summary}</p>
+    </header>
+    {article.blocks.map((block) => <Block block={block} />)}
+    <footer>
+      {
+        article.tags.length > 0 && (
+          <ul data-tags aria-label="Tags">
+            {article.tags.map((key) => <li>{tags.get(key)?.label ?? key}</li>)}
+          </ul>
+        )
+      }
+      <p class="meta" data-ai-note>
+        Texto gerado com IA a partir das fontes abaixo; pauta escolhida e versão final aprovada por um editor humano.
+      </p>
+    </footer>
+  </article>
+  <PromptActions actions={article.prompt_actions} />
+  <Sources sources={article.sources} />
+  <p><a href={`/edicoes/${article.edition_date}`}>Voltar à edição</a></p>
+</Base>
