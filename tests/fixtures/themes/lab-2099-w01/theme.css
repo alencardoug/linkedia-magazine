@@ -1,0 +1,18 @@
+/* Fixture: light palette, CSS only. Contrast on --bg: --fg 16.7:1, --muted 8.1:1, --accent 7.7:1, --warning 6.6:1
+   (on --surface 15.0, 7.2, 6.9, 6.0). */
+:root[data-theme='lab-2099-w01'] {
+  color-scheme: light;
+  --bg: #fbfaf7;
+  --surface: #f0eee8;
+  --border: #c9c5bb;
+  --fg: #1b1a17;
+  --muted: #514d45;
+  --accent: #0b4f9c;
+  --accent-strong: #073a75;
+  --warning: #7a5200;
+  --focus: #c76a00; /* ring 3.7:1 on --bg; skip-link text 4.9:1 on it */
+}
+
+:root[data-theme='lab-2099-w01'] [data-brand] {
+  font-family: Georgia, 'Times New Roman', serif;
+}

@@ -1,0 +1,24 @@
+/* Fixture: the baseline's dark palette with a warmer accent (9.9:1 on --bg, 9.0:1 on --surface); the enhancement
+   adds a decorative bar. */
+:root[data-theme='lab-2099-w02'] {
+  --accent: #f6ad6b;
+  --accent-strong: #fbd0a6;
+}
+
+:root[data-theme='lab-2099-w02'] [data-theme-decor] {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--accent);
+  animation: lab-2099-w02-pulse 2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes lab-2099-w02-pulse {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}

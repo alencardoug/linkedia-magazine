@@ -1,8 +1,14 @@
 ---
 // Shared page shell. Markup is semantic and theme-agnostic with stable data-* hooks; the look comes from the
-// active theme's CSS (baseline `minimal-dark`, 1B-02). No client JS here.
+// active theme's CSS (baseline `minimal-dark`, 1B-02; lab themes of the manifest's slots, 1C-01). Once a lab
+// theme exists, <html> names the three slots, the current one is the default, and a tiny inline script applies
+// the reader's stored slot before the first paint (its hash is in the CSP).
 import '../../themes/minimal-dark/theme.css';
+import 'virtual:linkedia-themes/styles';
+import slots from 'virtual:linkedia-themes/slots';
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
 import { AI_NOTE, EDITOR_NAME, EDITOR_URL } from '../lib/site';
+import { THEME_INIT_SCRIPT } from '../lib/theme-init';
 
 interface Props {
   title: string;
@@ -11,12 +17,20 @@ interface Props {
 const { title, description = 'Revista diária sobre engenharia de IA, liderança em IA e conhecimento em IA.' } =
   Astro.props;
 const pageTitle = title === 'Linkedia' ? title : `${title} — Linkedia`;
+const lab = slots.current !== null;
 ---
 
 <!doctype html>
-<html lang="pt-BR" data-theme="minimal-dark">
+<html
+  lang="pt-BR"
+  data-theme={slots.current?.id ?? slots.baseline.id}
+  data-theme-baseline={lab ? slots.baseline.id : undefined}
+  data-theme-previous={slots.previous?.id}
+  data-theme-current={slots.current?.id}
+>
   <head>
     <meta charset="utf-8" />
+    {lab && <script is:inline set:html={THEME_INIT_SCRIPT} />}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
     <meta name="description" content={description} />
@@ -39,6 +53,7 @@ const pageTitle = title === 'Linkedia' ? title : `${title} — Linkedia`;
       <p data-author>
         Editor: <a href={EDITOR_URL} rel="author">{EDITOR_NAME}</a>
       </p>
+      {lab && <ThemeSwitcher />}
     </footer>
   </body>
 </html>

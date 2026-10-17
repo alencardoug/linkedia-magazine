@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "baseline_theme_id": "minimal-dark",
+  "previous_theme_id": "lab-2099-w01",
+  "current_theme_id": "lab-2099-w02",
+  "week_id": "2099-W02",
+  "themes": [
+    {
+      "id": "minimal-dark",
+      "kind": "baseline",
+      "week_id": null,
+      "title": "Minimal Dark",
+      "status": "active",
+      "git_ref": null,
+      "summary": "Permanent CSS-only baseline."
+    },
+    {
+      "id": "lab-2099-w01",
+      "kind": "lab",
+      "week_id": "2099-W01",
+      "title": "Fixture Light",
+      "status": "active",
+      "git_ref": null,
+      "summary": "Test fixture: CSS-only light theme in the previous slot."
+    },
+    {
+      "id": "lab-2099-w02",
+      "kind": "lab",
+      "week_id": "2099-W02",
+      "title": "Fixture Motion",
+      "status": "active",
+      "git_ref": null,
+      "summary": "Test fixture: dark theme with an enhancement module that needs motion.",
+      "enhancement": { "requires": ["motion"] }
+    }
+  ]
+}

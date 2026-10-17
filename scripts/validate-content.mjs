@@ -10,6 +10,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import { BASELINE_ID, checkThemePackage, themesDir } from './themes.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRACTS_DIR = join(ROOT, 'contracts');
@@ -116,11 +117,12 @@ export function validateContent(contentDir) {
 }
 
 /**
- * The magazine-owned theme manifest (D-025): schema plus slot rules, so the switcher (1C) can trust it.
+ * The magazine-owned theme manifest (D-025): schema, slot rules and the files of every slotted lab theme
+ * (scripts/themes.mjs), so the switcher (1C-01) can trust it. Default: `<themes dir>/manifest.json`.
  * @param {string} [path]
  * @returns {string[]} errors (pt-BR)
  */
-export function validateThemes(path = join(ROOT, 'themes', 'manifest.json')) {
+export function validateThemes(path = join(themesDir(), 'manifest.json')) {
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   addFormats(ajv);
   const validate = ajv.compile(JSON.parse(readFileSync(join(CONTRACTS_DIR, 'theme_manifest.schema.json'), 'utf8')));
@@ -142,6 +144,22 @@ export function validateThemes(path = join(ROOT, 'themes', 'manifest.json')) {
   }
   if (manifest.current_theme_id === null && manifest.previous_theme_id !== null) {
     errors.push(`${where}: previous_theme_id sem current_theme_id`);
+  }
+  if (manifest.current_theme_id !== null && manifest.current_theme_id === manifest.previous_theme_id) {
+    errors.push(`${where}: previous_theme_id igual a current_theme_id`);
+  }
+  const slotted = new Set([manifest.current_theme_id, manifest.previous_theme_id]);
+  for (const theme of manifest.themes) {
+    if ((theme.kind === 'baseline') !== (theme.id === BASELINE_ID)) errors.push(`${where}: kind errado para ${theme.id}`);
+    if (theme.kind === 'baseline' && theme.enhancement) errors.push(`${where}: o baseline não tem enhancement (só CSS)`);
+    if (theme.kind === 'lab' && theme.status === 'active' && !slotted.has(theme.id)) {
+      errors.push(`${where}: ${theme.id} está ativo mas não ocupa um slot`);
+    }
+  }
+  if (errors.length) return errors;
+  const dir = dirname(path);
+  for (const theme of manifest.themes.filter((t) => slotted.has(t.id))) {
+    errors.push(...checkThemePackage(dir, theme).map((e) => `${where}: ${e}`));
   }
   return errors;
 }

@@ -1,8 +1,10 @@
 // firebase.json (1B-03): security headers on every path and exactly one Cache-Control rule per path.
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { IMAGE_HOSTS } from '../src/lib/labels';
+import { THEME_INIT_SCRIPT } from '../src/lib/theme-init';
 
 const hosting = JSON.parse(readFileSync(resolve(import.meta.dirname, '../firebase.json'), 'utf8')).hosting;
 
@@ -34,10 +36,12 @@ describe('firebase.json', () => {
     expect(hosting.rewrites).toBeUndefined(); // static files only, no SPA fallback
   });
 
-  it('sends a strict CSP that allows only same-origin scripts, styles and images', () => {
+  it('sends a strict CSP that allows only same-origin scripts, styles and images, and the hashed theme script', () => {
     const p = csp();
     expect(p['default-src']).toEqual(["'none'"]);
-    expect(p['script-src']).toEqual(["'self'"]);
+    // Same-origin files plus the one inline script the build emits: the pre-paint theme script (1C-01).
+    const hash = createHash('sha256').update(THEME_INIT_SCRIPT).digest('base64');
+    expect(p['script-src']).toEqual(["'self'", `'sha256-${hash}'`]);
     expect(p['style-src']).toEqual(["'self'"]);
     expect(p['frame-ancestors']).toEqual(["'none'"]);
     expect(p['base-uri']).toEqual(["'none'"]);

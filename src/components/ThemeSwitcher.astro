@@ -1,0 +1,40 @@
+---
+// Footer theme switcher (D-025, 1C-01): exactly three slots, rendered only once a lab theme exists (Base.astro).
+// Without JS it stays hidden and the build-time default (current) applies. The previous slot is disabled until
+// a second experiment exists.
+import slots from 'virtual:linkedia-themes/slots';
+import type { SlotName, ThemeSlot } from '../lib/theme-runtime';
+
+const options: { slot: SlotName; label: string; theme: ThemeSlot | null }[] = [
+  { slot: 'baseline', label: 'Base', theme: slots.baseline },
+  { slot: 'previous', label: 'Anterior', theme: slots.previous },
+  { slot: 'current', label: 'Atual', theme: slots.current },
+];
+---
+
+<fieldset data-theme-switcher hidden>
+  <legend>Tema visual</legend>
+  {
+    options.map((o) => (
+      <label data-theme-option={o.slot}>
+        <input
+          type="radio"
+          name="tema"
+          value={o.slot}
+          checked={o.slot === 'current'}
+          disabled={o.theme === null}
+          data-theme-title={o.theme?.title}
+        />
+        {o.theme ? `${o.label}: ${o.theme.title}` : `${o.label} (ainda não há)`}
+      </label>
+    ))
+  }
+  <p data-theme-status aria-live="polite" class="meta"></p>
+</fieldset>
+
+<script>
+  import enhancements from 'virtual:linkedia-themes/enhancements';
+  import { startThemes } from '../lib/theme-runtime';
+
+  startThemes(enhancements);
+</script>

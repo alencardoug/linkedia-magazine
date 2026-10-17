@@ -1,13 +1,16 @@
 // Static build (1B-01): every route is emitted from a content dir, and model-produced text is always escaped.
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+// Themes (1C-01): the build ships the slotted themes only, and the switcher appears once a lab theme exists.
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { build } from 'astro';
 import { afterAll, describe, expect, it } from 'vitest';
 import { validateContent } from '../scripts/validate-content.mjs';
+import { THEME_INIT_SCRIPT } from '../src/lib/theme-init';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const EXAMPLES = join(ROOT, 'content/examples');
+const FIXTURE_THEMES = join(ROOT, 'tests/fixtures/themes');
 // Breaks out of text (tags) and of a quoted attribute (`"` + event handler).
 const X = '<script>alert(1)</script><img src=x onerror=alert(2)>" onmouseover="alert(3)';
 const temps = [];
@@ -26,18 +29,40 @@ function temp(prefix, parent = tmpdir()) {
   return dir;
 }
 
-async function buildSite(contentDir) {
+// A themes dir from the fixtures, changed by `mutate(dir, manifest)`. `bootstrap` = the baseline only, the state
+// before the first experiment (the real themes/manifest.json changes weekly, so tests do not build from it).
+function themesVariant(mutate = () => {}) {
+  const dir = temp('linkedia-themes-', OUT_PARENT);
+  cpSync(FIXTURE_THEMES, dir, { recursive: true });
+  const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
+  mutate(dir, manifest);
+  writeFileSync(join(dir, 'manifest.json'), JSON.stringify(manifest));
+  return dir;
+}
+const bootstrap = () =>
+  themesVariant((_, m) => {
+    Object.assign(m, { previous_theme_id: null, current_theme_id: null, week_id: null });
+    m.themes = m.themes.filter((t) => t.kind === 'baseline');
+  });
+
+async function buildSite(contentDir, themesDir = bootstrap()) {
   const outDir = temp('linkedia-dist-', OUT_PARENT);
-  const previous = process.env.LINKEDIA_CONTENT_DIR;
-  process.env.LINKEDIA_CONTENT_DIR = contentDir;
+  const env = { LINKEDIA_CONTENT_DIR: contentDir, LINKEDIA_THEMES_DIR: themesDir };
+  const previous = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
+  Object.assign(process.env, env);
   try {
     await build({ root: ROOT, outDir, logLevel: 'error' });
   } finally {
-    if (previous === undefined) delete process.env.LINKEDIA_CONTENT_DIR;
-    else process.env.LINKEDIA_CONTENT_DIR = previous;
+    for (const [k, v] of Object.entries(previous)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
   }
   return outDir;
 }
+
+const assets = (out, ext) => readdirSync(join(out, '_astro')).filter((f) => f.endsWith(ext));
+const read = (out, page) => readFileSync(join(out, page), 'utf8');
 
 function htmlFiles(dir, prefix = '') {
   return readdirSync(join(dir, prefix), { withFileTypes: true }).flatMap((e) =>
@@ -151,7 +176,8 @@ describe('static build', () => {
     // Every page: one theme, the author link in the footer, the AI note, and client JS only with copy buttons.
     for (const page of htmlFiles(out)) {
       const html = readFileSync(join(out, page), 'utf8');
-      expect(html, page).toContain('data-theme="minimal-dark"');
+      expect(html, page).toContain('<html lang="pt-BR" data-theme="minimal-dark">'); // no slots, no switcher
+      expect(html, page).not.toContain('data-theme-switcher');
       expect(html, page).toMatch(/<a href="https:\/\/portfolio-douglas-alencar\.web\.app\/" rel="author">Douglas Alencar<\/a>/);
       expect(html, page).toContain('href="/sobre"');
       expect(html.includes('<script'), page).toBe(html.includes('data-copy='));
@@ -226,6 +252,64 @@ describe('static build', () => {
     expect(html).toMatch(/<a href="#fonte-s2" aria-label="Fonte 2">2<\/a>/);
     const diagram = html.slice(html.indexOf('data-block="diagram"'));
     expect(diagram.slice(0, diagram.indexOf('</figure>'))).toMatch(/<figcaption>[\s\S]*href="#fonte-s7"/);
+  }, 120_000);
+
+  it('ships three slots with lab themes: pre-paint script, hidden switcher, lazy enhancement', async () => {
+    const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
+    const pages = htmlFiles(out);
+    expect(pages).toHaveLength(9);
+    for (const page of pages) {
+      const html = read(out, page);
+      expect(html, page).toContain(
+        '<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" ' +
+          'data-theme-previous="lab-2099-w01" data-theme-current="lab-2099-w02">',
+      );
+      // Exactly one inline script, in <head>: the hashed pre-paint script (firebase.json script-src).
+      const inline = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)];
+      expect(inline.map((m) => m[1]), page).toEqual([THEME_INIT_SCRIPT]);
+      expect(inline[0].index, page).toBeLessThan(html.indexOf('</head>'));
+      expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
+      expect(html, page).toMatch(/<script type="module" src="\/_astro\/ThemeSwitcher[^"]*\.js"><\/script>/);
+      expect(html, page).not.toContain('enhance.'); // the enhancement is never preloaded
+      const switcher = html.slice(html.indexOf('<fieldset'), html.indexOf('</fieldset>'));
+      expect(switcher, page).toContain('<fieldset data-theme-switcher hidden><legend>Tema visual</legend>');
+      expect([...switcher.matchAll(/<input type="radio" name="tema" value="(\w+)"([^>]*)>/g)].map((m) => [m[1], m[2]])).toEqual([
+        ['baseline', ' data-theme-title="Minimal Dark"'],
+        ['previous', ' data-theme-title="Fixture Light"'],
+        ['current', ' checked data-theme-title="Fixture Motion"'],
+      ]);
+      expect(switcher).toContain('Anterior: Fixture Light</label>');
+      expect(switcher).toContain('<p data-theme-status aria-live="polite" class="meta"></p>');
+    }
+    // Slotted lab styles come after the baseline in the one stylesheet.
+    const [css] = assets(out, '.css');
+    const styles = read(out, `_astro/${css}`);
+    expect(styles.indexOf('lab-2099-w01')).toBeGreaterThan(styles.indexOf('minimal-dark'));
+    expect(styles).toContain('lab-2099-w02-pulse');
+    // The enhancement is its own chunk, imported only by the switcher; the switcher stays within budget.
+    const [enhance] = assets(out, '.js').filter((f) => f.startsWith('enhance.'));
+    const [entry] = assets(out, '.js').filter((f) => f.startsWith('ThemeSwitcher'));
+    expect(read(out, `_astro/${entry}`)).toContain(`import(\`./${enhance}\`)`);
+    expect(statSync(join(out, '_astro', entry)).size).toBeLessThanOrEqual(6_000);
+  }, 120_000);
+
+  it('disables the previous slot with a single experiment and ships no archived theme', async () => {
+    const themes = themesVariant((_, m) => {
+      m.previous_theme_id = null;
+      m.themes[1].status = 'archived'; // lab-2099-w01 keeps its folder but leaves the slots
+    });
+    const out = await buildSite(EXAMPLES, themes);
+    const html = read(out, 'index.html');
+    expect(html).toContain('<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" data-theme-current="lab-2099-w02">');
+    expect(html).toContain('<input type="radio" name="tema" value="previous" disabled>Anterior (ainda não há)</label>');
+    const styles = assets(out, '.css').map((f) => read(out, `_astro/${f}`)).join('');
+    expect(styles).toContain('lab-2099-w02');
+    expect(styles).not.toContain('lab-2099-w01');
+  }, 120_000);
+
+  it('refuses to build with a theme that styles outside its scope', async () => {
+    const themes = themesVariant((dir) => writeFileSync(join(dir, 'lab-2099-w01/theme.css'), 'main { display: none }'));
+    await expect(buildSite(EXAMPLES, themes)).rejects.toThrow(/Manifesto de temas inválido[\s\S]*seletor fora do escopo do tema: main/);
   }, 120_000);
 
   it('renders an empty magazine without editions', async () => {

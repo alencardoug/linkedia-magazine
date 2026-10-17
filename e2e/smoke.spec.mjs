@@ -1,4 +1,6 @@
-// Smoke suite over the example content (1B-04): routes, copy button, reading without JS, 320 px, axe.
+// Smoke suite over the example content (1B-04): routes, copy button, reading without JS, 320 px, axe. The
+// build uses the fixture themes (tests/fixtures/themes), so pages open in the current lab slot; themes.spec.mjs
+// covers the other slots.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
