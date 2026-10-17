@@ -1,6 +1,9 @@
 ---
-// Shared page shell (1B-01). Visual design and tokens come in 1B-02; markup stays semantic and theme-agnostic
-// with stable data-* hooks.
+// Shared page shell. Markup is semantic and theme-agnostic with stable data-* hooks; the look comes from the
+// active theme's CSS (baseline `minimal-dark`, 1B-02). No client JS here.
+import '../../themes/minimal-dark/theme.css';
+import { AI_NOTE, EDITOR_NAME, EDITOR_URL } from '../lib/site';
+
 interface Props {
   title: string;
   description?: string;
@@ -18,53 +21,23 @@ const pageTitle = title === 'Linkedia' ? title : `${title} — Linkedia`;
     <meta name="color-scheme" content="dark" />
     <meta name="description" content={description} />
     <title>{pageTitle}</title>
-    <style is:global>
-      :root {
-        color-scheme: dark;
-        --bg: #111214;
-        --fg: #e8e6e3;
-        --muted: #a7a39d;
-        --accent: #8ab4f8;
-      }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--fg);
-        font-family: system-ui, sans-serif;
-        line-height: 1.6;
-      }
-      a {
-        color: var(--accent);
-      }
-      header[data-site-header],
-      main,
-      footer[data-site-footer] {
-        max-width: 42rem;
-        margin: 0 auto;
-        padding: 1rem;
-      }
-      pre {
-        overflow-x: auto;
-      }
-      .meta {
-        color: var(--muted);
-      }
-    </style>
   </head>
   <body>
     <a href="#conteudo" class="pular">Pular para o conteúdo</a>
     <header data-site-header>
       <nav aria-label="Principal">
         <a href="/" data-brand><strong>Linkedia</strong></a>
-        · <a href="/edicoes">Edições</a>
+        <a href="/edicoes">Edições</a>
+        <a href="/sobre">Sobre</a>
       </nav>
     </header>
     <main id="conteudo">
       <slot />
     </main>
     <footer data-site-footer>
-      <p class="meta">
-        Textos gerados com IA a partir de fontes citadas, com pautas escolhidas e revisadas por um editor humano.
+      <p class="meta">{AI_NOTE} <a href="/sobre">Como a Linkedia é feita</a>.</p>
+      <p data-author>
+        Editor: <a href={EDITOR_URL} rel="author">{EDITOR_NAME}</a>
       </p>
     </footer>
   </body>

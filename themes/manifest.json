@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "baseline_theme_id": "minimal-dark",
+  "previous_theme_id": null,
+  "current_theme_id": null,
+  "week_id": null,
+  "themes": [
+    {
+      "id": "minimal-dark",
+      "kind": "baseline",
+      "week_id": null,
+      "title": "Minimal Dark",
+      "status": "active",
+      "git_ref": null,
+      "summary": "Permanent CSS-only baseline: dark, system fonts, readable without JS (1B-02)."
+    }
+  ]
+}

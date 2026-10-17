@@ -1,0 +1,50 @@
+---
+// `/sobre`: how editions are made (AI disclosure, D-028; owner-approved wording, O-3), identity and licenses.
+import Base from '../layouts/Base.astro';
+import { EDITOR_NAME, EDITOR_URL, REPO_URL } from '../lib/site';
+---
+
+<Base title="Sobre" description="Como a Linkedia é feita: fontes coletadas, pautas escolhidas por um editor humano e textos gerados com IA.">
+  <article data-about>
+    <h1>Sobre a Linkedia</h1>
+    <p>
+      A Linkedia é uma revista diária, em português, sobre engenharia de IA, liderança em IA e conhecimento em IA,
+      feita para profissionais de tecnologia que querem acompanhar o que muda e aplicar no trabalho.
+    </p>
+
+    <h2>Como cada edição é feita</h2>
+    <ol>
+      <li><strong>Fontes coletadas automaticamente.</strong> Um sistema reúne publicações recentes de fontes públicas, como blogs técnicos, documentação, artigos e notícias.</li>
+      <li><strong>Pautas escolhidas por um editor humano.</strong> O editor lê as sugestões do dia e decide quais temas entram na edição.</li>
+      <li><strong>Texto gerado por IA.</strong> Um modelo de IA escreve cada matéria a partir das fontes escolhidas e indica, trecho a trecho, a fonte de cada informação.</li>
+      <li><strong>Verificações automáticas.</strong> Checagens conferem a estrutura de cada matéria e se as citações apontam para fontes realmente coletadas.</li>
+      <li><strong>Revisão final do editor.</strong> Nenhuma matéria é publicada sem que o editor a leia e aprove; ele também pode pedir uma nova versão ou descartá-la.</li>
+    </ol>
+
+    <h2>O que isso significa para você</h2>
+    <ul>
+      <li>Todas as matérias são geradas com IA. Cada uma traz esse aviso e a lista numerada das fontes usadas.</li>
+      <li>A IA pode errar ou simplificar demais. Antes de uma decisão importante, confira a fonte original.</li>
+      <li>Os prompts ao fim das matérias são sugestões para você continuar aprendendo no assistente de IA que preferir. O site não envia nada a nenhum serviço.</li>
+    </ul>
+
+    <h2>Privacidade</h2>
+    <p>
+      Sem anúncios, cookies, contas ou análise de audiência. As páginas são estáticas e não carregam recursos de
+      outros sites.
+    </p>
+
+    <h2>Quem faz</h2>
+    <p data-author>
+      Edição de <a href={EDITOR_URL} rel="author">{EDITOR_NAME}</a>.
+    </p>
+
+    <h2>Licenças</h2>
+    <p>
+      Os textos da Linkedia estão sob a licença
+      <a href="https://creativecommons.org/licenses/by/4.0/deed.pt-br" rel="license noopener noreferrer">CC BY 4.0</a>;
+      o material de terceiros citado mantém a licença de origem. O código do site é aberto (MIT) e está em
+      <a href={REPO_URL} rel="noopener noreferrer">github.com/alencardoug/linkedia-magazine</a>.
+    </p>
+  </article>
+</Base>

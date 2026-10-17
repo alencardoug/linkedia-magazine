@@ -15,14 +15,19 @@ afterAll(() => {
   for (const dir of temps) rmSync(dir, { recursive: true, force: true });
 });
 
-function temp(prefix) {
-  const dir = mkdtempSync(join(tmpdir(), prefix));
+// Build output must sit on the project's filesystem: Astro moves bundled assets with rename(), which fails
+// across devices (EXDEV) when /tmp is a separate mount.
+const OUT_PARENT = join(ROOT, 'node_modules', '.cache');
+
+function temp(prefix, parent = tmpdir()) {
+  mkdirSync(parent, { recursive: true });
+  const dir = mkdtempSync(join(parent, prefix));
   temps.push(dir);
   return dir;
 }
 
 async function buildSite(contentDir) {
-  const outDir = temp('linkedia-dist-');
+  const outDir = temp('linkedia-dist-', OUT_PARENT);
   const previous = process.env.LINKEDIA_CONTENT_DIR;
   process.env.LINKEDIA_CONTENT_DIR = contentDir;
   try {
@@ -139,8 +144,21 @@ describe('static build', () => {
         'categorias/engenharia-de-ia.html',
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
+        'sobre.html',
       ].sort(),
     );
+    // Every page: one theme, the author link in the footer, the AI note, and client JS only with copy buttons.
+    for (const page of htmlFiles(out)) {
+      const html = readFileSync(join(out, page), 'utf8');
+      expect(html, page).toContain('data-theme="minimal-dark"');
+      expect(html, page).toMatch(/<a href="https:\/\/portfolio-douglas-alencar\.web\.app\/" rel="author">Douglas Alencar<\/a>/);
+      expect(html, page).toContain('href="/sobre"');
+      expect(html.includes('<script'), page).toBe(html.includes('data-copy='));
+      expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
+    }
+    const about = readFileSync(join(out, 'sobre.html'), 'utf8');
+    expect(about).toContain('Texto gerado por IA');
+    expect(about).toContain('Pautas escolhidas por um editor humano');
     const article = readFileSync(join(out, 'materias/exemplo-de-materia-linkedia.html'), 'utf8');
     expect(article).toContain('Exemplo ilustrativo de matéria');
     expect(article).toContain('id="fonte-s1"');
@@ -180,6 +198,7 @@ describe('static build', () => {
         'categorias/engenharia-de-ia.html',
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
+        'sobre.html',
       ].sort(),
     );
     expect(readFileSync(join(out, 'index.html'), 'utf8')).toContain('Nenhuma edição publicada ainda.');

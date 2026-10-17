@@ -115,6 +115,37 @@ export function validateContent(contentDir) {
   return { errors, counts: { articles: articles.size, editions, tags } };
 }
 
+/**
+ * The magazine-owned theme manifest (D-025): schema plus slot rules, so the switcher (1C) can trust it.
+ * @param {string} [path]
+ * @returns {string[]} errors (pt-BR)
+ */
+export function validateThemes(path = join(ROOT, 'themes', 'manifest.json')) {
+  const ajv = new Ajv2020({ allErrors: true, strict: true });
+  addFormats(ajv);
+  const validate = ajv.compile(JSON.parse(readFileSync(join(CONTRACTS_DIR, 'theme_manifest.schema.json'), 'utf8')));
+  const where = relative(ROOT, path) || basename(path);
+  let manifest;
+  try {
+    manifest = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (err) {
+    return [`${where}: JSON inválido ou ausente (${err.message})`];
+  }
+  if (!validate(manifest)) return (validate.errors ?? []).map((e) => `${where}: ${e.instancePath || '(raiz)'} ${e.message}`);
+  const errors = [];
+  const byId = new Map(manifest.themes.map((t) => [t.id, t]));
+  if (byId.size !== manifest.themes.length) errors.push(`${where}: id de tema repetido`);
+  if (byId.get('minimal-dark')?.status !== 'active') errors.push(`${where}: minimal-dark ausente ou inativo`);
+  for (const slot of ['current_theme_id', 'previous_theme_id']) {
+    const id = manifest[slot];
+    if (id !== null && byId.get(id)?.status !== 'active') errors.push(`${where}: ${slot} "${id}" não é um tema ativo`);
+  }
+  if (manifest.current_theme_id === null && manifest.previous_theme_id !== null) {
+    errors.push(`${where}: previous_theme_id sem current_theme_id`);
+  }
+  return errors;
+}
+
 function parseDir(argv) {
   const i = argv.indexOf('--dir');
   if (i !== -1) {
@@ -126,7 +157,8 @@ function parseDir(argv) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const dir = parseDir(process.argv.slice(2));
-  const { errors, counts } = validateContent(dir);
+  const { errors: contentErrors, counts } = validateContent(dir);
+  const errors = [...contentErrors, ...validateThemes()];
   if (errors.length) {
     console.error(`Conteúdo inválido em ${dir}:`);
     for (const e of errors) console.error(`  - ${e}`);
