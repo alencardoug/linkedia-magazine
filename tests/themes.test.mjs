@@ -1,4 +1,4 @@
-// themes/manifest.json (D-025): the bootstrap manifest is valid, slot rules reject broken manifests, and every
+// themes/manifest.json (D-025): the real manifest is valid, slot rules reject broken manifests, and every
 // slotted lab theme is a scoped, budgeted package (1C-01).
 import { cpSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -12,8 +12,11 @@ const FIXTURES = resolve(import.meta.dirname, 'fixtures/themes');
 const dir = mkdtempSync(join(tmpdir(), 'linkedia-themes-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
+// The real manifest reduced to its bootstrap state (baseline only, empty slots), changed by `mutate(doc)`.
 function variant(mutate) {
   const doc = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+  doc.themes = doc.themes.filter((t) => t.kind === 'baseline');
+  Object.assign(doc, { previous_theme_id: null, current_theme_id: null, week_id: null });
   mutate(doc);
   const path = join(dir, `${Math.random().toString(36).slice(2)}.json`);
   writeFileSync(path, JSON.stringify(doc));
@@ -21,10 +24,16 @@ function variant(mutate) {
 }
 
 describe('theme manifest', () => {
-  it('bootstraps with the baseline only and empty slots', () => {
+  it('is valid, and its current slot is the lab theme of the manifest week', () => {
     expect(validateThemes()).toEqual([]);
     const doc = JSON.parse(readFileSync(MANIFEST, 'utf8'));
-    expect([doc.current_theme_id, doc.previous_theme_id, doc.week_id]).toEqual([null, null, null]);
+    const current = doc.themes.find((t) => t.id === doc.current_theme_id);
+    expect(current).toMatchObject({ kind: 'lab', status: 'active', week_id: doc.week_id });
+    expect(current.id).toBe(`lab-${doc.week_id.toLowerCase()}`);
+  });
+
+  it('accepts the bootstrap state (baseline only, empty slots)', () => {
+    expect(validateThemes(variant(() => {}))).toEqual([]);
   });
 
   it('rejects a slot pointing at a missing theme, a previous without current, and a dropped baseline', () => {

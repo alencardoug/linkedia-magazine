@@ -1,0 +1,246 @@
+/* lab-2026-w42 "Broadsheet": the first weekly experiment (1C-02). A light newsprint page: ink-black serif text,
+   one red "headline ink" accent, a centred masthead, hairline and double rules, small-caps datelines, a drop cap
+   on the lead story and on the article's first paragraph, and a reading-progress rule driven by the page scroll
+   (CSS scroll-driven animation, no JS). CSS only; the markup is the baseline's.
+   Contrast on --bg: --fg 15.4:1, --muted 7.0:1, --accent 7.1:1, --accent-strong 10.9:1, --warning 5.9:1,
+   --focus 6.7:1; on --surface 13.8, 6.3, 6.3, 9.8, 5.3, 6.0. Skip-link text (#fff) on --focus 7.6:1. --border is
+   decorative (hairline rules) and never carries meaning. */
+:root[data-theme='lab-2026-w42'] {
+  color-scheme: light;
+  --bg: #f5f0e6;
+  --surface: #ebe4d5;
+  --border: #b3a68f;
+  --fg: #1c1915;
+  --muted: #594f43;
+  --accent: #9e1b14;
+  --accent-strong: #6a110c;
+  --warning: #7d5300;
+  --focus: #1b4fae;
+  --font-body: 'Iowan Old Style', 'Charter', 'Bitstream Charter', 'Sitka Text', Cambria, 'Noto Serif',
+    'Liberation Serif', Georgia, serif;
+  --font-label: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --measure: 70ch;
+  --radius: 0;
+  --text-base: 1.125rem;
+  --text-xl: clamp(1.9rem, 1.3rem + 3vw, 2.75rem);
+}
+
+:root[data-theme='lab-2026-w42'] body {
+  line-height: 1.6;
+}
+
+/* Masthead: the brand centred over the sections, closed by a double rule. */
+:root[data-theme='lab-2026-w42'] [data-site-header] {
+  padding-top: var(--space-4);
+  border-bottom: 4px double var(--fg);
+}
+
+:root[data-theme='lab-2026-w42'] [data-site-header] nav {
+  justify-content: center;
+  gap: var(--space-1) var(--space-4);
+  text-align: center;
+}
+
+:root[data-theme='lab-2026-w42'] [data-brand] {
+  flex-basis: 100%;
+  margin-right: 0;
+  font-size: clamp(2.4rem, 1.6rem + 4vw, 3.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+:root[data-theme='lab-2026-w42'] [data-site-header] nav a:not([data-brand]) {
+  font-family: var(--font-label);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--fg);
+}
+
+:root[data-theme='lab-2026-w42'] [data-site-header] nav a:not([data-brand]):hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* Headlines */
+:root[data-theme='lab-2026-w42'] :is(h1, h2, h3, h4) {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+:root[data-theme='lab-2026-w42'] p {
+  text-wrap: pretty;
+}
+
+/* Labels and datelines: sans-serif; the short ones that open a card, an edition or an article in small caps. */
+:root[data-theme='lab-2026-w42'] .meta {
+  font-family: var(--font-label);
+}
+
+:root[data-theme='lab-2026-w42'] :is([data-card] > .meta:first-child, [data-article] > header > .meta, [data-edition] > .meta) {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  font-size: 0.95rem;
+}
+
+:root[data-theme='lab-2026-w42'] [data-edition] > .meta {
+  padding: var(--space-1) 0;
+  border-top: 1px solid var(--fg);
+  border-bottom: 1px solid var(--fg);
+}
+
+/* Cards: the lead story opens under a heavy rule with a drop cap; the rest sit between hairlines. */
+:root[data-theme='lab-2026-w42'] [data-card] h2 a:hover,
+:root[data-theme='lab-2026-w42'] [data-card] h3 a:hover {
+  color: var(--accent);
+}
+
+:root[data-theme='lab-2026-w42'] [data-card][data-lead] {
+  margin-top: var(--space-4);
+  padding: var(--space-3) 0 var(--space-4);
+  border: 0;
+  border-top: 6px solid var(--fg);
+  border-bottom: 1px solid var(--fg);
+  border-radius: 0;
+  background: transparent;
+}
+
+:root[data-theme='lab-2026-w42'] [data-card][data-lead] h2 {
+  font-size: clamp(1.7rem, 1.3rem + 2vw, 2.3rem);
+  line-height: 1.15;
+}
+
+:root[data-theme='lab-2026-w42'] :is([data-card][data-lead] > p:last-child, [data-article] > header + p[data-block='paragraph'])::first-letter {
+  float: left;
+  margin: 0.06em 0.1em 0 0;
+  font-size: 3.4em;
+  font-weight: 700;
+  line-height: 0.8;
+  color: var(--accent);
+}
+
+/* Article */
+:root[data-theme='lab-2026-w42'] [data-article] > header {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--fg);
+}
+
+:root[data-theme='lab-2026-w42'] [data-article] > header h1 {
+  font-size: var(--text-xl);
+  line-height: 1.12;
+}
+
+:root[data-theme='lab-2026-w42'] [data-summary] {
+  font-style: italic;
+  color: var(--fg);
+}
+
+:root[data-theme='lab-2026-w42'] [data-block='heading'] {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+:root[data-theme='lab-2026-w42'] [data-block='quote'] blockquote {
+  padding: var(--space-2) 0;
+  border: 0;
+  border-top: 1px solid var(--fg);
+  border-bottom: 1px solid var(--fg);
+  font-size: var(--text-lg);
+  text-align: center;
+}
+
+:root[data-theme='lab-2026-w42'] [data-block='quote'] figcaption {
+  text-align: center;
+}
+
+:root[data-theme='lab-2026-w42'] [data-block='callout'] {
+  border-radius: 0;
+}
+
+:root[data-theme='lab-2026-w42'] :is([data-tags] li, button, [data-prompt-action], pre, [data-block='diagram'], [data-block='image']) {
+  border-radius: 0;
+}
+
+:root[data-theme='lab-2026-w42'] [data-tags] li {
+  font-family: var(--font-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--fg);
+  border-color: var(--fg);
+}
+
+:root[data-theme='lab-2026-w42'] button {
+  font-family: var(--font-label);
+  border-color: var(--fg);
+  color: var(--fg);
+}
+
+:root[data-theme='lab-2026-w42'] button:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+:root[data-theme='lab-2026-w42'] .pular {
+  color: #fff;
+}
+
+/* Footer: opened by the same double rule as the masthead. Its column is sized in body text (the measure is in
+   `ch`) so the rule spans the page width; the small type moves to its children. */
+:root[data-theme='lab-2026-w42'] [data-site-footer] {
+  border-top: 4px double var(--fg);
+  font-size: var(--text-base);
+}
+
+:root[data-theme='lab-2026-w42'] [data-site-footer] > * {
+  font-size: var(--text-sm);
+}
+
+:root[data-theme='lab-2026-w42'] [data-theme-switcher] {
+  font-family: var(--font-label);
+  border-color: var(--fg);
+  border-radius: 0;
+}
+
+/* Reading progress: a thin red rule along the top of the window, scaled by the page's scroll position. Only where
+   the browser has scroll timelines and the reader has not asked for reduced motion; elsewhere nothing is drawn.
+   A page too short to scroll has an inactive timeline, so the rule stays at width 0. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    :root[data-theme='lab-2026-w42'] body::before {
+      content: '';
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 20;
+      height: 3px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      pointer-events: none;
+      /* Longhands on purpose: the build's CSS minifier folds `animation` + `animation-timeline` into one
+         shorthand that browsers reject (the timeline is reset-only in the shorthand). */
+      animation-name: lab-2026-w42-progress;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes lab-2026-w42-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (forced-colors: active) {
+  :root[data-theme='lab-2026-w42'] body::before {
+    display: none;
+  }
+
+  :root[data-theme='lab-2026-w42'] :is([data-card][data-lead] > p:last-child, [data-article] > header + p[data-block='paragraph'])::first-letter {
+    color: CanvasText;
+  }
+}

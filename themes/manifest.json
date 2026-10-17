@@ -2,8 +2,8 @@
   "schema_version": "1.0.0",
   "baseline_theme_id": "minimal-dark",
   "previous_theme_id": null,
-  "current_theme_id": null,
-  "week_id": null,
+  "current_theme_id": "lab-2026-w42",
+  "week_id": "2026-W42",
   "themes": [
     {
       "id": "minimal-dark",
@@ -13,6 +13,15 @@
       "status": "active",
       "git_ref": null,
       "summary": "Permanent CSS-only baseline: dark, system fonts, readable without JS (1B-02)."
+    },
+    {
+      "id": "lab-2026-w42",
+      "kind": "lab",
+      "week_id": "2026-W42",
+      "title": "Broadsheet",
+      "status": "active",
+      "git_ref": null,
+      "summary": "Light newsprint page: serif masthead, ink and red accent, hairline rules, drop caps and a CSS scroll-driven reading-progress rule. CSS only."
     }
   ]
 }
