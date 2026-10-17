@@ -37,9 +37,19 @@
       "label": "Uso indevido"
     },
     {
+      "key": "risk:security",
+      "kind": "risk",
+      "label": "Segurança da informação"
+    },
+    {
       "key": "source:google-cloud",
       "kind": "source",
       "label": "Google Cloud Blog"
+    },
+    {
+      "key": "source:google-developers",
+      "kind": "source",
+      "label": "Google Developers Blog"
     },
     {
       "key": "source:mit-technology-review",
@@ -57,6 +67,16 @@
       "label": "Núcleo Jornalismo"
     },
     {
+      "key": "source:openai",
+      "kind": "source",
+      "label": "OpenAI"
+    },
+    {
+      "key": "source:simon-willison",
+      "kind": "source",
+      "label": "Simon Willison"
+    },
+    {
       "key": "theme:governance",
       "kind": "theme",
       "label": "Governança"
@@ -65,6 +85,11 @@
       "key": "theme:multimodal",
       "kind": "theme",
       "label": "Multimodalidade"
+    },
+    {
+      "key": "theme:operating-model",
+      "kind": "theme",
+      "label": "Modelo operacional"
     },
     {
       "key": "theme:regulation",
@@ -82,9 +107,24 @@
       "label": "Segurança de IA"
     },
     {
+      "key": "topic:agent-evaluation",
+      "kind": "topic",
+      "label": "Avaliação de agentes"
+    },
+    {
       "key": "topic:agents",
       "kind": "topic",
       "label": "Agentes de IA"
+    },
+    {
+      "key": "topic:coding-agents",
+      "kind": "topic",
+      "label": "Agentes de programação"
+    },
+    {
+      "key": "topic:context-engineering",
+      "kind": "topic",
+      "label": "Engenharia de contexto"
     },
     {
       "key": "topic:gcp",
@@ -102,9 +142,34 @@
       "label": "Inferência e serving"
     },
     {
+      "key": "topic:llm-evaluation",
+      "kind": "topic",
+      "label": "Avaliação de LLMs"
+    },
+    {
       "key": "topic:llm-security",
       "kind": "topic",
       "label": "Segurança de aplicações com LLM"
+    },
+    {
+      "key": "topic:mcp",
+      "kind": "topic",
+      "label": "Model Context Protocol (MCP)"
+    },
+    {
+      "key": "topic:observability",
+      "kind": "topic",
+      "label": "Observabilidade"
+    },
+    {
+      "key": "topic:prompt-engineering",
+      "kind": "topic",
+      "label": "Engenharia de prompts"
+    },
+    {
+      "key": "topic:rag",
+      "kind": "topic",
+      "label": "RAG"
     },
     {
       "key": "topic:token-efficiency",

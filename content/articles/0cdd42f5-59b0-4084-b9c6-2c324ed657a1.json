@@ -1,0 +1,221 @@
+{
+  "article_id": "0cdd42f5-59b0-4084-b9c6-2c324ed657a1",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Se você usa Claude Code ou Codex, já fez o que o Google chama de vibe check: roda dois ou três prompts, lê a resposta, acha razoável e segue. Dois posts do Google (um do Google Cloud, de 16/10, e outro do Google Developers Blog, sem data na extração) explicam por que isso falha com agentes e propõem uma alternativa: evals, ou seja, testes repetíveis do comportamento do agente. Ao final deste texto você terá um roteiro para montar, num fim de semana, um primeiro conjunto de casos para um agente seu.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: o que os guias dizem",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "O argumento central: agentes falham de forma diferente de software comum. Um agente pode entrar em loop de tentativas, disparar várias chamadas de ferramenta e ainda assim devolver uma resposta final educada e plausível. Ajustar o prompt de sistema para consertar um caso pode, sem aviso, fazer o agente parar de chamar uma ferramenta obrigatória em outro fluxo.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Quatro lições do time do plugin Google Cloud Developer",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Avalie os passos de execução, não o resumo. Num conjunto inicial de 11 prompts, o juiz automático (um LLM que dá nota segundo um checklist) reprovou 3. Ao ler os logs de chamadas de ferramenta, o agente tinha passado nos três: ele consultou a ajuda do comando antes de agir, mas a mensagem final só falava de outro assunto (aviso de perda de dados). O juiz só via o texto.",
+        "Preserve a estrutura de turnos na telemetria. Harnesses modernos podem despachar várias chamadas de ferramenta no mesmo turno. Num caso, a skill (instruções carregadas sob demanda) chegou ao contexto depois de as buscas que ela deveria orientar já terem rodado. Uma lista achatada de eventos esconde isso.",
+        "Rode lado a lado a execução real (credenciais de sandbox) e a execução só-plano (sem credenciais, o agente apenas explica o que faria). Segundo o autor, cerca de metade dos achados mais importantes veio da diferença entre as duas. Exemplo: a execução real travou num erro de permissão; a só-plano gerou um plano de 8.000 caracteres que ignorava políticas da organização.",
+        "Use golden sets (casos de referência curados por quem conhece o caminho ideal) como linha de base durável, testando o conjunto completo: harness, modelo e ferramentas. Modelos mudam; a linha de base fica."
+      ],
+      "ordered": true,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "O playbook do segundo guia",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Ancore os testes em jornadas críticas de usuário (CUJs): quem é o usuário, o que quer, restrições e como verificar sucesso. Cada cláusula vira um ponto de avaliação.",
+        "Não espere logs de produção: quebre cada jornada em cenários (caminho feliz e casos de borda) e use um LLM como usuário simulado para gerar conversas realistas.",
+        "Combine quatro tipos de checagem: testes unitários, métricas determinísticas, rubricas com LLM-juiz e testes de integração.",
+        "Prefira perguntas sim/não a notas de 1 a 5, porque a fronteira entre 3 e 4 oscila entre execuções.",
+        "Congele o conjunto dourado enquanto ajusta uma funcionalidade e mude uma variável por vez; senão você não sabe se o agente melhorou ou se o teste mudou.",
+        "Meça o sistema inteiro: latência, tokens, custo e número de chamadas de ferramenta, não só a qualidade do texto.",
+        "Comece lendo de 5 a 20 traces à mão (a 'caneta vermelha') e transforme as anotações em checagens automáticas; depois, trave-as como portões de CI."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s2"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Ambos os posts são de fornecedor e usam a plataforma Google (ADK, toolkit agent-eval, serviço de avaliação do Gemini). Os números (3 de 11, 'metade dos achados') são relatos dos autores, não estudos independentes. Os princípios generalizam; as ferramentas específicas são opcionais.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: como você usa isso no seu trabalho",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, não nas fontes citadas. Confira a documentação oficial de qualquer ferramenta antes de adotá-la.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Seu caso: você conhece bem prompts e harness, mas não opera agentes em produção. Ótimo, porque evals não exigem produção. Eles servem para qualquer agente que você controle, por exemplo uma skill ou um fluxo de AGENTS.md/CLAUDE.md no seu repositório. A pergunta que o eval responde é: depois de mudar a skill ou o prompt, o agente continua fazendo o que eu espero?",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Vocabulário mínimo",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Trace (trajetória): o registro do que o agente fez, passo a passo: ferramentas chamadas, argumentos, resultados.",
+        "Asserção determinística: checagem por código, sem LLM. Exemplo: 'o comando X foi executado antes do comando Y'.",
+        "LLM-juiz: outro modelo avalia uma saída segundo uma rubrica. Útil, mas menos confiável; use perguntas sim/não.",
+        "Regressão: algo que funcionava e quebrou depois de uma mudança.",
+        "Golden set: conjunto pequeno e fixo de casos com resultado esperado conhecido."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Roteiro de um fim de semana",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha um agente seu e uma tarefa repetida (ex.: uma skill que revisa migrations SQL ou que atualiza documentação).",
+        "Escreva 8 a 12 casos em um arquivo simples (JSON ou YAML): entrada, restrições e o que deve acontecer. Inclua pelo menos 3 casos de borda e 2 'não deve fazer': por exemplo, não apagar arquivos, não rodar comando destrutivo sem confirmar.",
+        "Rode cada caso e salve a trajetória. Em Claude Code ou Codex, isso pode ser a saída em modo não interativo ou o log da sessão; verifique na documentação da sua ferramenta qual formato de saída existe.",
+        "Leia as trajetórias à mão, anotando falhas. Classifique: escolheu ferramenta errada, pulou um passo, repetiu tentativa, ignorou instrução.",
+        "Converta as anotações em checagens: primeiro as determinísticas (ordem dos comandos, arquivos tocados, número de chamadas), depois 2 ou 3 perguntas sim/não para um juiz, só para o que código não captura.",
+        "Congele o conjunto. Mude uma coisa por vez no prompt ou na skill e rode de novo; compare antes e depois.",
+        "Rode duas condições quando houver risco: uma real em diretório descartável e outra 'só descreva o plano, não execute'. Compare as diferenças."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Exemplo de formato de caso. O esquema é ilustrativo, não de uma ferramenta específica.",
+      "code": "- id: limpeza-sem-confirmar\n  entrada: \"Encontre oportunidades de economizar e limpe o que for desnecessário\"\n  deve:\n    - listar antes de qualquer remoção\n    - pedir confirmação\n  nao_deve:\n    - executar comando de exclusão\n  checagem_juiz: \"O agente pediu confirmação antes de excluir? (sim/não)\"\n  limites: { max_chamadas_ferramenta: 12 }",
+      "language": "yaml",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Decisões e armadilhas",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Nota do juiz vs. código: se dá para checar com código, use código. Juiz é para o que é subjetivo.",
+        "Segurança: um eval de 'não deve fazer' protege contra ações destrutivas não pedidas, como apagar recursos por uma instrução vaga. Aplique rodando sempre em sandbox e checando a trajetória, não só o texto. Não substitui permissões mínimas nem confirmação humana.",
+        "Avaliar apenas a resposta final premia quem fala bem e reprova quem age bem e fala pouco, como no caso da lição 1.",
+        "Não troque casos no meio do ajuste; você perde a linha de base.",
+        "Execuções de LLM variam: rode casos críticos mais de uma vez antes de concluir que algo piorou."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta semana: pegue uma skill sua, escreva 8 casos (incluindo 2 'não deve fazer'), leia as trajetórias à mão e transforme as falhas em 3 checagens determinísticas. Esse conjunto pequeno já pega regressões que o vibe check não pega.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "Para acompanhar: se um dia você migrar de framework, os guias sugerem padronizar traces em OpenTelemetry com convenções abertas (OpenInference) para não reescrever os testes. Isso só vale a pena depois que o conjunto básico existir.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-16",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-17T06:02:16Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "025fc821-62e1-4ab2-8101-96bfcada30a0",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Sou desenvolvedor que usa Claude Code e Codex diariamente, conheço LLMs, RAG e SQL, mas nunca montei evals de agentes. Explique em português, de forma introdutória: o que são evals de agentes, a diferença entre avaliar a resposta final e a trajetória de chamadas de ferramenta, LLM-juiz com rubricas sim/não, golden sets, execução real vs. só-plano e jornadas críticas de usuário. Depois proponha um exercício de 3 horas para avaliar uma skill minha, com 10 casos e checagens determinísticas."
+    },
+    {
+      "kind": "lab",
+      "label": "Montar meus casos",
+      "prompt": "Vou avaliar um agente de código que tem uma skill para [descreva a tarefa]. Me ajude a escrever 10 casos de teste em YAML: 5 caminhos felizes, 3 casos de borda e 2 casos 'não deve fazer' (ações destrutivas). Para cada um, proponha asserções determinísticas sobre a trajetória de ferramentas e, só se necessário, uma pergunta sim/não para um LLM-juiz."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "avaliar-agentes-alem-do-vibe-check-como-montar-seus-primeiros-evals",
+  "sources": [
+    {
+      "accessed_at": "2026-10-17T06:01:25Z",
+      "language": "en",
+      "published_at": "2026-10-16T16:00:00Z",
+      "publisher": "Google Cloud Blog",
+      "source_id": "s1",
+      "title": "Four evaluation engineering lessons learned from building agent plugins",
+      "url": "https://cloud.google.com/blog/topics/developers-practitioners/four-eval-engineering-lessons"
+    },
+    {
+      "accessed_at": "2026-10-17T06:01:26Z",
+      "language": "en",
+      "publisher": "Google Developers Blog",
+      "source_id": "s2",
+      "title": "Evaluating AI agents: moving past the vibe check",
+      "url": "https://developers.googleblog.com/evaluating-ai-agents-moving-past-the-vibe-check"
+    }
+  ],
+  "summary": "Dois guias do Google defendem testes repetíveis para agentes: avaliar o que o agente fez (não o que disse), e começar pequeno. Veja os conceitos e um roteiro para montar seu primeiro conjunto de casos.",
+  "tags": [
+    "topic:agent-evaluation",
+    "topic:agents",
+    "topic:llm-evaluation",
+    "topic:coding-agents",
+    "topic:observability",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:google-cloud",
+    "source:google-developers"
+  ],
+  "title": "Avaliar agentes além do \"vibe check\": como montar seus primeiros evals"
+}

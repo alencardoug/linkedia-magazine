@@ -1,0 +1,214 @@
+{
+  "article_id": "5df9d931-7f58-4934-b818-359b5898f535",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O Google Developers Blog publicou um tour do repositório google/adk-recipes, sucessor do google/adk-samples. A ideia central: um repositório escrito primeiro para ser lido por assistentes de código (AGENTS.md, manifest.yaml, SKILL.md) e só depois por humanos (README.md). Depois deste texto, você terá um modelo concreto de como estruturar e validar um repositório de skills reutilizáveis seu.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: três camadas, um repositório",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "core/: padrões de referência curados pelas equipes do Agents CLI e DevRel. O exemplo é o Horizon (core/python/long-horizon-harness), um harness para agentes que operam por dias, com memória entre sessões, sandbox por usuário, gestão de segredos e guardrails contra comportamento descontrolado.",
+        "plugins/: skills verticais instaláveis, empacotadas como Plugin Recipes conforme a especificação Agent Plugins v1.0.0. O primeiro vertical completo é varejo (retail).",
+        "contrib/: serviços implantáveis de ponta a ponta, em cinco linguagens, que entram por pull request."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Toda receita traz um manifest.yaml validado e um AGENTS.md que diz ao assistente o que a receita é e como usá-la. Em contrib/ e plugins/ há também Dockerfile e teste de execução. A CI aplica esses padrões em cada PR, e skills do próprio repositório (como prepare-python-recipe, generate-manifest e github-pr-review) ajudam o agente a montar, validar e submeter uma receita.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Anatomia de um plugin de skills",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o texto, um plugin é um pacote de uma ou mais skills com um plugin.json na raiz (nome, versão, licença, responsável). Cada skill é uma pasta autocontida com SKILL.md (um instalador conversacional), README.md, EVAL.yaml com critérios de qualidade e pastas de scripts, references e assets. O plugin de varejo tem duas skills: retail-product-search (busca vetorial com BigQuery e Vector Search 2.0) e retail-virtual-tryon (imagem e vídeo gerados com modelos Gemini e Veo).",
+      "type": "paragraph"
+    },
+    {
+      "alt": "Árvore de pastas do plugin retail com duas skills",
+      "caption": "Layout descrito no artigo do Google.",
+      "diagram_format": "text",
+      "diagram_spec": "plugins/retail/\n  plugin.json\n  skills/\n    product-search/\n      SKILL.md   (instalador conversacional)\n      README.md\n      EVAL.yaml  (rubricas LLM-as-judge + asserções determinísticas)\n      scripts/ references/ assets/\n    virtual-tryon/",
+      "long_description": "Diagrama em texto da pasta plugins/retail: um plugin.json na raiz e uma pasta skills com product-search e virtual-tryon. Cada skill contém SKILL.md, README.md, EVAL.yaml, scripts, references e assets.",
+      "source_ids": [
+        "s1"
+      ],
+      "type": "diagram"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A instalação é por um comando, e o texto afirma que funciona com Antigravity, Claude Code, Codex, Cursor e outros: npx skills add google/adk-recipes --skill retail-product-search --full-depth. O flag --full-depth faz a CLI descer até a estrutura aninhada plugins/retail/skills/. A skill vai para ~/.agents/skills/ e é ligada por symlink aos assistentes detectados. Para assistentes fora das ferramentas do Google, o texto diz que a instalação passa pela CLI aberta npx skills, mantida pela vercel-labs.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Depois de instalada, o assistente lê o SKILL.md e conduz uma entrevista (Q-MODE): no Quick Start são duas perguntas, no Full Setup quatro. Ao final, a skill escreve um design-spec.md, roda scripts/setup.py e executa o EVAL.yaml. Se a pontuação ficar abaixo da meta de 80% de aprovação, a skill para e mostra as falhas. O próprio output da instalação avisa: revise as skills antes do uso, pois elas rodam com as permissões completas do agente.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O trecho do pacote termina no meio do texto (a parte sobre contrib/ e a reflexão final não aparecem), e a data de publicação não consta. Não verifiquei o repositório em si, apenas o tour do blog.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: aplicando a ideia ao seu repositório de skills",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. A transferência do padrão do ADK para o seu uso com Claude Code é uma inferência nossa.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você já configura harness e skills. O que o adk-recipes acrescenta não é o formato da skill, e sim a disciplina em volta dela: separar por intenção do leitor, ter metadados validáveis e medir qualidade de forma automática.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "1. Separe por ação do leitor, não por tecnologia",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "patterns/ (equivalente ao core): padrões que o agente estuda antes de construir algo, como seu modelo de harness ou de testes.",
+        "skills/ (equivalente ao plugins): capacidades instaláveis e focadas em um domínio, por exemplo SQL do seu projeto ou revisão de PR.",
+        "examples/ (equivalente ao contrib): projetos completos que rodam de ponta a ponta."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "2. Escreva o arquivo de entrada para o agente",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Em cada pasta, um AGENTS.md curto responde: o que é isto, quando usar, como rodar, o que não tocar. É contexto sob demanda: o agente só carrega o que precisa. Deixe o README para humanos.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "3. Dê a cada skill um critério de qualidade",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "A ideia do EVAL.yaml é transplantável: um arquivo ao lado da skill com verificações. Misture asserções determinísticas (o arquivo foi criado? o SQL executa? o teste passa?) com rubricas avaliadas por um LLM (a resposta seguiu o formato pedido?). Prefira as determinísticas sempre que possível, pois o juiz LLM também erra. Um esboço genérico, que não segue um schema oficial:",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Esboço de arquivo de avaliação por skill. O formato é ilustrativo; o EVAL.yaml do Google tem seu próprio esquema.",
+      "code": "skill: revisar-sql\nchecks:\n  - tipo: deterministico\n    descricao: query de exemplo executa sem erro no banco local\n  - tipo: deterministico\n    descricao: saida contem secao 'riscos'\n  - tipo: rubrica-llm\n    descricao: aponta ao menos um problema de performance real\nmeta_aprovacao: 0.8",
+      "language": "yaml",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "4. Segurança: trate skills instaladas como código executável",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "O aviso da própria CLI é sério: a skill roda com as permissões do agente. O ataque real é a cadeia de suprimentos com injeção de prompt: um SKILL.md ou script malicioso (ou alterado depois de uma atualização) instrui o agente a ler segredos, executar comandos ou enviar dados para fora. Proteções aplicáveis hoje: leia o SKILL.md e os scripts antes de instalar; fixe a origem em um commit específico quando possível; rode em um ambiente com credenciais mínimas; mantenha a aprovação manual de comandos de rede e de escrita fora do projeto; e revise o diff quando atualizar. Confira a documentação oficial da CLI para saber como fixar versões.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Copie o padrão, não o conteúdo: três pastas por intenção, AGENTS.md em cada receita, um manifesto validado em CI e um arquivo de avaliação por skill. E leia qualquer skill de terceiros como leria um script que vai rodar na sua máquina.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 2,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha uma skill sua que você usa toda semana.",
+        "Crie ao lado dela um arquivo de checks com 3 verificações, sendo ao menos 2 determinísticas.",
+        "Adicione um AGENTS.md de 10 linhas na pasta.",
+        "Opcional: leia, sem instalar, o SKILL.md de uma skill do adk-recipes para ver como o instalador conversacional faz perguntas e gera um design-spec."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-16",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-17T06:04:24Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "025fc821-62e1-4ab2-8101-96bfcada30a0",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como organizar um repositório de skills para assistentes de código (Claude Code, Codex) inspirado no google/adk-recipes: três camadas (padrões de referência, plugins de skills instaláveis, serviços de exemplo), AGENTS.md, manifestos validados em CI e arquivos de avaliação por skill (asserções determinísticas e rubricas com LLM como juiz). Inclua riscos de segurança ao instalar skills de terceiros (injeção de prompt, cadeia de suprimentos) e exemplos práticos para um desenvolvedor que já usa skills no dia a dia."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "skills-verticais-instalaveis-o-que-o-google-adk-recipes-ensina-sobre-organizar",
+  "sources": [
+    {
+      "accessed_at": "2026-10-17T06:03:40Z",
+      "language": "en",
+      "publisher": "Google Developers Blog",
+      "source_id": "s1",
+      "title": "Three layers, one repo: a tour of google/adk-recipes",
+      "url": "https://developers.googleblog.com/three-layers-one-repo-a-tour-of-googleadk-recipes"
+    }
+  ],
+  "summary": "O Google reorganizou o adk-recipes em três camadas (core, plugins, contrib) com skills instaláveis em assistentes como Claude Code e Codex. Veja o que mudou e como aplicar a estrutura ao seu repositório de skills.",
+  "tags": [
+    "topic:coding-agents",
+    "topic:agents",
+    "topic:context-engineering",
+    "topic:gcp",
+    "risk:security",
+    "reason:career-utility",
+    "reason:learning-value",
+    "source:google-developers"
+  ],
+  "title": "Skills verticais instaláveis: o que o google/adk-recipes ensina sobre organizar seu repositório"
+}

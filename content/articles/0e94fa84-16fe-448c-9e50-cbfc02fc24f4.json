@@ -1,0 +1,158 @@
+{
+  "article_id": "0e94fa84-16fe-448c-9e50-cbfc02fc24f4",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 15/10, a MIT Technology Review Brasil publicou uma reportagem sobre como empresas brasileiras tentam levar a IA do discurso à operação, com base no evento SAP Now 2026. Depois deste texto, você terá um roteiro de perguntas para usar numa conversa sobre sair do piloto: quem é o dono do processo, como medir resultado e o que muda na operação.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: investimento sobe, escala não acompanha",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Segundo a pesquisa The Value of AI: Brazil 2026 (SAP com a Oxford Economics), o investimento médio em IA das empresas brasileiras passou de US$ 14,2 milhões para US$ 20,2 milhões, com projeção de alta superior a 46% em dois anos.",
+        "Mais de 68% das organizações seguem em estágios iniciais de exploração. Só 7,9% integraram a tecnologia de ponta a ponta em processos centrais (dado de levantamento da própria MIT Technology Review Brasil).",
+        "77% das lideranças reconhecem o potencial dos agentes autônomos, mas só 3% declaram maturidade plena para escalá-los.",
+        "Obstáculos citados: dados fragmentados (cerca de 75% dos executivos) e falta de talentos (65%).",
+        "Shadow AI, o uso informal de ferramentas não homologadas pela TI, afeta a consistência das entregas em 50% das empresas, expõe risco de vazamento de dados em 43% e ameaça a segurança da informação em 33%."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Os executivos da SAP afirmam que IA genérica não basta: para Adriana Aroulho, os modelos são tão potentes quanto o contexto a que têm acesso. Rogério Ceccato diz que um processo de 3 a 4 meses de desenvolvimento poderia cair para 15 minutos ao criar agentes, com governança e rastreabilidade nativas da plataforma. Christian Geronasso afirma que a gestão precisa trazer o problema de negócio e garantir retorno e qualidade.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A fonte é cobertura de um evento da SAP, fornecedora com interesse comercial, e as pesquisas são dela. A promessa de 15 minutos é declaração de executivo, sem metodologia no trecho disponível. Trate os números como indício, não como prova.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: perguntas para sair do piloto",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você usa agentes de código no dia a dia, mas não os opera em produção. A diferença é que, em produção, o problema deixa de ser o modelo e passa a ser responsabilidade, medição e controle. Use as perguntas abaixo como checklist.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Dono: quem responde pelo resultado do processo (não pela ferramenta)? Se ninguém da área de negócio assina, o piloto tende a ficar parado.",
+        "Métrica de base: qual número atual você quer mudar (tempo de ciclo, custo por caso, taxa de erro)? Meça antes do piloto, senão não há como provar retorno.",
+        "Critério de saída: qual resultado faz o piloto virar produção, e qual o faz ser encerrado? Defina por escrito antes de começar.",
+        "Dados: de onde vêm os dados que o sistema usa, quem os mantém e eles são confiáveis? Em RAG, o contexto ruim gera resposta ruim com aparência confiante.",
+        "Avaliação: existe um conjunto fixo de casos reais para testar a cada mudança de prompt ou modelo? É o equivalente a testes automatizados do seu código.",
+        "Humano no circuito: quais ações o agente pode executar sozinho e quais exigem aprovação? Comece com permissão de leitura e sugestão; dê escrita só depois de medir.",
+        "Rastreabilidade: dá para reconstruir o que o agente fez, com que dados e por quê? Sem logs, não há auditoria nem depuração.",
+        "Shadow AI: as pessoas já usam ferramentas por fora? Ofereça uma alternativa aprovada, com regras claras sobre dados pessoais e LGPD, em vez de só proibir."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Risco e controle: o que cada medida evita",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Lista de ferramentas aprovadas e política de dados: reduz vazamento de informação sensível para serviços não homologados.",
+        "Permissões mínimas para o agente: limita o estrago se ele errar ou sofrer prompt injection (instruções maliciosas escondidas em texto que o modelo lê). Dê só as credenciais necessárias, por tarefa.",
+        "Aprovação humana em ações irreversíveis (pagamento, envio externo, exclusão): evita que um erro do modelo vire prejuízo."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Para conversar com a diretoria, leve três respostas por escrito: quem é o dono, qual métrica de base muda e qual critério encerra ou escala o piloto. Sem isso, mais orçamento não resolve.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 2,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha um projeto seu ou do trabalho e preencha as oito perguntas em meia página. As que você não souber responder mostram onde o piloto ainda não está pronto. Confira os números da reportagem no texto completo antes de citá-los a terceiros.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-10-16",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-17T06:04:47Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "025fc821-62e1-4ab2-8101-96bfcada30a0",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português do Brasil como empresas levam projetos de IA e agentes de pilotos para produção. Cubra: dono do processo, métricas de base e retorno, avaliação com casos reais, humano no circuito, rastreabilidade, Shadow AI, LGPD e permissões mínimas para agentes. Dê exemplos concretos e um checklist para quem usa agentes de código mas ainda não opera IA em produção."
+    },
+    {
+      "kind": "leadership",
+      "label": "Roteiro para a diretoria",
+      "prompt": "Ajude-me a montar uma conversa de 15 minutos com a diretoria sobre sair de um piloto de IA para produção. Preciso de: métrica de base, critério de escala ou encerramento, dono do processo, riscos com dados e LGPD, e um pedido claro de decisão. Faça perguntas sobre meu caso antes de propor o roteiro."
+    }
+  ],
+  "read_minutes": 4,
+  "schema_version": "1.0.0",
+  "slug": "do-piloto-a-operacao-o-que-a-sap-e-lideres-brasileiros-dizem-sobre-levar-ia-a",
+  "sources": [
+    {
+      "accessed_at": "2026-10-17T06:04:26Z",
+      "language": "pt",
+      "published_at": "2026-10-15T21:00:49Z",
+      "publisher": "MIT Technology Review Brasil",
+      "source_id": "s1",
+      "title": "Além dos testes: como as empresas brasileiras estão levando a IA do discurso à operação",
+      "url": "https://mittechreview.com.br/alem-dos-testes-como-as-empresas-brasileiras-estao-levando-a-ia-do-discurso-a-operacao"
+    }
+  ],
+  "summary": "Pesquisa da SAP com a Oxford Economics aponta investimento em alta, mas poucas empresas brasileiras com IA integrada ponta a ponta. Veja os números, os limites da fonte e perguntas práticas para sair do piloto.",
+  "tags": [
+    "region:brazil",
+    "theme:operating-model",
+    "theme:roi",
+    "topic:agents",
+    "theme:governance",
+    "risk:security",
+    "reason:career-utility",
+    "source:mit-technology-review-brasil"
+  ],
+  "title": "Do piloto à operação: o que a SAP e líderes brasileiros dizem sobre levar IA à produção"
+}

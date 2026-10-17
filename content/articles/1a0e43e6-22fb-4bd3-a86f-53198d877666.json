@@ -1,0 +1,195 @@
+{
+  "article_id": "1a0e43e6-22fb-4bd3-a86f-53198d877666",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Em 14/10, a OpenAI publicou dois estudos de caso sobre o uso do Daybreak, seu produto que dá a defensores acesso a modelos para trabalho de cibersegurança. A SentinelOne relata engenharia reversa de malware em cerca de 8 horas, contra 4 a 6 semanas. A Block relata correções propostas em minutos e centenas de horas de analista devolvidas por trimestre. Depois deste texto, você terá uma lista de perguntas para exigir métricas antes de aprovar um piloto parecido.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: o que foi relatado",
+      "type": "heading"
+    },
+    {
+      "level": 3,
+      "text": "SentinelOne: análise de malware",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Engenharia reversa de malware é desmontar um software malicioso para entender como ele se comporta. Segundo Gregor Stewart, Chief AI Officer da SentinelOne, o Daybreak produz saída de nível humano em cerca de 8 horas num trabalho que levaria 4 a 6 semanas a um pesquisador de ponta. O ganho prático citado é analisar mais amostras e achar componentes compartilhados entre ameaças aparentemente não relacionadas. Stewart também diz que a responsabilidade continua humana: mudanças de arquitetura pedem olhos humanos, enquanto correções pontuais seriam mais automatizáveis.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Block: triagem, detecção e correção",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Menos de 1 hora para reexecutar uma mudança proposta de detecção contra sete meses de telemetria.",
+        "18 minutos entre submeter uma vulnerabilidade em alto nível e receber um patch proposto automaticamente, em exercícios recentes de red team (simulação de ataque).",
+        "Cerca de 600 horas de analista por trimestre devolvidas, antes gastas com falsos positivos.",
+        "Cerca de 1.100 horas de investigação por trimestre feitas pelo sistema, com aumento de 50% na vazão da triagem e de 50% em investigações e coleta de inteligência."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s2"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "A Block descreve um processo em que a IA propõe o patch, confirma a explorabilidade e verifica a correção, com humano guiando e fazendo o deploy. Também diz usar modelos diferentes para tarefas diferentes, com um harness próprio sobre o Daybreak, ganchos para humanos assumirem e agentes verificando uns aos outros. Avalia o sistema contra benchmarks internos e desempenho real.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Fatos, interpretação e incerteza",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Toda a evidência vem de textos publicados pela própria OpenAI, com falas de executivos dos clientes. O pacote não traz avaliação independente nem metodologia. Não se sabe o que significa 'nível humano', quais malwares foram usados, como a qualidade foi medida, nem quantos patches propostos foram aceitos ou rejeitados. 'Semanas para horas' é afirmação da empresa. Os 18 minutos vêm de exercícios de red team, não necessariamente de vulnerabilidades reais em produção.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: como usar isso no seu trabalho",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você não opera agentes em produção, mas já usa agentes de código. A lógica de avaliar um piloto de segurança é a mesma que você aplicaria a um agente seu: defina o que é 'certo', meça contra uma referência e olhe os erros, não só a velocidade.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Perguntas para pedir métricas antes de um piloto",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Qual é a linha de base? 'Semanas' para quem, em que tipo de amostra, incluindo ou não o tempo de revisão humana?",
+        "Como a qualidade foi medida? Peça um conjunto de casos com resposta conhecida, corrigido por um especialista que não viu a saída da IA.",
+        "Qual a taxa de falsos positivos e falsos negativos? Triagem mais rápida que deixa passar ameaça real é pior que triagem lenta.",
+        "Dos patches propostos, quantos foram aceitos, quantos passaram nos testes e quantos foram revertidos depois?",
+        "O tempo total inclui a validação humana? Um patch em 18 minutos que leva dias para revisar muda a conta.",
+        "Quais dados saem do seu ambiente? Logs, código e amostras de malware podem conter dados pessoais ou segredos; verifique contrato, retenção e LGPD.",
+        "O que o agente pode fazer sozinho? Quanto menor a permissão (somente leitura, sem deploy), menor o dano de um erro ou de uma injeção de prompt.",
+        "Existe registro auditável de cada passo e como um humano assume a tarefa?",
+        "Os resultados foram replicados fora do fornecedor, em um ambiente parecido com o seu?"
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Que risco cada controle reduz",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Humano aprovando cada deploy: evita que um patch plausível, mas errado ou malicioso, entre em produção. Aplique exigindo aprovação em pull request e testes automáticos.",
+        "Permissões mínimas para o agente: reduz o impacto de prompt injection, quando texto malicioso em um log ou arquivo analisado tenta dar ordens ao modelo. Aplique credenciais somente leitura e sandbox para analisar amostras.",
+        "Avaliação própria contínua: evita confiar em número de marketing. A Block diz fazer isso; faça o mesmo com um conjunto pequeno de casos seus."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de uma hora",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Monte uma planilha com 20 casos antigos do seu time ou de um projeto pessoal, como alertas, bugs de segurança ou achados de linter, com a resposta correta já conhecida. Peça ao seu agente de código para classificar ou propor correção em cada um. Registre: acertou, errou, precisou de ajuste humano, tempo gasto. Esse é o miniaturizado do que você deve exigir de um fornecedor.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Trate 'semanas para horas' como hipótese a testar. Antes de aprovar um piloto, peça linha de base, taxa de erro, taxa de aceitação de patches e o tempo de revisão humana incluído.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: escreva as perguntas acima como checklist de uma página e use-o na próxima demonstração de qualquer ferramenta de IA para segurança. Confira a documentação oficial do fornecedor para condições de dados e retenção, que podem mudar.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-10-16",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-17T06:05:13Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "025fc821-62e1-4ab2-8101-96bfcada30a0",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como avaliar um piloto de IA em operações de segurança (SOC): engenharia reversa de malware, triagem de alertas e geração de patches. Cubra linha de base, taxa de falsos positivos e negativos, taxa de aceitação de patches, human-in-the-loop, permissões mínimas para agentes e prompt injection em logs. Dê exemplos e um método para montar um conjunto de avaliação próprio, em nível intermediário para quem usa agentes de código."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "ia-em-seguranca-o-que-sentinelone-e-block-relatam-e-como-cobrar-metricas",
+  "sources": [
+    {
+      "accessed_at": "2026-10-17T06:04:48Z",
+      "language": "en",
+      "published_at": "2026-10-14T12:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s1",
+      "title": "SentinelOne cuts malware analysis from weeks to hours",
+      "url": "https://openai.com/index/sentinelone"
+    },
+    {
+      "accessed_at": "2026-10-17T06:04:50Z",
+      "language": "en",
+      "published_at": "2026-10-14T07:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s2",
+      "title": "How Block is building AI-powered security with OpenAI technology",
+      "url": "https://openai.com/index/block-ai-powered-security"
+    }
+  ],
+  "summary": "A OpenAI publicou dois casos (SentinelOne e Block) com ganhos de semanas para horas em segurança. Veja o que foi dito, o que é só relato do fornecedor e que perguntas fazer antes de aprovar um piloto.",
+  "tags": [
+    "topic:llm-security",
+    "topic:agents",
+    "theme:roi",
+    "risk:security",
+    "topic:agent-evaluation",
+    "reason:career-utility",
+    "source:openai"
+  ],
+  "title": "IA em segurança: o que SentinelOne e Block relatam e como cobrar métricas"
+}

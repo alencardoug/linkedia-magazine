@@ -1,0 +1,197 @@
+{
+  "article_id": "aca785bc-b87e-4509-9fef-9cd6693a78e4",
+  "blocks": [
+    {
+      "level": 2,
+      "text": "O que aconteceu",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "text": "Entre 14 e 15 de outubro de 2026, Simon Willison publicou três notas curtas sobre protótipos pequenos gerados por modelos de código. Todos são páginas estáticas, ou seja, HTML e JavaScript que rodam no navegador, sem servidor próprio. São experimentos pessoais, não métodos validados.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Tree Appreciator: um jogo em three.js (biblioteca de gráficos 3D para a web) com duas árvores geradas por algoritmo, em que o jogador aprecia as diferenças entre elas. Foi feito no app de iPhone do Claude em modo chat, não no Claude Code, com Opus 5.5 Max.",
+        "Chirp Pong: um jogo tipo pong para dois jogadores em dois celulares, em HTML estático, cuja rede usa chirps (pios sonoros) lidos pela API de microfone da web. Segundo ele, parece funcionar. Foi feito com Opus 5.5 Extra no Claude Code.",
+        "Renderizador de LaTeX: inspirado no Tiny Little Office, de Paul Ford e da Aboard Foundary, que guarda o conteúdo do documento no fragmento (#) da URL. A ferramenta de Willison renderiza LaTeX vindo do fragmento, com opção de compressão e de carregar de URL ou Gist."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s2",
+        "s3"
+      ],
+      "text": "Detalhes que chamam atenção: o prompt do Tree Appreciator pedia para pensar muito em ser divertido e bonito, e Willison diz que pedir que o jogo seja divertido funciona surpreendentemente bem. O Claude trabalhou 3 horas e 7 minutos e devolveu um jogo de achar diferenças com música, animação e conquistas. No LaTeX, ele pediu proteção contra XSS (injeção de script em página) reaproveitando o mecanismo de iframe com sandbox de outra ferramenta sua. A ferramenta usa Pako, MathJax, faster-latex e DOMPurify.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "As notas são curtas. Não há código, nem teste do Chirp Pong em ambientes ruidosos, e não sabemos quantas iterações cada resultado exigiu além dos prompts mostrados. O Chirp Pong é descrito apenas como aparentemente funcional.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Como usar isso no seu trabalho",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você já usa agentes de código, então o ganho aqui não é aprender a pedir código. É adotar um formato: protótipo de arquivo único, estático, descartável e testável em minutos. Isso baixa o custo de testar ideias que normalmente ficariam só em conversa.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Por que HTML único funciona bem",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Não há build, banco nem deploy: abrir o arquivo já é testar.",
+        "O escopo é pequeno, então o agente erra menos e você revisa tudo.",
+        "Dá para compartilhar por arquivo, hospedagem estática ou, como no caso do LaTeX, por link.",
+        "O navegador oferece APIs prontas (áudio, canvas, microfone, armazenamento local) que substituem backend."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Receita em cinco passos",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escreva um prompt com objetivo, restrições e critério de qualidade: 'um arquivo HTML, sem servidor, bibliotecas via CDN, funciona no celular'.",
+        "Inclua um pedido de qualidade subjetiva, como Willison fez com 'divertido e bonito'. Teste se isso muda o resultado na sua tarefa.",
+        "Abra, use e anote falhas concretas. Responda com bugs observáveis, não com pedidos vagos.",
+        "Peça segurança explicitamente quando houver entrada do usuário, como fez ele com XSS.",
+        "Guarde o prompt junto do arquivo. O prompt é a documentação e permite refazer."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Segurança em ferramentas que renderizam entrada alheia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Se a ferramenta renderiza conteúdo vindo de URL, fragmento ou Gist, o ataque realista é XSS: alguém envia um link com script malicioso que roda na sua origem. Defesas comuns: executar o conteúdo dentro de um iframe com atributo sandbox, sanitizar o HTML com uma biblioteca como DOMPurify e nunca colocar segredos ou tokens na mesma origem. Aplique revisando o código gerado e procurando usos de innerHTML sem sanitização. Confira a documentação oficial para os detalhes de sandbox.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Aviso sobre custo e tempo: o Tree Appreciator levou mais de três horas em uma única resposta. Em contas com limites ou cobrança por uso, prompts do tipo 'pense muito' podem custar caro. Verifique seus limites antes.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de uma tarde",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha uma ferramenta que você faz hoje à mão, como formatar JSON de logs, comparar dois textos ou visualizar resultados de SQL colados.",
+        "Peça ao seu agente um HTML único para isso, com campo de colar, resultado e botão de copiar.",
+        "Adicione uma exigência de segurança: nada de enviar dados para fora, sanitizar tudo que for exibido.",
+        "Mude uma só coisa no prompt (por exemplo, acrescente 'faça ser agradável de usar') e compare as duas versões lado a lado.",
+        "Anote o que a versão extra mudou. Isso vale mais que uma impressão geral."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta semana: gere um protótipo de arquivo único para uma tarefa real sua, com requisito explícito de segurança, e guarde o prompt ao lado do arquivo. Trate relatos como o de Willison como hipóteses para testar, não como regra.",
+      "type": "callout",
+      "variant": "takeaway"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-16",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-17T06:03:39Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "025fc821-62e1-4ab2-8101-96bfcada30a0",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como construir protótipos de um único arquivo HTML estático com a ajuda de um agente de código (como Claude Code ou Codex). Cubra: por que o formato funciona, como escrever o prompt, APIs de navegador úteis (canvas, Web Audio, microfone, localStorage), riscos de XSS ao renderizar entrada de usuário (iframe sandbox, sanitização) e como iterar. Dê três exemplos práticos e um exercício de uma tarde, para alguém que já usa agentes de código diariamente."
+    }
+  ],
+  "read_minutes": 4,
+  "schema_version": "1.0.0",
+  "slug": "prototipos-de-uma-conversa-tres-experimentos-de-simon-willison-com-html-unico",
+  "sources": [
+    {
+      "accessed_at": "2026-10-17T06:03:03Z",
+      "language": "en",
+      "published_at": "2026-10-15T19:47:52Z",
+      "publisher": "Simon Willison",
+      "source_id": "s1",
+      "title": "Chirp Pong",
+      "url": "https://simonwillison.net/2026/Oct/15/chirp-pong"
+    },
+    {
+      "accessed_at": "2026-10-17T06:03:03Z",
+      "language": "en",
+      "published_at": "2026-10-15T02:07:28Z",
+      "publisher": "Simon Willison",
+      "source_id": "s2",
+      "title": "LaTeX renderer",
+      "url": "https://simonwillison.net/2026/Oct/15/latex"
+    },
+    {
+      "accessed_at": "2026-10-17T06:03:03Z",
+      "language": "en",
+      "published_at": "2026-10-14T21:23:01Z",
+      "publisher": "Simon Willison",
+      "source_id": "s3",
+      "title": "Tree Appreciator",
+      "url": "https://simonwillison.net/2026/Oct/14/tree-appreciator"
+    }
+  ],
+  "summary": "Em 14 e 15/10, Simon Willison publicou três protótipos em HTML estático feitos com poucos prompts: um jogo, um jogo em rede por áudio e um renderizador de LaTeX. Veja o que ele fez e como adaptar o método.",
+  "tags": [
+    "topic:coding-agents",
+    "topic:prompt-engineering",
+    "risk:security",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:simon-willison"
+  ],
+  "title": "Protótipos de uma conversa: três experimentos de Simon Willison com HTML único"
+}

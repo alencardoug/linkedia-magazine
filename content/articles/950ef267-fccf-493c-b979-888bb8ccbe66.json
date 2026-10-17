@@ -1,0 +1,173 @@
+{
+  "article_id": "950ef267-fccf-493c-b979-888bb8ccbe66",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 16 de outubro de 2026, Simon Willison citou um trecho de Addy Osmani, Morgan Westlee Lunt e Qing Wang, do texto 'How the Claude Code team does code review'. A ideia central: a pergunta 'um humano leu o código?' é um substituto impreciso para outra, mais útil. Depois de ler este artigo, você terá um método simples para decidir, em cada mudança feita por agente, qual risco existe e qual checagem é a certa para ele.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que o trecho diz",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Os autores veem 'um humano leu?' como proxy impreciso de 'o que pode dar errado com esta mudança, e qual checagem, automática ou humana, é a certa para pegar isso?'.",
+        "Essa pergunta também muda quando a revisão acontece: antes era um portão no fim (escrever, abrir PR, esperar o colega); agora roda continuamente, como um corretor ortográfico enquanto você escreve.",
+        "Segundo o trecho, a maioria das mudanças já foi revisada e corrigida pelo Claude ao menos uma vez antes de um humano ser chamado. Isso pega a maioria dos erros rotineiros e reserva a atenção da equipe para perguntas e escrutínio de nível mais alto."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Só vimos esse trecho citado, não o texto completo. Não sabemos quais checagens específicas a equipe usa, nem há números sobre quantos erros são pegos. Tratamos a ideia como princípio, não como receita comprovada.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: montar seu fluxo por risco",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Intuição primeiro: um PR revisado por humano dá uma sensação de segurança, mas a leitura humana é ruim para certos riscos (um caso de borda esquecido, uma dependência nova) e boa para outros (a decisão de design está certa?). Em vez de um portão único, pense em uma malha de checagens, cada uma boa em um tipo de falha.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Passo 1: liste os riscos da mudança",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Antes de pedir ao agente, ou logo depois, escreva em poucas linhas o que pode dar errado. Exemplos: quebrar comportamento existente; consulta SQL lenta ou errada; vazar segredo ou dado pessoal; adicionar dependência indevida; resolver o problema errado.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Passo 2: case cada risco com uma checagem",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Regressão: testes automatizados rodando a cada edição do agente (hooks do Claude Code podem disparar testes após alterações; confira a documentação atual).",
+        "Estilo e erros simples: linter e verificador de tipos, rodados automaticamente.",
+        "Segredos e dados pessoais: varredura automática de segredos e regra explícita no arquivo de instruções do repositório.",
+        "Lógica e casos de borda: segunda passada de um modelo revisor (você já usa o Codex assim), com um prompt focado no risco listado, não um genérico 'revise isto'.",
+        "Decisão de design, migração de dados, segurança, mudança irreversível: revisão humana. Aqui o humano é a checagem certa."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Passo 3: rode durante a escrita, não só no PR",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Peça ao agente, no próprio ciclo de trabalho, para rodar testes e a revisão antes de dar a tarefa por concluída. Você pode registrar isso numa skill ou no arquivo de instruções: 'antes de finalizar, rode testes e linter, faça uma revisão focada nos riscos listados e corrija'. Assim, quando você abre o PR, o que sobra é o que exige julgamento.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Modelo de mini plano de riscos e checagens para colar no início de uma tarefa.",
+      "code": "Tarefa: adicionar filtro por data na consulta de relatórios.\nRiscos: (1) SQL lento sem índice; (2) fuso horário errado;\n(3) quebrar relatórios existentes.\nChecagens: (1) EXPLAIN revisado por mim; (2) teste com datas de borda;\n(3) suíte de testes atual + revisor automático focado em (2).\nAntes de concluir: rode tudo e me mostre o resultado.",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Cuidados e trade-offs",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Revisor automático não é independente se usa o mesmo modelo que escreveu: erros correlacionados passam juntos. Use modelo ou ferramenta diferente quando o risco for alto.",
+        "Checagem que o agente pode editar (por exemplo, apagar um teste que falha) perde valor. Revise mudanças em testes com atenção e proteja a configuração de checagens.",
+        "Revisão contínua gasta tokens e tempo. Calibre: mudanças de baixo risco, checagens leves; de alto risco, mais camadas e humano.",
+        "Esse método não elimina o humano: concentra a atenção dele onde faz diferença."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Para cada mudança, escreva uma linha: 'o que pode dar errado?' e outra: 'qual checagem pega isso?'. Se a resposta for 'ninguém olha', você achou o buraco do seu fluxo.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 2,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha um projeto pessoal e acrescente ao arquivo de instruções do agente uma seção 'Riscos e checagens' com três riscos típicos do projeto e a checagem de cada um. Depois de uma semana, anote quais erros chegaram ao PR e que checagem faltou.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-16",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-17T06:02:38Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "025fc821-62e1-4ab2-8101-96bfcada30a0",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em pt-BR a ideia de revisão de código contínua com agentes de código (como o Claude Code), em que a pergunta deixa de ser 'um humano leu o código?' e passa a ser 'qual risco existe e qual checagem, automática ou humana, é a certa?'. Cubra: tipos de risco em mudanças de código, checagens automáticas (testes, linter, tipos, varredura de segredos, revisor por modelo), quando a revisão humana é indispensável, limites de revisores baseados em LLM (erros correlacionados) e como montar um plano de riscos e checagens para um projeto pessoal. Dê exemplos concretos."
+    }
+  ],
+  "read_minutes": 4,
+  "schema_version": "1.0.0",
+  "slug": "revisao-de-codigo-continua-de-um-humano-leu-a-qual-verificacao-pega-este-risco",
+  "sources": [
+    {
+      "accessed_at": "2026-10-17T06:02:17Z",
+      "language": "en",
+      "published_at": "2026-10-16T22:06:37Z",
+      "publisher": "Simon Willison",
+      "source_id": "s1",
+      "title": "Quoting Addy Osmani, Morgan Westlee Lunt, and Qing Wang",
+      "url": "https://simonwillison.net/2026/Oct/16/code-review"
+    }
+  ],
+  "summary": "Um trecho de Addy Osmani e coautores propõe trocar a pergunta \"um humano leu o código?\" por \"o que pode dar errado e qual checagem pega isso?\". Veja como aplicar isso ao seu fluxo com agentes de código.",
+  "tags": [
+    "topic:coding-agents",
+    "topic:guardrails",
+    "topic:agent-evaluation",
+    "theme:operating-model",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:simon-willison"
+  ],
+  "title": "Revisão de código contínua: de \"um humano leu?\" a \"qual verificação pega este risco?\""
+}

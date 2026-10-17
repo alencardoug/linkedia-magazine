@@ -1,0 +1,185 @@
+{
+  "article_id": "00e1cf85-65bf-424e-88e7-60ff530187d2",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O Google publicou no Google Developers Blog um conjunto de ferramentas em torno da Developer Knowledge API: uma fonte oficial e programática da documentação de Google Cloud, Firebase, Android e outros produtos. O objetivo é que agentes de código parem de depender do que o modelo memorizou no treinamento, que pode estar defasado, ou de web scraping frágil. Depois deste texto você saberá o que é MCP, como esse ecossistema funciona e como fazer um teste pequeno e controlado.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o anúncio, a API serve documentação em Markdown, com busca semântica e por palavra-chave, divisão inteligente em trechos (chunks) e perguntas e respostas ancoradas na documentação. O Google afirma que o índice é atualizado com frequência, para reduzir o intervalo entre a mudança na documentação e o acesso do agente. Também diz que isso mantém os agentes precisos e econômicos em tokens.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O pacote tem quatro frentes. A primeira é uma interface na gcloud CLI, com os comandos answer-query, documents search-chunks e documents describe. Segundo o texto, ela já vem no Cloud Shell e funciona em instalações padrão do Google Cloud SDK em Linux, macOS e Windows. A segunda é uma skill de agente, instalada com o comando npx skills add google/skills --skill retrieving-developer-knowledge. Ela ensina o assistente a usar o servidor MCP, ou a cair para a API REST via curl. A terceira são bibliotecas cliente em várias linguagens, com exemplo em Python. A quarta é o APIs Explorer, uma interface interativa para testar requisições sem escrever código.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A skill orienta um fluxo econômico: primeiro buscar trechos com searchDocumentChunks, depois baixar páginas completas com documents.get só quando necessário, ou pedir uma resposta fundamentada com answerQuery. A autenticação pode usar Application Default Credentials ou chave de API.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Tudo isso vem de um único texto do próprio fornecedor, sem data visível no material. A candidatura da pauta fala em preview público, mas o trecho extraído não detalha limites, custos, cotas nem a qualidade real das respostas. Não há medição independente. Confira a documentação oficial antes de depender disso.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: o que fazer com isso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, não nas fontes citadas. Detalhes de comandos e configuração podem ter mudado: confira a documentação oficial.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "level": 3,
+      "text": "O que é MCP, em termos simples",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "MCP (Model Context Protocol) é um protocolo aberto que padroniza como um agente de IA se conecta a ferramentas e fontes de dados. Pense numa porta USB para agentes: o servidor MCP expõe funções, como buscar documentação, e o cliente (seu Claude Code, Codex ou IDE) as descobre e chama. Um servidor MCP de documentação é, na prática, um RAG já pronto, mantido pelo dono da documentação: busca, trechos relevantes e injeção no contexto, sem você montar índice nem embeddings.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Por que isso importa para quem já usa agentes de código",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Modelos erram APIs novas ou alteradas porque o treinamento tem data de corte. O agente inventa um parâmetro que não existe mais.",
+        "Colar documentação à mão consome contexto e envelhece. Buscar sob demanda traz só o trecho necessário.",
+        "O padrão buscar trechos, depois ler a página inteira só se preciso, é boa prática geral de engenharia de contexto, útil mesmo fora do Google."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Experimento de uma tarde",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha uma tarefa pequena com Firebase, BigQuery ou Cloud Storage, num repositório descartável.",
+        "Antes de conectar qualquer coisa, peça ao agente o código e anote os erros: parâmetros inexistentes, funções antigas.",
+        "Se tiver o gcloud, teste a CLI sozinha com uma pergunta simples, como o exemplo do anúncio sobre criar um dataset no BigQuery, para ver a qualidade da resposta.",
+        "Instale a skill ou configure o servidor MCP seguindo a página oficial de conexão e repita a mesma tarefa.",
+        "Compare: o agente citou a documentação? Os erros sumiram? Quantos tokens e quanto tempo a mais gastou?"
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Um truque do anúncio é útil: enviar um log de erro direto para o comando de consulta, com answer-query e o conteúdo do arquivo de erro. É uma forma barata de depurar com base na documentação oficial, sem abrir o agente.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Riscos e controle",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Autenticação: prefira credenciais de escopo mínimo e não coloque chaves em arquivos versionados. Isso evita vazamento de credenciais.",
+        "Prompt injection: todo conteúdo que entra no contexto do agente pode conter instruções maliciosas. Uma fonte oficial reduz o risco, mas não o elimina. Mantenha confirmação humana para comandos que alteram coisas.",
+        "Instalar uma skill via npx executa código de terceiros. Leia o conteúdo antes de instalar, mesmo vindo de um repositório do Google.",
+        "Fundamentação não é verdade garantida: revise o código e rode testes. Resposta ancorada ainda pode ser mal interpretada."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta semana: escolha uma tarefa em que seu agente erra APIs recentes, rode-a sem e com a documentação via MCP ou skill, e meça erros, tokens e tempo. Se o ganho for real, você ganhou um padrão reaproveitável para qualquer servidor MCP de documentação.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Limite do escopo: a ferramenta cobre documentação do Google. Para outras bibliotecas, a ideia vale, mas você precisará de outro servidor equivalente.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-16",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-17T06:03:02Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "025fc821-62e1-4ab2-8101-96bfcada30a0",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique o Model Context Protocol (MCP) para um engenheiro que usa Claude Code e Codex diariamente e conhece RAG. Cubra cliente, servidor, ferramentas, recursos, autenticação e riscos como prompt injection. Depois compare um servidor MCP de documentação com montar um RAG próprio, com prós e contras, e proponha um experimento de duas horas para medir se a documentação atualizada reduz erros de API em um agente de código."
+    },
+    {
+      "kind": "critic",
+      "label": "Avaliar riscos",
+      "prompt": "Atue como revisor de segurança. Liste os riscos de conectar um agente de código a um servidor MCP externo e de instalar uma skill via npx: prompt injection, vazamento de credenciais, execução de código de terceiros. Para cada risco, diga que ataque real ele representa e como mitigar em um projeto pessoal."
+    }
+  ],
+  "read_minutes": 4,
+  "schema_version": "1.0.0",
+  "slug": "mcp-de-documentacao-como-dar-ao-seu-agente-de-codigo-docs-oficiais-do-google",
+  "sources": [
+    {
+      "accessed_at": "2026-10-17T06:02:40Z",
+      "language": "en",
+      "publisher": "Google Developers Blog",
+      "source_id": "s1",
+      "title": "Supercharge your development with the Google Developer Knowledge API ecosystem",
+      "url": "https://developers.googleblog.com/supercharge-your-development-with-the-google-developer-knowledge-api-ecosystem"
+    }
+  ],
+  "summary": "O Google lançou a Developer Knowledge API, com servidor MCP, CLI e skill, para agentes consultarem documentação oficial atual. Veja o que é MCP, o que mudou e como testar hoje com cautela.",
+  "tags": [
+    "topic:mcp",
+    "topic:coding-agents",
+    "topic:context-engineering",
+    "topic:rag",
+    "topic:gcp",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:google-developers"
+  ],
+  "title": "MCP de documentação: como dar ao seu agente de código docs oficiais do Google atualizadas"
+}
