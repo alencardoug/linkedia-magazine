@@ -38,7 +38,13 @@ const DISK_N = [0, Math.cos(TILT), -Math.sin(TILT)];
 const DISK_T1 = [1, 0, 0];
 const DISK_T2 = [0, Math.sin(TILT), Math.cos(TILT)];
 
+/** Software rasterizers (SwiftShader, llvmpipe…) would take seconds per frame of the ray tracer. */
+export function isSoftwareRenderer(name: string): boolean {
+  return /swiftshader|llvmpipe|softpipe|lavapipe|software|basic render|offscreen/i.test(name);
+}
+
 export class Singularity {
+  /** Null without a hardware WebGL2 context: no WebGL2, a software one, or a shader that does not build. */
   static create(canvas: HTMLCanvasElement): Singularity | null {
     try {
       const gl = canvas.getContext('webgl2', {
@@ -47,8 +53,13 @@ export class Singularity {
         depth: false,
         stencil: false,
         powerPreference: 'high-performance',
+        failIfMajorPerformanceCaveat: true, // the browser would render in software: keep the HTML cover
       });
-      return gl ? new Singularity(canvas, gl) : null;
+      if (!gl) return null;
+      const info = gl.getExtension('WEBGL_debug_renderer_info');
+      const name: unknown = gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER);
+      if (typeof name === 'string' && isSoftwareRenderer(name)) return null;
+      return new Singularity(canvas, gl);
     } catch {
       return null;
     }
@@ -79,6 +90,13 @@ export class Singularity {
   healthy(): boolean {
     const { gl } = this;
     return !gl.isContextLost() && gl.getError() === gl.NO_ERROR;
+  }
+
+  /** Waits until everything drawn so far is done (reads one pixel back): only for the start-up measurement. */
+  finish(): void {
+    const { gl } = this;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
   }
 
   /** Largest bitmap side the GPU takes. */

@@ -112,6 +112,31 @@ test.describe('cover', () => {
     expect(errors).toEqual([]);
   });
 
+  test('a software WebGL renderer is refused and the HTML cover stays', async ({ page }) => {
+    // CI's headless Chromium renders WebGL in software (SwiftShader): seconds per frame of the ray tracer. The cover
+    // asks for a hardware context (failIfMajorPerformanceCaveat) and refuses software renderers by name.
+    const errors = watchErrors(page);
+    await page.addInitScript(() => {
+      const getContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (type, attributes, ...rest) {
+        if (!/webgl/i.test(type)) return getContext.call(this, type, attributes, ...rest);
+        window.__webglAttributes = attributes;
+        return {
+          getExtension: (name) => (name === 'WEBGL_debug_renderer_info' ? { UNMASKED_RENDERER_WEBGL: 0x9246 } : null),
+          getParameter: () => 'ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)), SwiftShader driver)',
+          RENDERER: 0x1f01,
+        };
+      };
+    });
+    await page.goto(COVER);
+    await page.waitForTimeout(600);
+    expect(await page.evaluate(() => window.__webglAttributes?.failIfMajorPerformanceCaveat)).toBe(true);
+    await expect(page.locator('html')).not.toHaveAttribute('data-art', /./);
+    await page.mouse.click(300, 200);
+    await expect(page).toHaveURL(ENTERED);
+    expect(errors).toEqual([]);
+  });
+
   test('the archive lists the cover, which keeps its own page', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('/capas');

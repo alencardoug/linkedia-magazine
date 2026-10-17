@@ -19,7 +19,7 @@ import {
   wander,
   type Vec,
 } from './motion';
-import { createQuality, initialScale, observeFrame, type Quality } from './quality';
+import { calibratedScale, createQuality, initialScale, MIN_SCALE, observeFrame, type Quality } from './quality';
 import { Singularity } from './renderer';
 import { bitmapScale, paintCover } from './snapshot';
 
@@ -100,6 +100,7 @@ class Art {
     this.born = performance.now();
     this.lastInput = this.born;
     this.hole = this.home;
+    if (!this.calibrate()) return this.abort();
     this.draw(this.born);
     if (!this.renderer.healthy()) return this.abort();
     this.live = true;
@@ -196,6 +197,27 @@ class Art {
     return false;
   }
 
+  /**
+   * Times one finished frame at the minimum scale (after an untimed warm-up that absorbs lazy shader compilation)
+   * and picks the starting scale from it; false when even that frame is too slow to animate.
+   */
+  private calibrate(): boolean {
+    const renderer = this.renderer;
+    if (!renderer) return false;
+    const [w, h] = viewport();
+    renderer.setSize(w, h, this.canvasRatio(), MIN_SCALE);
+    this.draw(this.born);
+    renderer.finish();
+    const t0 = performance.now();
+    this.draw(this.born);
+    renderer.finish();
+    const scale = calibratedScale(performance.now() - t0, this.quality.scale);
+    if (scale === null || !renderer.healthy()) return false;
+    this.quality = createQuality(scale, performance.now());
+    renderer.setSize(w, h, this.canvasRatio(), scale);
+    return true;
+  }
+
   private canvasRatio(): number {
     const [w, h] = viewport();
     return Math.min(devicePixelRatio || 1, 2, Math.sqrt(CANVAS_PIXELS / Math.max(w * h, 1)));
@@ -221,10 +243,7 @@ class Art {
       this.last = now;
       const before = this.quality.scale;
       this.quality = observeFrame(this.quality, interval, now);
-      if (this.quality.still && !this.exitAt) {
-        this.draw(now);
-        return; // too slow even at the lowest scale: keep this frame, stop animating
-      }
+      if (this.quality.still && !this.exitAt) return; // stalling or too slow at the lowest scale: keep the last frame
       if (this.quality.scale !== before) {
         const [w, h] = viewport();
         this.renderer?.setSize(w, h, this.canvasRatio(), this.quality.scale);
