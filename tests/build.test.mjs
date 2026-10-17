@@ -145,6 +145,7 @@ describe('static build', () => {
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
         'sobre.html',
+        '404.html',
       ].sort(),
     );
     // Every page: one theme, the author link in the footer, the AI note, and client JS only with copy buttons.
@@ -155,7 +156,13 @@ describe('static build', () => {
       expect(html, page).toContain('href="/sobre"');
       expect(html.includes('<script'), page).toBe(html.includes('data-copy='));
       expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
+      // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
+      expect(html, page).not.toMatch(/<script(?![^>]*\ssrc="\/_astro\/)[^>]*>/);
+      expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
     }
+    const notFound = readFileSync(join(out, '404.html'), 'utf8');
+    expect(notFound).toContain('Página não encontrada');
+    expect(notFound).toContain('href="/edicoes"');
     const about = readFileSync(join(out, 'sobre.html'), 'utf8');
     expect(about).toContain('Texto gerado por IA');
     expect(about).toContain('Pautas escolhidas por um editor humano');
@@ -199,6 +206,7 @@ describe('static build', () => {
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
         'sobre.html',
+        '404.html',
       ].sort(),
     );
     expect(readFileSync(join(out, 'index.html'), 'utf8')).toContain('Nenhuma edição publicada ainda.');

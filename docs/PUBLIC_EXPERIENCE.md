@@ -10,6 +10,7 @@ On opening the homepage, lead with one extraordinary presentation of **today's p
 - `/materias/{slug}`: article permalink.
 - `/categorias/{canal}`: published articles of one channel, pt-BR slugs `engenharia-de-ia`, `lideranca-de-ia`, `conhecimento-de-ia` (1B-01).
 - `/sobre`: how editions are made (AI disclosure, D-028), privacy, editor, licenses (1B-02).
+- Any unknown path: `404.html` with status 404 ("Página não encontrada", links to `/` and `/edicoes`; 1B-03).
 - `/tags/{tag}` may be added when useful; avoid complexity in phase 1B.
 
 As built (1B-01): content comes from `LINKEDIA_CONTENT_DIR` (default `content`; tests build `content/examples` and a hostile fixture) through `src/lib/content.ts`; an article page exists for every article listed in some edition. Blocks render as escaped text (`src/components/Block.astro`): code and diagram specs in `<pre><code>`, a diagram as a `<figure>` with its long description and the spec in `<details>` (D-027), an image only from a host in `IMAGE_HOSTS` (empty, D-026) else its text fallback. Each article ends with its prompts (`<details>` with selectable text; a copy button appears only with JS and reports in `aria-live`), the AI note and the numbered source list that block citations link to.
