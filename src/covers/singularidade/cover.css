@@ -1,0 +1,208 @@
+/* "Singularidade" (docs/COVERS.md): a typographic cover that is complete without JS. With WebGL2 the renderer paints
+   the [data-ink] text into its texture and, once its first frame is up (html[data-art='live']), the ink here turns
+   transparent (fill only, so computed colours stay readable for a repaint) while staying in place for screen
+   readers. Scoped to html[data-cover='singularidade'].
+   Contrast on --sg-bg: --sg-ink 17.7:1, --sg-soft 15.4:1, the "IA" gradient 5.7–10.6:1, hint 9.6:1. */
+html[data-cover='singularidade'] {
+  --sg-bg: #0a0d26;
+  --sg-ink: #f4f6ff;
+  --sg-soft: #dfe6ff;
+  --sg-rule: rgba(200, 230, 255, 0.45);
+  --sg-dot: rgba(120, 170, 255, 0.28);
+  --ink-from: #ff3d7f;
+  --ink-to: #ffb13d;
+  --cover-bg: var(--sg-bg);
+}
+
+/* The dot grid; the renderer draws the same grid (2.6vh cells) and animates it. */
+html[data-cover='singularidade'] body {
+  background-image: radial-gradient(circle, var(--sg-dot) 1.1px, transparent 1.6px);
+  background-size: 2.6vh 2.6vh;
+}
+
+html[data-cover='singularidade'] .sg {
+  position: relative; /* no z-index: the canvas, the link layer and the bar stack with the shell's fine print */
+  -webkit-user-select: none;
+  user-select: none;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: clamp(0.4rem, 1.6vh, 1rem);
+  padding: clamp(1rem, 4vh, 2.5rem) clamp(1rem, 6vw, 5rem) 0.25rem;
+  min-width: 0;
+}
+
+html[data-cover='singularidade'] [data-ink-rule] {
+  --ink-rule: var(--sg-rule);
+}
+
+html[data-cover='singularidade'] .sg-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--sg-rule);
+  font-size: clamp(0.68rem, 1.9vh, 0.95rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html[data-cover='singularidade'] .sg-masthead {
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+  font-size: min(29vh, 16.5vw);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+html[data-cover='singularidade'] .sg-ia {
+  background: linear-gradient(90deg, var(--ink-from), var(--ink-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html[data-cover='singularidade'] .sg-lead {
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--sg-rule);
+  color: var(--sg-soft);
+  font-size: clamp(0.8rem, 2.3vh, 1.15rem);
+  font-weight: 500;
+}
+
+html[data-cover='singularidade'] .sg-heads {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-cover='singularidade'] .sg-n {
+  opacity: 0.7;
+}
+
+html[data-cover='singularidade'] :is(.sg-more, .sg-empty) {
+  margin: 0.35rem 0 0;
+  opacity: 0.75;
+}
+
+/* The bar sits above the canvas and the link layer; only the link itself takes clicks. */
+html[data-cover='singularidade'] .sg-bar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  pointer-events: none;
+  text-shadow: 0 0 10px var(--sg-bg), 0 0 3px var(--sg-bg);
+}
+
+html[data-cover='singularidade'] .sg-hint {
+  color: var(--cover-fine);
+  font: 400 clamp(0.62rem, 1.6vh, 0.78rem) / 1.4 var(--cover-mono);
+}
+
+html[data-cover='singularidade'] .sg-enter {
+  pointer-events: auto;
+  color: var(--sg-ink);
+  font-size: clamp(0.72rem, 1.9vh, 0.92rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none; /* a long touch holds the hole; the fine-print links keep their menus */
+}
+
+/* The whole viewport is this link. */
+html[data-cover='singularidade'] .sg-enter::after {
+  content: '';
+  position: fixed;
+  z-index: 2;
+  inset: 0;
+  cursor: pointer;
+}
+
+html[data-cover='singularidade'] .sg-canvas {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Portrait: "Linked" over a giant "IA". */
+@media (orientation: portrait) {
+  html[data-cover='singularidade'] .sg-masthead {
+    font-size: 21vw;
+    text-align: center;
+    white-space: normal;
+  }
+
+  html[data-cover='singularidade'] .sg-ia {
+    display: block;
+    font-size: 1.9em;
+  }
+}
+
+/* Phones and short screens: two lines per headline at most, so the cover fits and the art can start. */
+@media (orientation: portrait), (max-height: 640px) {
+  html[data-cover='singularidade'] .sg-heads li {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+}
+
+/* Live art: the canvas shows the cover (painted from this HTML), the page does not scroll or pan, and a drag steers
+   the hole instead of moving the page. Pinch zoom stays where supported. */
+html[data-cover='singularidade'][data-art='live'] body {
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background-image: none;
+  touch-action: none;
+  touch-action: pinch-zoom;
+}
+
+html[data-cover='singularidade'][data-art='live'] .sg-canvas {
+  opacity: 1;
+}
+
+html[data-cover='singularidade'][data-art='live'] .sg-enter::after {
+  cursor: crosshair;
+}
+
+html[data-cover='singularidade'][data-art='live'] :is(.sg-kicker, .sg-masthead, .sg-lead) {
+  border-color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-cover='singularidade'][data-art='live'] .sg-ia {
+  background: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-cover='singularidade'][data-art='live'] .sg-hint {
+    animation: sg-pulse 2.8s ease-in-out infinite;
+  }
+}
+
+@keyframes sg-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}

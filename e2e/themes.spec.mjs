@@ -218,7 +218,7 @@ for (const [slot, id] of Object.entries(THEMES)) {
   test.describe(`slot ${slot} (${id})`, () => {
     test.beforeEach(({ page }) => preset(page, slot));
 
-    for (const path of ['/', ARTICLE]) {
+    for (const path of ['/revista', ARTICLE]) {
       test(`${path}: no serious axe violation, no horizontal scroll at 320 px, switcher visible`, async ({ page }) => {
         await page.setViewportSize({ width: 320, height: 640 });
         await page.goto(path);

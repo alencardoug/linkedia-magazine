@@ -1,12 +1,15 @@
 // Smoke suite over the example content (1B-04): routes, copy button, reading without JS, 320 px, axe. The
 // build uses the fixture themes (tests/fixtures/themes), so pages open in the current lab slot; themes.spec.mjs
-// covers the other slots.
+// covers the other slots. `/` is the cover pre-page (3-01; cover.spec.mjs covers its behaviour).
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 const ARTICLE = '/materias/exemplo-de-materia-linkedia';
 const ROUTES = [
   '/',
+  '/revista',
+  '/capas',
+  '/capas/singularidade',
   '/edicoes',
   '/edicoes/2026-10-14',
   ARTICLE,

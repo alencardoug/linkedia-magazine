@@ -1,0 +1,84 @@
+/* Shell of the cover pages (CoverPage.astro, docs/COVERS.md). Everything is scoped to html[data-cover], so nothing
+   here can reach the reading pages; a cover sets the tokens under html[data-cover='<slug>']. The fine print lets
+   clicks through to the cover's viewport-wide link, except on its own links. Contrast on the default --cover-bg:
+   --cover-fine 9.6:1, --cover-link 10.6:1. */
+html[data-cover] {
+  color-scheme: dark;
+  --cover-bg: #0a0d26;
+  --cover-ink: #f4f6ff;
+  --cover-fine: #a9b8dc;
+  --cover-link: #ffb13d;
+  --cover-focus: #ffd166;
+  --cover-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --cover-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Code', 'Liberation Mono', Menlo, Consolas, monospace;
+  background: var(--cover-bg);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html[data-cover] *,
+html[data-cover] *::before,
+html[data-cover] *::after {
+  box-sizing: border-box;
+}
+
+html[data-cover] body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: var(--cover-bg);
+  color: var(--cover-ink);
+  font-family: var(--cover-font);
+}
+
+html[data-cover] :focus-visible {
+  outline: 2px solid var(--cover-focus);
+  outline-offset: 3px;
+}
+
+/* Skip link: off screen until focused, then a solid label on top of everything. */
+html[data-cover] .cover-skip {
+  position: fixed;
+  z-index: 10;
+  left: 1rem;
+  top: 1rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.3rem;
+  background: var(--cover-ink);
+  color: var(--cover-bg);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-300%);
+}
+
+html[data-cover] .cover-skip:focus {
+  transform: none;
+}
+
+html[data-cover] .cover-fine {
+  position: relative;
+  z-index: 4;
+  pointer-events: none;
+  padding: 0.35rem clamp(1rem, 6vw, 5rem) 0.6rem;
+  color: var(--cover-fine);
+  font: 400 0.68rem/1.45 var(--cover-mono);
+  text-shadow: 0 0 6px var(--cover-bg), 0 0 2px var(--cover-bg);
+}
+
+html[data-cover] .cover-fine p {
+  margin: 0;
+}
+
+html[data-cover] .cover-fine a {
+  pointer-events: auto;
+  color: var(--cover-link);
+}
+
+/* Narrow or short screens: the cover's credit (also on /capas) gives its room to the art. */
+@media (max-width: 600px), (max-height: 420px) {
+  html[data-cover] .cover-credit {
+    display: none;
+  }
+}

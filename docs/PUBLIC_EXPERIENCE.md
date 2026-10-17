@@ -4,7 +4,10 @@
 On opening the homepage, lead with one extraordinary presentation of **today's published issue**, not a cluttered analytics dashboard. Readers can reach older issues through one unobtrusive archive link, or navigate by category and tags. The 3 categories do not require permanent tabs; any accessible design metaphor is allowed. Feature important stories visually rather than enforcing equal category blocks.
 
 ## Routes
-- `/`: most recent available edition, not necessarily today's calendar date.
+- `/`: the cover pre-page — the current weekly cover, unlimited interactive art; one click, tap or Enter anywhere enters
+  `/revista` (3-01, D-067, `docs/COVERS.md`). Until 3-01 `/` was the edition home.
+- `/revista`: most recent available edition, not necessarily today's calendar date (the header brand links here).
+- `/capas`: every weekly cover, newest first; `/capas/{slug}`: each cover, reachable for good.
 - `/edicoes`: simple archive by date, with filters for channels/tags when useful.
 - `/edicoes/YYYY-MM-DD`: fixed daily edition.
 - `/materias/{slug}`: article permalink.

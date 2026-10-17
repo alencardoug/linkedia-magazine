@@ -1,0 +1,11 @@
+/* Cross-document view transition from a cover into /revista (3-01): only pages importing this file opt in, so the
+   cover → magazine step cross-fades and every other navigation stays plain. Off under reduced motion. */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}

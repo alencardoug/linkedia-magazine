@@ -1,11 +1,13 @@
 // Static build (1B-01): every route is emitted from a content dir, and model-produced text is always escaped.
 // Themes (1C-01): the build ships the slotted themes only, and the switcher appears once a lab theme exists.
+// Covers (3-01): `/` and `/capas/<slug>` are cover pages with their own shell and code; reading pages load none of it.
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { build } from 'astro';
 import { afterAll, describe, expect, it } from 'vitest';
 import { validateContent } from '../scripts/validate-content.mjs';
+import { COVERS, CURRENT_COVER } from '../src/covers/registry';
 import { THEME_INIT_SCRIPT } from '../src/lib/theme-init';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -63,6 +65,9 @@ async function buildSite(contentDir, themesDir = bootstrap()) {
 
 const assets = (out, ext) => readdirSync(join(out, '_astro')).filter((f) => f.endsWith(ext));
 const read = (out, page) => readFileSync(join(out, page), 'utf8');
+// Cover pages (3-01): the current cover at `/` and every cover in the archive.
+const COVER_PAGES = ['index.html', ...COVERS.map((c) => `capas/${c.slug}.html`)];
+const isCover = (page) => COVER_PAGES.includes(page);
 
 function htmlFiles(dir, prefix = '') {
   return readdirSync(join(dir, prefix), { withFileTypes: true }).flatMap((e) =>
@@ -163,6 +168,9 @@ describe('static build', () => {
     expect(htmlFiles(out).sort()).toEqual(
       [
         'index.html',
+        'revista.html',
+        'capas.html',
+        ...COVERS.map((c) => `capas/${c.slug}.html`),
         'edicoes.html',
         'edicoes/2026-10-14.html',
         'materias/exemplo-de-materia-linkedia.html',
@@ -173,13 +181,30 @@ describe('static build', () => {
         '404.html',
       ].sort(),
     );
-    // Every page: one theme, the author link in the footer, the AI note, and client JS only with copy buttons.
+    // Every page: the author link in the footer, the AI note, no inline code. Reading pages: one theme and client JS
+    // only with copy buttons; cover pages: their own shell and only their own cover's script.
     for (const page of htmlFiles(out)) {
       const html = readFileSync(join(out, page), 'utf8');
-      expect(html, page).toContain('<html lang="pt-BR" data-theme="minimal-dark">'); // no slots, no switcher
-      expect(html, page).not.toContain('data-theme-switcher');
       expect(html, page).toMatch(/<a href="https:\/\/portfolio-douglas-alencar\.web\.app\/" rel="author">Douglas Alencar<\/a>/);
       expect(html, page).toContain('href="/sobre"');
+      expect(html, page).toContain('Textos gerados com IA');
+      if (isCover(page)) {
+        expect(html, page).toMatch(/^<!DOCTYPE html><html lang="pt-BR" data-cover="[a-z0-9-]+">/);
+        expect(html, page).not.toContain('data-theme');
+        expect(html, page).toContain('<a href="/revista" class="cover-skip">Pular a capa e ir para a revista</a>');
+        expect(html, page).toMatch(/<a class="[^"]*" href="\/revista" draggable="false" data-enter>/);
+        expect(html, page).toContain('href="/capas"');
+        expect(html.match(/<h1[\s>]/g), page).toHaveLength(1);
+        expect([...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map((m) => m[1]), page).toEqual([
+          expect.stringMatching(/^\/_astro\/Cover\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/),
+        ]);
+        continue;
+      }
+      expect(html, page).toContain('<html lang="pt-BR" data-theme="minimal-dark">'); // no slots, no switcher
+      expect(html, page).not.toContain('data-theme-switcher');
+      expect(html, page).not.toContain('Cover.astro'); // no cover code on reading pages
+      expect(html, page).toContain('<a href="/revista" data-brand>');
+      expect(html, page).toContain('<a href="/capas">Capas</a>');
       expect(html.includes('<script'), page).toBe(html.includes('data-copy='));
       expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
       // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
@@ -192,7 +217,21 @@ describe('static build', () => {
     }
     const notFound = readFileSync(join(out, '404.html'), 'utf8');
     expect(notFound).toContain('Página não encontrada');
+    expect(notFound).toContain('<a href="/revista">Ir para a edição mais recente</a>');
     expect(notFound).toContain('href="/edicoes"');
+    // `/revista` is the edition home that `/` used to be; `/` is the current cover, with the edition's text.
+    const home = read(out, 'revista.html');
+    expect(home).toContain('data-edition="2026-10-14"');
+    const cover = read(out, 'index.html');
+    expect(cover).toContain(`<html lang="pt-BR" data-cover="${CURRENT_COVER}">`);
+    expect(cover).toContain(`data-cover-art="${CURRENT_COVER}"`); // the page imports the registry's current cover
+    expect(cover).toContain('<time datetime="2026-10-14">14 de outubro de 2026</time>');
+    expect(cover).toContain('Exemplo ilustrativo de matéria');
+    const archive = read(out, 'capas.html');
+    for (const c of COVERS) {
+      expect(archive).toContain(`<a href="/capas/${c.slug}">${c.title}</a>`);
+      expect(read(out, `capas/${c.slug}.html`)).toContain(`data-cover-art="${c.slug}"`);
+    }
     const about = readFileSync(join(out, 'sobre.html'), 'utf8');
     expect(about).toContain('Texto gerado por IA');
     expect(about).toContain('Pautas escolhidas por um editor humano');
@@ -264,8 +303,8 @@ describe('static build', () => {
   it('ships three slots with lab themes: pre-paint script, hidden switcher, lazy enhancement', async () => {
     const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
     const pages = htmlFiles(out);
-    expect(pages).toHaveLength(9);
-    for (const page of pages) {
+    expect(pages).toHaveLength(11 + COVERS.length);
+    for (const page of pages.filter((p) => !isCover(p))) {
       const html = read(out, page);
       expect(html, page).toContain(
         '<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" ' +
@@ -306,7 +345,7 @@ describe('static build', () => {
       m.themes[1].status = 'archived'; // lab-2099-w01 keeps its folder but leaves the slots
     });
     const out = await buildSite(EXAMPLES, themes);
-    const html = read(out, 'index.html');
+    const html = read(out, 'revista.html');
     expect(html).toContain('<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" data-theme-current="lab-2099-w02">');
     expect(html).toContain('<input type="radio" name="tema" value="previous" disabled>Anterior (ainda não há)</label>');
     const styles = assets(out, '.css').map((f) => read(out, `_astro/${f}`)).join('');
@@ -324,6 +363,9 @@ describe('static build', () => {
     expect(htmlFiles(out).sort()).toEqual(
       [
         'index.html',
+        'revista.html',
+        'capas.html',
+        ...COVERS.map((c) => `capas/${c.slug}.html`),
         'edicoes.html',
         'categorias/engenharia-de-ia.html',
         'categorias/lideranca-de-ia.html',
@@ -332,6 +374,7 @@ describe('static build', () => {
         '404.html',
       ].sort(),
     );
+    expect(readFileSync(join(out, 'revista.html'), 'utf8')).toContain('Nenhuma edição publicada ainda.');
     expect(readFileSync(join(out, 'index.html'), 'utf8')).toContain('Nenhuma edição publicada ainda.');
   }, 120_000);
 });

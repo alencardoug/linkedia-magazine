@@ -1,0 +1,58 @@
+---
+// "Singularidade" (2026-W42, the first cover; docs/COVERS.md, ./README.md). The HTML below is a complete
+// typographic cover on its own — without JS, without WebGL2, with reduced motion. With WebGL2 the script paints the
+// `data-ink` text into a texture and a real-time black hole bends its light (main.ts). The viewport-wide link into the
+// magazine is a real link, so every click, tap or key press ends in /revista.
+import './cover.css';
+import type { EditionWithArticles } from '../../lib/content';
+import { longDate } from '../../lib/labels';
+
+interface Props {
+  latest: EditionWithArticles | undefined;
+}
+const { latest } = Astro.props;
+const LEAD = 3; // headlines on the cover; the rest are counted
+const heads = latest?.articles.slice(0, LEAD) ?? [];
+const more = (latest?.articles.length ?? 0) - heads.length;
+---
+
+<main class="sg" data-sg data-cover-art="singularidade">
+  <p class="sg-kicker" data-ink data-ink-rule>
+    <span>Revista diária · Inteligência artificial</span>
+    {
+      latest && (
+        <span>
+          Edição de <time datetime={latest.edition.edition_date}>{longDate(latest.edition.edition_date)}</time>
+        </span>
+      )
+    }
+  </p>
+  <h1 class="sg-masthead" data-ink>Linked<span class="sg-ia" data-ink-gradient data-anchor>IA</span></h1>
+  <div class="sg-lead" data-ink data-ink-rule>
+    {
+      heads.length > 0 ? (
+        <ol class="sg-heads">
+          {heads.map((a, i) => (
+            <li>
+              <span class="sg-n" aria-hidden="true">{i + 1}</span> {a.title}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="sg-empty">Nenhuma edição publicada ainda.</p>
+      )
+    }
+    {more > 0 && <p class="sg-more">+ {more} {more === 1 ? 'matéria' : 'matérias'} nesta edição</p>}
+  </div>
+  <p class="sg-bar">
+    <span class="sg-hint" data-hint>Clique ou toque em qualquer lugar para entrar.</span>
+    <a class="sg-enter" href="/revista" draggable="false" data-enter>Entrar na revista <span aria-hidden="true">→</span></a>
+  </p>
+  <canvas class="sg-canvas" aria-hidden="true" data-canvas></canvas>
+</main>
+
+<script>
+  import { boot } from './main';
+
+  boot();
+</script>

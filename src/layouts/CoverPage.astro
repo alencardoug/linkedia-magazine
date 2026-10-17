@@ -1,0 +1,36 @@
+---
+// Shell of a cover page (`/` and `/capas/<slug>`, 3-01, docs/COVERS.md): the document around one cover, without the
+// reading pages' theme, header or switcher. It owns what every cover must keep: a visible skip link into the
+// magazine and the fine print (the cover's credit, other covers, the AI note, /sobre and the editor). The cover
+// itself (the slot) renders the art and the viewport-wide link into `/revista`.
+import './cover-shell.css';
+import '../covers/view-transition.css';
+import type { CoverMeta } from '../covers/registry';
+import { AI_NOTE, EDITOR_NAME, EDITOR_URL } from '../lib/site';
+
+interface Props {
+  cover: CoverMeta;
+  title: string;
+  description: string;
+}
+const { cover, title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR" data-cover={cover.slug}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a href="/revista" class="cover-skip">Pular a capa e ir para a revista</a>
+    <slot />
+    <footer class="cover-fine" data-cover-fine>
+      <p>Capa “{cover.title}”<span class="cover-credit"> — {cover.credit}</span> · <a href="/capas">Outras capas</a></p>
+      <p>{AI_NOTE} <a href="/sobre">Como a Linkedia é feita</a>. Editor: <a href={EDITOR_URL} rel="author">{EDITOR_NAME}</a></p>
+    </footer>
+  </body>
+</html>

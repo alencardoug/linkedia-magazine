@@ -13,8 +13,9 @@ Status and tasks for this repository are tracked in the owner's private engine c
 - The build fails on invalid content (`scripts/validate-content.mjs`, run as `prebuild`).
 - Accessibility: keyboard, screen readers, `prefers-reduced-motion`, 320 px layouts, AA contrast; full article reading without JS.
 - Themes: `minimal-dark` is the permanent baseline; experiments follow the theme contract in `docs/VISUAL_LAB.md`; the switcher has exactly three slots once experiments exist.
+- Covers: `/` is the weekly cover pre-page and `/revista` the edition home; every cover follows the contract in `docs/COVERS.md` (entry never depends on the art, complete HTML cover, fine print, CSP, no lock-up) and stays deployed at `/capas/<slug>`.
 - `content/**` normally changes only through engine commits; manual edits go through a reviewed PR.
 - Never commit `.env`, Firebase service-account JSON, tokens, or engine files other than exported content and public contracts.
 
 ## Map
-`docs/PUBLIC_EXPERIENCE.md` (routes, rendering, transparency) · `docs/VISUAL_LAB.md` (themes) · `docs/ACCESSIBILITY.md` · `docs/DEPLOYMENT.md` · `docs/CROSS_REPO_PROTOCOL.md` · `docs/QUALITY_GATES.md` · `docs/prompts/weekly_visual.md`.
+`docs/PUBLIC_EXPERIENCE.md` (routes, rendering, transparency) · `docs/VISUAL_LAB.md` (themes) · `docs/ACCESSIBILITY.md` · `docs/DEPLOYMENT.md` · `docs/CROSS_REPO_PROTOCOL.md` · `docs/QUALITY_GATES.md` · `docs/prompts/weekly_visual.md` · `docs/prompts/cover_art.md` (the owner's brief for the cover pre-page and the idea queue: read before any cover work) · `docs/COVERS.md` (weekly covers: routes, package, contract) · `docs/prompts/weekly_cover.md`.

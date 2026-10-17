@@ -1,0 +1,19 @@
+---
+// `/`: the cover pre-page (3-01, D-067, docs/COVERS.md): the current weekly cover, then one click, tap or key into
+// `/revista`. The current cover is CURRENT_COVER in src/covers/registry.ts; the import below must be the same cover
+// (tests/build.test.mjs checks its `data-cover-art` against the registry).
+import CoverPage from '../layouts/CoverPage.astro';
+import Cover from '../covers/singularidade/Cover.astro';
+import { coverBySlug, coverEdition, CURRENT_COVER } from '../covers/registry';
+import { loadContent } from '../lib/content';
+
+const cover = coverBySlug(CURRENT_COVER);
+---
+
+<CoverPage
+  cover={cover}
+  title="Linkedia — revista diária de IA"
+  description="Linkedia, revista diária sobre engenharia de IA, liderança em IA e conhecimento em IA. Toque em qualquer lugar da capa para entrar."
+>
+  <Cover latest={coverEdition(cover, loadContent().editions)} />
+</CoverPage>

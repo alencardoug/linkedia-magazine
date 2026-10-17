@@ -17,11 +17,11 @@ const pages = (dir) =>
     .map((f) => `/${dir}/${f.slice(0, -'.html'.length)}`);
 const NOT_FOUND = '/pagina-que-nao-existe';
 const ARTICLES = pages('materias').slice(0, 3);
-const ROUTES = ['/', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, '/sobre', NOT_FOUND];
+const ROUTES = ['/revista', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, '/sobre', NOT_FOUND];
 const WIDTHS = [1100, 320];
 const SLOTS = Object.entries(slots(readManifest())).filter(([, theme]) => theme !== null);
 const ENHANCE = '/enhance.';
-const shotName = (route) => (route === '/' ? 'home' : route.slice(1).replaceAll('/', '_'));
+const shotName = (route) => route.slice(1).replaceAll('/', '_');
 const ignore404 = (route) => (route === NOT_FOUND ? /status of 404/ : undefined);
 
 test('the production build has pages of every kind and a lab theme in the current slot', () => {
@@ -92,5 +92,21 @@ for (const [slot, theme] of SLOTS) {
       await expect(page.locator('h1')).toBeVisible();
       expect(errors).toEqual([]);
     });
+  });
+}
+
+// The cover pre-page (3-01) of the production build as every device first sees it (headless Chromium has no WebGL,
+// so this is the HTML cover the art is painted from): 320 and 1100 px, axe, and a screenshot next to the themes'.
+for (const width of WIDTHS) {
+  test(`cover / at ${width} px`, async ({ page }, testInfo) => {
+    const errors = watchErrors(page);
+    await page.setViewportSize({ width, height: width < 600 ? 640 : 900 });
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('data-cover', /./);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    expect(await axeBlocking(page)).toEqual([]);
+    const path = join(testInfo.project.outputDir, 'screenshots', 'cover', `cover-${width}.png`);
+    await testInfo.attach(`cover ${width}px`, { body: await page.screenshot({ path }), contentType: 'image/png' });
+    expect(errors).toEqual([]);
   });
 }

@@ -1,6 +1,8 @@
 ---
-// `/`: the most recent edition (PUBLIC_EXPERIENCE), lead story first; a day without edition shows the last one.
+// `/revista`: the most recent edition (PUBLIC_EXPERIENCE), lead story first; a day without edition shows the last one.
+// It was `/` until the cover pre-page took that route (3-01, D-067); the header brand and the 404 page link here.
 import Base from '../layouts/Base.astro';
+import '../covers/view-transition.css';
 import ArticleCard from '../components/ArticleCard.astro';
 import { loadContent } from '../lib/content';
 import { longDate } from '../lib/labels';
