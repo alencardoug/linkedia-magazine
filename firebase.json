@@ -7,7 +7,12 @@
     "trailingSlash": false,
     "redirects": [
       { "regex": "^/capas(?:\\.html)?/?$", "destination": "/visual", "type": 301 },
-      { "regex": "^/capas/([a-z0-9-]+)(?:\\.html)?/?$", "destination": "/visual/:1", "type": 301 }
+      { "regex": "^/capas/([a-z0-9-]+)(?:\\.html)?/?$", "destination": "/visual/:1", "type": 301 },
+      {
+        "regex": "^/materias/meta-volta-aos-0013(?:\\.html)?/?$",
+        "destination": "/materias/meta-volta-aos-pesos-abertos-o-que-muda-para-quem-escolhe-modelo",
+        "type": 301
+      }
     ],
     "headers": [
       {

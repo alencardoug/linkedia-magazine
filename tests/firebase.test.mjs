@@ -34,8 +34,10 @@ describe('firebase.json', () => {
     expect(hosting.cleanUrls).toBe(true);
     expect(hosting.trailingSlash).toBe(false);
     expect(hosting.rewrites).toBeUndefined(); // static files only, no SPA fallback
-    // The only redirects: the old /capas addresses (D-069), with or without .html or a trailing slash.
-    const [archive, cover] = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
+    // The only redirects: the old /capas addresses (D-069) and one short link the owner asked for (D-072),
+    // with or without .html or a trailing slash.
+    const [archive, cover, meta] = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
+    expect(hosting.redirects).toHaveLength(3);
     expect(hosting.redirects.every((r) => r.type === 301)).toBe(true);
     for (const path of ['/capas', '/capas/', '/capas.html']) expect(archive.re.test(path), path).toBe(true);
     for (const path of ['/capas/x', '/capas/x/', '/capas/x.html']) {
@@ -43,6 +45,14 @@ describe('firebase.json', () => {
     }
     for (const path of ['/capasx', '/visual', '/capas/x/y']) {
       expect(archive.re.test(path) || cover.re.test(path), path).toBe(false);
+    }
+    const long = '/materias/meta-volta-aos-pesos-abertos-o-que-muda-para-quem-escolhe-modelo';
+    expect(meta.destination).toBe(long);
+    for (const path of ['/materias/meta-volta-aos-0013', '/materias/meta-volta-aos-0013/', '/materias/meta-volta-aos-0013.html']) {
+      expect(meta.re.test(path), path).toBe(true);
+    }
+    for (const path of ['/materias/meta-volta-aos-00130', '/materias/meta-volta-aos-0014', long]) {
+      expect(meta.re.test(path), path).toBe(false);
     }
   });
 
