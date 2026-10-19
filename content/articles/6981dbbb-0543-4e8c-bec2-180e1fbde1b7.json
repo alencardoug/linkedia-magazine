@@ -1,0 +1,202 @@
+{
+  "article_id": "6981dbbb-0543-4e8c-bec2-180e1fbde1b7",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em resumo: a Meta liberou os pesos do Muse Spark Open, que a Interconnects chama de o modelo aberto mais forte feito nos EUA, mas ele ainda fica atrás de modelos abertos chineses. Depois de ler, você saberá o que custa rodar um modelo desse tamanho, quais cláusulas de licença olhar e como montar um teste de poucas horas contra a API fechada que usa hoje.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que aconteceu",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Pesos abertos significam que os parâmetros treinados do modelo estão disponíveis para download. Você pode rodá-lo em infraestrutura própria ou num provedor de inferência (empresa que hospeda o modelo e cobra pelo uso). Não é o mesmo que código aberto: tudo depende da licença.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo a Interconnects (17/10/2026), a semana empurrou os modelos abertos americanos de volta para perto da fronteira. O Muse Spark Open, da Meta, lidera entre os americanos, com folga, e o primeiro modelo da Reflection, o Beam, também entra. O ponto-chave: sem esses dois, mais de 20 modelos abertos chineses seriam melhores que o melhor ocidental. Ou seja, a liderança é só entre os americanos. O autor estima que a distância entre os melhores modelos americanos e chineses caiu cerca de pela metade, de irrelevantes para quem exige o estado da arte a atrasados, porém relevantes.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Pela avaliação do autor, o Muse Spark Open fica acima do GLM 5.2, perto do DeepSeek V4.1 Flash e atrás do GLM 5.3 e do Kimi K3. O Xiaomi V2.6 Pro aparece como o melhor modelo aberto no geral. O ranking final do autor põe os pesos abertos dos EUA por último, abaixo dos pesos abertos chineses. O texto não informa a posição exata do Muse Spark Open numa lista geral. Segundo o model card citado, ele tem 816 bilhões de parâmetros no total e 42 bilhões ativos, contexto de 1 milhão de tokens, foco em código e trabalho agêntico, e é multimodal nativo.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O autor também observa que modelos ocidentais abertos têm adoção muito maior que modelos chineses de porte e desempenho parecidos. Dias antes, a Meta lançou os modelos fechados Muse Wonder e Muse Wonder Full, que, segundo ele, ficam atrás apenas do Opus 5.5 da Anthropic em benchmarks tradicionais. Seria a única empresa americana com modelos de fronteira abertos e fechados.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Riscos: licença e segurança",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Exige exibir a marca Built with Muse nos produtos que usam o modelo (o autor diz que quase ninguém cumpre esse tipo de exigência).",
+        "Empresas com receita acima de US$ 20 milhões por mês, somando o negócio inteiro, precisam de licença separada com a Meta, segundo o texto. O autor liga esse tipo de cláusula a acordos de divisão de receita na revenda de inferência.",
+        "Há política de uso aceitável, o que, para o autor, torna o modelo muito pouco open source.",
+        "As regras valem também para saídas e derivados, o que cria ambiguidade jurídica sobre usar o modelo para gerar dados sintéticos.",
+        "Uso interno em pesquisa e aplicações é permitido."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O autor diz que a licença é complexa e não foi testada em tribunal, e que muitos vão ignorá-la. Isso é opinião dele, não orientação jurídica. A versão aberta recebeu treino extra de segurança, e o model card recomenda implantá-la dentro de um sistema maior, com guardrails (camadas de filtro e controle fora do modelo) adequados ao caso de uso.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O packet é um único texto de análise e termina cortado. Ele fala em limite de US$ 20 milhões por mês; não confirma período de 12 meses nem restrição apenas a quem oferece o modelo como serviço, nem traz preços de provedores. Benchmarks e comparações são avaliações do autor. Não vi o model card nem a licença completa: confirme nos documentos oficiais.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: custo real e como decidir entre aberto e fechado",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Pesos grátis não significam uso grátis. Você tem dois caminhos: hospedar ou pagar um provedor. Hospedar exige memória. Mesmo que só 42 bilhões de parâmetros trabalhem a cada token, todos os 816 bilhões precisam estar carregados. Conta de padaria: com 1 byte por parâmetro (8 bits) são cerca de 816 GB; com 4 bits (quantização agressiva, que perde alguma qualidade) cerca de 400 GB; a isso se soma a memória do contexto longo. Ou seja, são várias GPUs de datacenter, não um notebook. Valores exatos dependem do formato e do software.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Para o seu nível, o caminho realista é o provedor de inferência, que cobra por milhão de tokens (entrada e saída têm preços diferentes). Consulte a página de preços do provedor e confirme se ele já oferece este modelo; preços e disponibilidade mudam. Compare com o que você paga hoje na API fechada, em custo por tarefa concluída, não por token.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Roteiro de cerca de 3 horas",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha 15 a 20 tarefas reais dos seus projetos: revisar um diff, escrever uma consulta SQL, resumir documentação, responder uma pergunta do seu RAG. Anote o resultado esperado.",
+        "Defina um critério por tarefa: passou, falhou ou parcial. Se há teste automático, use-o.",
+        "Rode as tarefas na API fechada que você usa hoje e guarde as respostas.",
+        "Rode as mesmas tarefas no modelo aberto, por um provedor que o ofereça.",
+        "Embaralhe as respostas e avalie sem saber qual modelo gerou cada uma, para não se enviesar.",
+        "Compare taxa de acerto, custo por tarefa, latência e tipos de falha. Decida por tipo de tarefa: é comum usar o aberto em volume de baixo risco e manter o fechado nas difíceis."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Checklist de licença antes de usar em produto",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Sua empresa se aproxima do limite de receita? Confirme no texto oficial como ele é medido e a quem se aplica.",
+        "Você consegue exibir a atribuição exigida?",
+        "Vai usar saídas para gerar dados de treino ou ajuste fino? É a área mais ambígua; consulte o jurídico.",
+        "Seu uso cabe na política de uso aceitável?",
+        "Releia a licença na época da decisão: termos mudam."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Segurança: o que o aviso do model card significa",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Ao usar um modelo aberto, parte dos controles que uma API fechada costuma aplicar no servidor fica por sua conta. O ataque a evitar é a prompt injection: instruções maliciosas escondidas em texto que o agente lê (páginas, e-mails, issues) e que o fazem executar ações indevidas. Como aplicar a proteção: dê ao agente permissões mínimas, valide e limite o que cada ferramenta pode fazer, exija confirmação humana para ações destrutivas, filtre entradas e saídas e registre logs. Isso vale também para modelos fechados, mas aqui a responsabilidade é sua.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Pesos abertos viram opção real quando o seu teste, com as suas tarefas, mostra qualidade suficiente a um custo e controle melhores, já contando memória ou preço do provedor. Antes de usar em produto, leia a licença: ela pode pesar mais que o benchmark.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Primeiro passo desta semana: monte a lista de 15 tarefas e rode-a nos dois lados. Mesmo que o aberto perca, você terá uma pequena suíte de avaliação reutilizável. Fique de olho também no Mistral Large 4, cujos pesos, segundo o autor, ainda não foram liberados.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-19",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-19T18:56:41Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "64ee5b6e-6944-4406-b264-e80e00de6a33",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique para um desenvolvedor que usa Claude Code e Codex a diferença entre modelos de pesos abertos, modelos open source e APIs fechadas. Cubra licenças restritivas (atribuição obrigatória, limite de receita, política de uso aceitável), quanta memória um modelo de 816 bilhões de parâmetros exige em diferentes quantizações, provedores de inferência, quando vale hospedar e como montar um teste comparativo com 15 tarefas reais. Inclua riscos como prompt injection e o papel de guardrails."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "meta-volta-aos-pesos-abertos-o-que-muda-para-quem-escolhe-modelo",
+  "sources": [
+    {
+      "accessed_at": "2026-10-19T17:53:13Z",
+      "language": "en",
+      "published_at": "2026-10-17T14:06:54Z",
+      "publisher": "Interconnects",
+      "source_id": "s1",
+      "title": "Meta shakes up the frontiers, open and closed",
+      "url": "https://www.interconnects.ai/p/meta-shakes-up-the-frontiers-open"
+    }
+  ],
+  "summary": "Segundo a Interconnects, o Muse Spark Open da Meta é o melhor modelo aberto americano, mas segue atrás de modelos chineses e tem licença restritiva. Veja o custo real e como testá-lo contra uma API fechada.",
+  "tags": [
+    "theme:open-models",
+    "region:usa",
+    "region:china",
+    "topic:llm-evaluation",
+    "topic:inference",
+    "risk:security",
+    "reason:novelty",
+    "reason:popularity",
+    "source:interconnects"
+  ],
+  "title": "Meta volta aos pesos abertos: o que muda para quem escolhe modelo"
+}

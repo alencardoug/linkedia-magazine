@@ -1,0 +1,170 @@
+{
+  "article_id": "1686facc-470e-4518-b4c1-302dc5f46f73",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 16 de outubro, a OpenAI publicou um estudo de caso sobre o Itaú. Há dois elementos: o ia.i, interface conversacional para clientes, e a IARA, plataforma interna que dá às equipes do banco acesso controlado a vários modelos, conforme políticas internas. Para quem já usa agentes de código todo dia, a parte mais útil é a IARA: ela mostra uma camada de controle entre os modelos e os produtos. Ao final, você terá um checklist para aplicar essa ideia, em escala pequena, aos seus projetos.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que o Itaú diz ter feito",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "O ia.i junta conta corrente, crédito, cartões e seguros numa camada conversacional, por texto ou voz, com transferência para atendimento humano quando necessário. A primeira fase atingiu cerca de 300 mil clientes, e a meta é toda a base até o fim de 2026.",
+        "A IARA é descrita como plataforma de governança e orquestração. A OpenAI é um dos provedores de modelos disponíveis nela.",
+        "O CTO afirma que a IARA ataca três problemas ao mesmo tempo: custo por token, precisão das respostas e aplicação de políticas de IA responsável.",
+        "Num caso jurídico, a plataforma automatiza leitura e análise de documentos: repositório de mais de 90 milhões de documentos, mais de 2 milhões de tarefas por mês e ganhos de eficiência de 20% a 80% em etapas do processo.",
+        "O Itaú usa uma gama de modelos: os mais simples, por custo e latência, e os mais complexos, onde se exige raciocínio."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "attribution": "Carlos Eduardo Mazzei, CTO do Itaú",
+      "source_ids": [
+        "s1"
+      ],
+      "text": "IARA is a fundamental platform, because it ensures we can have governance and observability in a highly regulated environment.",
+      "type": "quote"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A fonte é única e vem de um fornecedor de modelos. Os números são declarados pelo banco, sem verificação independente. O texto não explica como a IARA funciona por dentro: não diz quem aprova casos de uso, como o risco é registrado nem quais controles são técnicos. Esses pontos aparecem abaixo como perguntas, não como fatos sobre o Itaú.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: um checklist de governança para o seu nível",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Verifique a documentação oficial das ferramentas que você usar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "A ideia central é um gateway de modelos: um ponto único por onde passam todas as chamadas de LLM de uma organização. Em vez de cada projeto chamar a API do provedor diretamente, todos passam por essa camada. Ela pode registrar cada chamada (observabilidade), aplicar limites de gasto, escolher o modelo e checar regras antes e depois da resposta. O caso do Itaú sugere algo nessa linha, mas o texto não confirma a implementação.",
+      "type": "paragraph"
+    },
+    {
+      "alt": "Fluxo de uma chamada de IA passando por uma camada central de governança antes e depois do modelo.",
+      "caption": "Esquema genérico de gateway de modelos. É ilustração didática, não a arquitetura da IARA.",
+      "diagram_format": "mermaid",
+      "diagram_spec": "flowchart LR\nA[Produto ou agente] --> B[Camada central]\nB --> C{Política permite?}\nC -- não --> D[Bloqueia e registra]\nC -- sim --> E[Escolhe modelo por custo e tarefa]\nE --> F[Modelo]\nF --> G[Checagem da saída]\nG --> H[Log: tokens, custo, versão do prompt]\nG --> A",
+      "long_description": "O produto ou agente envia a requisição a uma camada central. Ela verifica se a política permite. Se não permitir, bloqueia e registra. Se permitir, escolhe o modelo conforme custo e tipo de tarefa, chama o modelo, checa a saída, grava um log com tokens, custo e versão do prompt e devolve a resposta ao produto.",
+      "source_ids": [],
+      "type": "diagram"
+    },
+    {
+      "level": 3,
+      "text": "Perguntas para fazer sobre qualquer caso de uso de IA",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Quem aprova um novo caso de uso e com base em quê? Mesmo sozinho, escreva uma ficha de uma página: objetivo, dados usados, o que acontece se errar.",
+        "Como o risco é registrado? Um arquivo simples no repositório, com risco, impacto, mitigação e dono, já cria o hábito.",
+        "Que dados saem do seu contexto? Pergunte quais dados pessoais vão ao modelo e se isso é necessário. Com dados de terceiros, a LGPD entra aqui.",
+        "Qual modelo para qual tarefa? Tarefas simples pedem modelo barato e rápido; só as difíceis pedem raciocínio. É a lógica que o caso descreve.",
+        "Quanto custa cada tarefa? Meça tokens por tarefa desde o início, como o CTO recomenda.",
+        "Como saber que a qualidade não caiu? Mantenha um conjunto pequeno de casos de teste e rode a cada mudança de prompt ou modelo.",
+        "Quando o humano assume? Defina o gatilho de escalonamento, como o ia.i faz ao conectar o cliente a atendimento especializado."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de até 2 horas",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha um projeto pessoal seu que chame um LLM.",
+        "Crie uma função única, por exemplo chamar_modelo(tarefa, entrada), e faça todas as chamadas passarem por ela.",
+        "Dentro dela, grave em um arquivo de log: data, tarefa, modelo, tokens de entrada e de saída, latência e versão do prompt. A maioria das APIs devolve a contagem de tokens na resposta; confira na documentação do seu provedor.",
+        "Adicione uma tabela simples mapeando tarefa para modelo (barato para classificar, mais forte para raciocínio) e um teto de gasto diário que interrompe as chamadas.",
+        "Depois de uma semana, consulte o log com SQL (que você já domina) e descubra qual tarefa custa mais."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Segurança: um ponto central de logs vira alvo. Não grave prompts com dados pessoais ou segredos sem mascarar, pois o log vazado expõe tudo o que passou pela camada. Mascare campos sensíveis antes de gravar e limite quem lê o arquivo. Essa proteção reduz vazamento de dados via logs, não protege contra prompt injection.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [],
+      "text": "Governança começa antes de escalar: um ponto único de chamada com log de tokens e custo, uma ficha de risco por caso de uso e um teste de regressão pequeno. Você faz isso hoje num projeto pessoal e usa as mesmas perguntas ao avaliar o caso de uma empresa grande.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Cuidado com a extrapolação: o caso é de um banco com milhões de clientes e times dedicados. O que se transfere é o princípio, que é centralizar, medir e registrar, e não o tamanho da estrutura. Para o próximo passo desta semana, implemente a função única com log e leia o resultado no fim de domingo.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-10-19",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-19T17:55:59Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "64ee5b6e-6944-4406-b264-e80e00de6a33",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique o que é um gateway de modelos de linguagem (camada central de governança de IA) em empresas reguladas, como bancos. Cubra: registro de chamadas e observabilidade, controle de custo por token, roteamento de modelos por tarefa, políticas de IA responsável, fichas de risco e aprovação de casos de uso. Dê exemplos práticos para um desenvolvedor que usa agentes de código, mas ainda não opera IA em produção, e sugira exercícios de até 2 horas."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "itau-e-a-iara-como-uma-camada-de-governanca-de-ia-sustenta-o-escalonamento-em",
+  "sources": [
+    {
+      "accessed_at": "2026-10-19T17:55:33Z",
+      "language": "en",
+      "published_at": "2026-10-16T19:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s1",
+      "title": "How Itaú is building generative AI for its entire customer base",
+      "url": "https://openai.com/index/itau-generative-ai"
+    }
+  ],
+  "summary": "O Itaú descreve a IARA, plataforma que centraliza o acesso a modelos com governança, observabilidade e controle de custo por token. Veja o que o caso diz, o que não diz e como transformar isso em um checklist de controle para seus próprios projetos com agentes.",
+  "tags": [
+    "theme:governance",
+    "topic:observability",
+    "topic:guardrails",
+    "theme:operating-model",
+    "region:brazil",
+    "topic:token-efficiency",
+    "reason:career-utility",
+    "source:openai"
+  ],
+  "title": "Itaú e a IARA: como uma camada de governança de IA sustenta o escalonamento em banco"
+}

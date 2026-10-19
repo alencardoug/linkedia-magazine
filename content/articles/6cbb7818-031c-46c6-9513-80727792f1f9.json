@@ -1,0 +1,147 @@
+{
+  "article_id": "6cbb7818-031c-46c6-9513-80727792f1f9",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 18 de outubro de 2026, Simon Willison publicou o llm-echo 0.5, uma atualização de um plugin de depuração para a CLI LLM, a ferramenta de linha de comando dele para falar com modelos de linguagem. O plugin oferece um 'modelo' que não envolve nenhum LLM: ele apenas devolve o que recebeu. Depois deste texto, você terá uma ideia clara de como usar um modelo falso para testar seu código de agente de graça e de forma repetível.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que mudou na versão 0.5",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o autor, ele está trabalhando em uma nova versão do LLM e, ao testar pull requests, voltou ao llm-echo. A novidade é que a contagem simulada de tokens agora leva em conta três coisas: chamadas de ferramentas (tool calls), system prompts e tokens de reasoning (o 'raciocínio' interno que alguns modelos geram antes de responder).",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O exemplo do post usa o comando uvx --with llm-echo llm -m echo 'hi there' -o thinking 1 --usage. A saída traz uma frase de 'pensamento' simulado, um JSON com o prompt, o system vazio, anexos vazios, stream ligado e histórico anterior vazio, e a linha 'Token usage: 2 input, 24 output'. Ou seja, a resposta é o próprio prompt estruturado, e o uso de tokens é calculado de forma simulada.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O trecho disponível é curto. Não vi a documentação do plugin nem como a contagem é calculada, então não sei quão próxima ela é da contagem de um tokenizador real. Trate os números como simulados. O uso também exige a CLI LLM de Willison.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte prática: como usar a ideia no seu trabalho",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "A ideia central é o que se chama de test double: um substituto controlado para uma dependência cara ou imprevisível. Um modelo real custa tokens, demora e responde diferente a cada execução. Um modelo falso que ecoa a entrada custa zero, responde sempre igual e deixa você testar tudo o que está ao redor do modelo.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O que dá para testar sem um LLM de verdade",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Montagem do prompt: o eco mostra exatamente o que seu código enviou (system, histórico, anexos). Se um template de prompt quebrou, você vê na hora.",
+        "Fluxo de ferramentas: se seu código registra funções e as passa ao modelo, o eco permite checar o que foi enviado, sem depender de o modelo decidir chamá-las.",
+        "Tamanho do contexto: com uma contagem simulada, dá para comparar versões do seu prompt e notar quando o contexto cresceu demais, antes de pagar por um modelo real.",
+        "Tratamento de erros e formatação: o parsing da resposta pode ser exercitado com saídas conhecidas."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de uns 30 minutos",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Instale a CLI LLM e rode o comando do exemplo, conferindo na documentação oficial a forma atual de instalar e executar.",
+        "Troque o prompt e adicione um system prompt. Compare o 'Token usage' antes e depois.",
+        "Ligue a opção de thinking e veja o aumento nos tokens de saída.",
+        "Escreva um teste automatizado no seu projeto que usa o modelo echo e verifica que o JSON enviado contém o que você espera.",
+        "Use o mesmo teste em CI: como não há chamada de rede nem custo, ele roda a cada commit."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Limites e decisões",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Um eco não avalia qualidade. Ele não diz se o modelo escolheria a ferramenta certa nem se a resposta é boa. Pense em duas camadas: testes baratos e determinísticos com o modelo falso para a 'encanação' (prompts, ferramentas, parsing, orçamento de contexto) e um conjunto pequeno de avaliações com modelo real para o comportamento. Também não confie na contagem simulada para estimar custo exato: para isso, use o uso reportado pelo provedor.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta semana: escolha um fluxo do seu agente, troque o modelo por um eco em um teste e valide o prompt enviado e o tamanho do contexto. Só depois gaste tokens com um modelo real.",
+      "type": "callout",
+      "variant": "takeaway"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-19",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-19T17:53:57Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "64ee5b6e-6944-4406-b264-e80e00de6a33",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português, para quem usa agentes de código diariamente, o conceito de test double (mock, fake, stub) aplicado a chamadas de LLM. Mostre como testar a montagem de prompts, tool calls e o tamanho do contexto sem gastar tokens, quais são os limites dessa abordagem e como combiná-la com avaliações usando um modelo real. Use a CLI LLM de Simon Willison e o plugin llm-echo como exemplo."
+    }
+  ],
+  "read_minutes": 3,
+  "schema_version": "1.0.0",
+  "slug": "llm-echo-testar-seu-fluxo-de-agente-sem-gastar-tokens-com-um-modelo-falso",
+  "sources": [
+    {
+      "accessed_at": "2026-10-19T17:53:40Z",
+      "language": "en",
+      "published_at": "2026-10-18T23:16:16Z",
+      "publisher": "Simon Willison",
+      "source_id": "s1",
+      "title": "llm-echo 0.5",
+      "url": "https://simonwillison.net/2026/Oct/18/llm-echo"
+    }
+  ],
+  "summary": "Simon Willison lançou o llm-echo 0.5, plugin que simula um modelo sem LLM e agora contabiliza tokens de tool calls, system prompts e reasoning. Veja o que é novo e como aplicar a ideia em testes baratos e determinísticos.",
+  "tags": [
+    "topic:agent-evaluation",
+    "topic:token-efficiency",
+    "topic:context-engineering",
+    "topic:agents",
+    "reason:novelty",
+    "source:simon-willison"
+  ],
+  "title": "llm-echo: testar seu fluxo de agente sem gastar tokens, com um modelo falso"
+}

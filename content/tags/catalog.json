@@ -17,9 +17,24 @@
       "label": "Novidade"
     },
     {
+      "key": "reason:popularity",
+      "kind": "reason",
+      "label": "Repercussão"
+    },
+    {
       "key": "region:brazil",
       "kind": "region",
       "label": "Brasil"
+    },
+    {
+      "key": "region:china",
+      "kind": "region",
+      "label": "China"
+    },
+    {
+      "key": "region:usa",
+      "kind": "region",
+      "label": "Estados Unidos"
     },
     {
       "key": "risk:bias",
@@ -50,6 +65,11 @@
       "key": "source:google-developers",
       "kind": "source",
       "label": "Google Developers Blog"
+    },
+    {
+      "key": "source:interconnects",
+      "kind": "source",
+      "label": "Interconnects"
     },
     {
       "key": "source:mit-technology-review",
@@ -85,6 +105,11 @@
       "key": "theme:multimodal",
       "kind": "theme",
       "label": "Multimodalidade"
+    },
+    {
+      "key": "theme:open-models",
+      "kind": "theme",
+      "label": "Modelos abertos"
     },
     {
       "key": "theme:operating-model",
