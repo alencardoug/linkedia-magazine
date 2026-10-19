@@ -61,3 +61,4 @@ the HTML and CSS and call `boot()` from `main.ts`.
 
 ## Acceptance (fill in at each change)
 - 2026-10-17, prototype in Chrome 152 on an Intel HD 620 laptop (1366×593, DPR 1): 60 fps at 1025×445 scene pixels.
+- 2026-10-19, live https://linkedia.web.app/ checked by the owner on the Intel HD 620 laptop and on their phone (finger steering, tap to enter): "Todas funcionaram perfeitamente".

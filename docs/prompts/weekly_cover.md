@@ -3,7 +3,7 @@
 Run as a development task in this repository; follow the cover contract in `docs/COVERS.md` and read the owner's
 brief and the idea queue in `docs/prompts/cover_art.md` first.
 
-One new cover per ISO week (owner, 2026-10-17: covers are made weekly and every past cover stays reachable). Take the
+One new cover per ISO week, made on Fridays (owner, 2026-10-17 and 2026-10-19: covers are made weekly and every past cover stays reachable). Take the
 next idea of the queue unless the owner names another; anything technological and impressive goes — the cover is the
 place where the owner wants to look and think "isso é incrivelmente diferente". Aim for maximum ambition, never a
 tasteful default; prototype early in the owner's browser (an integrated GPU: WebGL2, no WebGPU) and show it before building
