@@ -333,7 +333,7 @@ describe('static build', () => {
         ['previous', ' data-theme-title="Fixture Light"'],
         ['current', ' checked data-theme-title="Fixture Motion"'],
       ]);
-      expect(switcher).toContain('Anterior: Fixture Light</label>');
+      expect(switcher).toContain('Fixo: Fixture Light</label>');
       expect(switcher).toContain('<p data-theme-status aria-live="polite" class="meta"></p>');
     }
     // Slotted lab styles come after the baseline in the one stylesheet.
@@ -356,7 +356,7 @@ describe('static build', () => {
     const out = await buildSite(EXAMPLES, themes);
     const html = read(out, 'visual.html');
     expect(html).toContain('<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" data-theme-current="lab-2099-w02">');
-    expect(html).toContain('<input type="radio" name="tema" value="previous" disabled>Anterior (ainda não há)</label>');
+    expect(html).toContain('<input type="radio" name="tema" value="previous" disabled>Fixo (ainda não há)</label>');
     const styles = assets(out, '.css').map((f) => read(out, `_astro/${f}`)).join('');
     expect(styles).toContain('lab-2099-w02');
     expect(styles).not.toContain('lab-2099-w01');

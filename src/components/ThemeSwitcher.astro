@@ -1,13 +1,14 @@
 ---
 // Theme switcher (D-025, 1C-01): exactly three slots, on `/visual` only (owner, 2026-10-19), rendered only once a
 // lab theme exists; ThemeRuntime.astro (in Base.astro) wires it. Without JS it stays hidden and the build-time
-// default (current) applies. The previous slot is disabled until a second experiment exists.
+// default (current) applies. The `previous` slot holds the fixed second theme (owner, 2026-10-19: Broadsheet; the
+// slot name is historical) and is disabled until it has one.
 import slots from 'virtual:linkedia-themes/slots';
 import type { SlotName, ThemeSlot } from '../lib/theme-runtime';
 
 const options: { slot: SlotName; label: string; theme: ThemeSlot | null }[] = [
   { slot: 'baseline', label: 'Base', theme: slots.baseline },
-  { slot: 'previous', label: 'Anterior', theme: slots.previous },
+  { slot: 'previous', label: 'Fixo', theme: slots.previous },
   { slot: 'current', label: 'Atual', theme: slots.current },
 ];
 ---

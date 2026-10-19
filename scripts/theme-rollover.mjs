@@ -1,7 +1,8 @@
 // Week rollover of the visual laboratory (1C-03, docs/VISUAL_LAB.md):
 //   npm run theme:rollover -- --week 2026-W43 --title "Nome do tema" [--summary "…"] [--dry-run]
-// moves the slots (previous ← current, current ← lab-2026-w43, the theme leaving the slots → archived with the
-// Git commit that last touched its folder), scaffolds themes/<id>/ when it does not exist yet, and validates the
+// moves the slots (current ← lab-2026-w43; the old current → archived with the Git commit that last touched its
+// folder; the `previous` slot is the fixed second theme, owner 2026-10-19: it never rotates, and only takes the
+// leaving current when it is still empty), scaffolds themes/<id>/ when it does not exist yet, and validates the
 // result like `prebuild` does; on any error the manifest and the scaffold are put back as they were.
 // Themes dir: `themes`, or env LINKEDIA_THEMES_DIR.
 
@@ -46,7 +47,9 @@ export function rollover(manifest, { week, title, summary, archivedRef = null })
   if (manifest.week_id !== null && week <= manifest.week_id) {
     throw new Error(`a semana ${week} não é posterior à semana atual do manifesto (${manifest.week_id})`);
   }
-  const archived = manifest.previous_theme_id; // null while current is null (validated)
+  // The `previous` slot is fixed (owner, 2026-10-19): the leaving current fills it only while it is empty; otherwise
+  // the leaving current is archived. Null from the bootstrap state (current is null, validated).
+  const archived = manifest.previous_theme_id === null ? null : manifest.current_theme_id;
   const themes = manifest.themes.map((t) =>
     t.id === archived ? { ...t, status: 'archived', git_ref: archivedRef ?? t.git_ref ?? null } : { ...t },
   );
@@ -58,7 +61,7 @@ export function rollover(manifest, { week, title, summary, archivedRef = null })
     archived,
     manifest: {
       ...manifest,
-      previous_theme_id: manifest.current_theme_id,
+      previous_theme_id: manifest.previous_theme_id ?? manifest.current_theme_id,
       current_theme_id: id,
       week_id: week,
       themes,
@@ -118,14 +121,14 @@ export function run({ week, title, summary, dryRun = false }, dir = themesDir())
   if (before.length) throw new Error(`o manifesto atual é inválido:\n  - ${before.join('\n  - ')}`);
   const original = readFileSync(manifestPath, 'utf8');
   const current = JSON.parse(original);
-  const leaving = current.previous_theme_id;
+  const leaving = current.previous_theme_id === null ? null : current.current_theme_id;
   const archivedRef = leaving === null ? null : lastCommit(themeFiles(dir, leaving).folder);
   const { manifest, id, archived } = rollover(current, { week, title, summary, archivedRef });
   const files = themeFiles(dir, id);
   const created = !existsSync(files.folder);
   const lines = [
     `Atual: ${id} (${manifest.themes.at(-1).title})`,
-    `Anterior: ${manifest.previous_theme_id ?? '(nenhum)'}`,
+    `Fixo: ${manifest.previous_theme_id ?? '(nenhum)'}`,
     `Arquivado: ${archived === null ? '(nenhum)' : `${archived} @ ${archivedRef}`}`,
     created ? `Pacote novo: ${files.folder} (theme.css + README.md)` : `Pacote existente: ${files.folder}`,
   ];

@@ -37,7 +37,7 @@ test('opens in the current slot with its enhancement and an operable switcher', 
   await expect(page.getByRole('group', { name: 'Tema visual' })).toBeVisible();
   await expect(page.getByRole('radio')).toHaveCount(3);
   await expect(radio(page, 'Atual: Fixture Motion')).toBeChecked();
-  await expect(radio(page, 'Anterior: Fixture Light')).toBeEnabled();
+  await expect(radio(page, 'Fixo: Fixture Light')).toBeEnabled();
   expect(errors).toEqual([]);
 });
 
@@ -52,7 +52,7 @@ test('switches by keyboard, announces, persists and cleans up the enhancement', 
   expect(outline).not.toBe('none');
 
   await page.keyboard.press('ArrowLeft');
-  await expect(radio(page, 'Anterior: Fixture Light')).toBeChecked();
+  await expect(radio(page, 'Fixo: Fixture Light')).toBeChecked();
   await expect(theme(page)).toHaveAttribute('data-theme', THEMES.previous);
   await expect(status(page)).toHaveText('Tema aplicado: Fixture Light.');
   await expect(page.locator('[data-theme-decor]')).toHaveCount(0);
@@ -76,7 +76,7 @@ test('never changes the article content across switches and a fallback', async (
   await page.goto(ARTICLE);
   await expect(theme(page)).toHaveAttribute('data-theme-enhanced', THEMES.current);
   const before = await content(page);
-  for (const [name, slot] of [['Anterior: Fixture Light', 'previous'], ['Base: Minimal Dark', 'baseline'], ['Atual: Fixture Motion', 'current']]) {
+  for (const [name, slot] of [['Fixo: Fixture Light', 'previous'], ['Base: Minimal Dark', 'baseline'], ['Atual: Fixture Motion', 'current']]) {
     await page.goto(VISUAL);
     await radio(page, name).check();
     await expect(radio(page, name)).toBeChecked();
@@ -92,7 +92,7 @@ test('never changes the article content across switches and a fallback', async (
 
 test('the inline script alone applies the stored slot before the body is parsed', async ({ page }) => {
   await page.goto(VISUAL);
-  await radio(page, 'Anterior: Fixture Light').check();
+  await radio(page, 'Fixo: Fixture Light').check();
   await page.route('**/_astro/ThemeRuntime*.js', (route) => route.abort());
   await page.addInitScript(() => {
     new MutationObserver((_, observer) => {

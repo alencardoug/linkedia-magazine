@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://linkedia.web.app/contracts/theme_manifest.schema.json",
   "title": "Visual Theme Manifest",
-  "description": "Owned by this repository (themes/manifest.json) and changed only by weekly visual-lab PRs (D-025). Bootstrap: before the first experiment, current/previous are null and no switcher renders; with a single experiment, previous is null and its slot renders disabled. A lab theme may declare an enhancement module; the baseline never does.",
+  "description": "Owned by this repository (themes/manifest.json) and changed only by weekly visual-lab PRs (D-025). Bootstrap: before the first experiment, current/previous are null and no switcher renders; with a single experiment, previous is null and its slot renders disabled. previous is the fixed second theme (owner, 2026-10-19): the weekly rollover replaces only current. A lab theme may declare an enhancement module; the baseline never does.",
   "type": "object",
   "additionalProperties": false,
   "required": [

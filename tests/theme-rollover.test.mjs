@@ -1,4 +1,4 @@
-// Week rollover (1C-03): slot rotation, one theme per ISO week, archived Git ref, scaffold, and the CLI on a
+// Week rollover (1C-03; fixed previous slot since 2026-10-19): slot rotation, one theme per ISO week, archived Git ref, scaffold, and the CLI on a
 // Git-tracked copy of the fixture themes (it validates the result and undoes an invalid one).
 import { execFileSync, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -31,13 +31,17 @@ describe('ISO weeks', () => {
 });
 
 describe('rollover', () => {
-  it('moves current to previous, archives the old previous with its ref, and adds the new current', () => {
+  it('keeps the fixed previous theme, archives the old current with its ref, and adds the new current', () => {
     const before = fixture();
     const { manifest, id, archived } = rollover(before, { week: '2099-W03', title: ' Nova ', archivedRef: 'abc123' });
     expect(id).toBe('lab-2099-w03');
-    expect(archived).toBe('lab-2099-w01');
-    expect(manifest).toMatchObject({ previous_theme_id: 'lab-2099-w02', current_theme_id: id, week_id: '2099-W03' });
-    expect(manifest.themes.find((t) => t.id === 'lab-2099-w01')).toMatchObject({ status: 'archived', git_ref: 'abc123' });
+    expect(archived).toBe('lab-2099-w02');
+    expect(manifest).toMatchObject({ previous_theme_id: 'lab-2099-w01', current_theme_id: id, week_id: '2099-W03' });
+    expect(manifest.themes.find((t) => t.id === 'lab-2099-w02')).toMatchObject({ status: 'archived', git_ref: 'abc123' });
+    expect(manifest.themes.find((t) => t.id === 'lab-2099-w01')).toMatchObject({ status: 'active' });
+    const next = rollover(manifest, { week: '2099-W04', title: 'Outra', archivedRef: 'def456' });
+    expect(next.archived).toBe('lab-2099-w03'); // week after week, only the current rotates
+    expect(next.manifest).toMatchObject({ previous_theme_id: 'lab-2099-w01', current_theme_id: 'lab-2099-w04' });
     expect(manifest.themes.at(-1)).toEqual({
       id, kind: 'lab', week_id: '2099-W03', title: 'Nova', status: 'active', git_ref: null,
     });
@@ -90,9 +94,10 @@ describe('npm run theme:rollover', () => {
     const result = cli(dir, '--week', '2099-W03', '--title', 'Nova');
     expect(result.stderr).toBe('');
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain(`Arquivado: lab-2099-w01 @ ${head}`);
-    expect(manifest(dir)).toMatchObject({ previous_theme_id: 'lab-2099-w02', current_theme_id: 'lab-2099-w03' });
-    expect(manifest(dir).themes.find((t) => t.id === 'lab-2099-w01').git_ref).toBe(head);
+    expect(result.stdout).toContain(`Arquivado: lab-2099-w02 @ ${head}`);
+    expect(result.stdout).toContain('Fixo: lab-2099-w01');
+    expect(manifest(dir)).toMatchObject({ previous_theme_id: 'lab-2099-w01', current_theme_id: 'lab-2099-w03' });
+    expect(manifest(dir).themes.find((t) => t.id === 'lab-2099-w02').git_ref).toBe(head);
     expect(existsSync(join(dir, 'lab-2099-w03', 'theme.css'))).toBe(true);
     expect(existsSync(join(dir, 'lab-2099-w03', 'README.md'))).toBe(true);
   });
@@ -121,7 +126,7 @@ describe('npm run theme:rollover', () => {
 
   it('refuses to archive a theme with uncommitted changes, and an invalid current manifest', () => {
     const { dir } = repo();
-    writeFileSync(join(dir, 'lab-2099-w01', 'theme.css'), '/* edited */', { flag: 'a' });
+    writeFileSync(join(dir, 'lab-2099-w02', 'theme.css'), '/* edited */', { flag: 'a' });
     const dirty = cli(dir, '--week', '2099-W03', '--title', 'Nova');
     expect(dirty.status).toBe(1);
     expect(dirty.stderr).toContain('mudanças não commitadas');

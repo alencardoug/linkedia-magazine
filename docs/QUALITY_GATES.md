@@ -16,4 +16,4 @@ Source provenance, factual uncertainty, proper date/timezone, anti-dup, `pt-BR` 
 CLI preflight required; no direct paid API calls. Use and report per-run call caps. Review is zero or one pass only unless a user explicitly overrides. Persist prompts and retrieval caches for controlled reuse. If quota exhaustion or hidden billing risk occurs, stop and keep journalled state.
 
 ## Visual gates
-Exactly 3 visible theme slots once the first experiment exists (bootstrap rule D-025), baseline invariant, previous/current rotation, current default, one weekly experiment, old theme recoverability, reduced motion, screen-reader and keyboard support, graceful performance and media fallback.
+Exactly 3 visible theme slots once the first experiment exists (bootstrap rule D-025), baseline invariant, fixed previous slot and current rotation (2026-10-19), current default, one weekly experiment, old theme recoverability, reduced motion, screen-reader and keyboard support, graceful performance and media fallback.
