@@ -181,7 +181,8 @@ export function themeController({
   return { apply, stop };
 }
 
-/** Wires the footer switcher (ThemeSwitcher.astro) and starts the active theme's enhancement. */
+/** Wires the switcher (ThemeSwitcher.astro, on `/visual` only) when the page has one and starts the active theme's
+ * enhancement. */
 export function startThemes(enhancements: Readonly<Record<string, EnhancementEntry>>): void {
   const root = document.documentElement;
   const switcher = document.querySelector<HTMLFieldSetElement>('[data-theme-switcher]');

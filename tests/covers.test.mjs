@@ -52,7 +52,7 @@ describe('cover registry', () => {
     expect(weekLabel('2026-W42')).toBe('semana 42 de 2026');
     expect(weekLabel('2027-W03')).toBe('semana 3 de 2027');
     expect(() => weekLabel('2026-42')).toThrow();
-    expect(coverPath('singularidade')).toBe('/capas/singularidade');
+    expect(coverPath('singularidade')).toBe('/visual/singularidade');
     expect(() => coverBySlug('nao-existe')).toThrow(/Capa desconhecida/);
   });
 

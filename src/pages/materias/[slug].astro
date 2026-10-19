@@ -19,7 +19,7 @@ const { article } = Astro.props;
 const tags = loadContent().tags;
 ---
 
-<Base title={article.title} description={article.summary}>
+<Base title={article.title} description={article.summary} aiNote>
   <article data-article={article.article_id} data-channel={article.channel}>
     <header>
       <p class="meta">

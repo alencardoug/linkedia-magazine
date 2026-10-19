@@ -1,15 +1,15 @@
 // Weekly covers (docs/COVERS.md, D-067): every cover ever published, newest first. `/` renders the current one,
-// `/capas` lists them all and `/capas/<slug>` keeps each one reachable for good. Pure data, so the tests can check
-// it; the pages import each cover's component themselves (src/pages/index.astro, src/pages/capas/<slug>.astro).
+// `/visual` lists them all and `/visual/<slug>` keeps each one reachable for good. Pure data, so the tests can check
+// it; the pages import each cover's component themselves (src/pages/index.astro, src/pages/visual/<slug>.astro).
 
 export interface CoverMeta {
-  /** URL segment under /capas: lowercase ASCII letters, digits and hyphens. */
+  /** URL segment under /visual: lowercase ASCII letters, digits and hyphens. */
   slug: string;
   /** pt-BR display name. */
   title: string;
   /** ISO week in which it became the cover, e.g. `2026-W42`. */
   weekId: string;
-  /** One or two pt-BR sentences for `/capas`. */
+  /** One or two pt-BR sentences for `/visual`. */
   summary: string;
   /** Short pt-BR phrase (no final period) for the cover's own fine print: what the art is and how it is made. */
   credit: string;
@@ -43,7 +43,7 @@ export function coverBySlug(slug: string): CoverMeta {
   return cover;
 }
 
-export const coverPath = (slug: string): string => `/capas/${slug}`;
+export const coverPath = (slug: string): string => `/visual/${slug}`;
 
 /** The edition a cover shows: its frozen one once archived, else the newest (`editions` newest first). */
 export function coverEdition<T extends { edition: { edition_date: string } }>(cover: CoverMeta, editions: T[]): T | undefined {

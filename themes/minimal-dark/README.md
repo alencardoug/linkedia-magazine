@@ -11,5 +11,5 @@ The permanent Linkedia theme (D-025, `docs/VISUAL_LAB.md`). It changes only for 
   - one 68ch reading column that works from 320 px up;
   - `prefers-reduced-motion` and `forced-colors` are respected.
 - **Fonts:** the system font stack only. No webfont, no CDN.
-- **Switcher (1C-01):** the rules for `[data-theme-switcher]`, `[data-theme-option]`, `[data-theme-status]` and `[hidden] { display: none !important }` live here, so every lab theme inherits a readable, working switcher.
+- **Switcher (1C-01):** the rules for `[data-theme-switcher]`, `[data-theme-option]`, `[data-theme-status]` and `[hidden] { display: none !important }` (the switcher keeps its room while hidden, `visibility: hidden`) live here, so every lab theme inherits a readable, working switcher.
 - **Reuse:** copy `theme.css` into another project and add the same `data-*` hooks to its markup.

@@ -10,7 +10,7 @@ tasteful default; prototype early in the owner's browser (an integrated GPU: Web
 it into the site. Codex may give divergent ideas and one critique of the plan (read-only, effort as the owner sets).
 
 Deliver: the package `src/covers/<slug>/` (component, scoped CSS, client modules, README with concept, references
-with dates, accessibility, fallbacks, budgets, reuse and acceptance evidence), `src/pages/capas/<slug>.astro`, the
+with dates, accessibility, fallbacks, budgets, reuse and acceptance evidence), `src/pages/visual/<slug>.astro`, the
 registry entry, the outgoing cover archived with its `edition`, `CURRENT_COVER` and the `/` import moved, unit tests
 for the cover's pure logic, then `npm run check && npm test && npm run e2e` and the real-GPU acceptance (owner's
 Chrome and a phone). Never weaken the contract: entry independent of the art, complete HTML cover, fine print, CSP,

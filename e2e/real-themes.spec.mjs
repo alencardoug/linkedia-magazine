@@ -1,6 +1,6 @@
 // Real themes (1C-03) on the production build (`npm run e2e:themes`: real content, themes/manifest.json): every
 // slot of the manifest on one page of each kind, at 1100 and 320 px — axe, no horizontal scroll, no layout shift,
-// switcher visible, no errors, and a full-page screenshot in test-results/screenshots/<theme>/ (attached to the
+// switcher visible on /visual (its only page since 2026-10-19), no errors, and a full-page screenshot in test-results/screenshots/<theme>/ (attached to the
 // report; CI uploads them). Then reduced motion and a device without WebGL. Generic over the manifest, so it keeps
 // working after each rollover.
 import { readdirSync } from 'node:fs';
@@ -17,7 +17,7 @@ const pages = (dir) =>
     .map((f) => `/${dir}/${f.slice(0, -'.html'.length)}`);
 const NOT_FOUND = '/pagina-que-nao-existe';
 const ARTICLES = pages('materias').slice(0, 3);
-const ROUTES = ['/revista', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, '/sobre', NOT_FOUND];
+const ROUTES = ['/revista', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, '/sobre', '/visual', NOT_FOUND];
 const WIDTHS = [1100, 320];
 const SLOTS = Object.entries(slots(readManifest())).filter(([, theme]) => theme !== null);
 const ENHANCE = '/enhance.';
@@ -41,7 +41,8 @@ for (const [slot, theme] of SLOTS) {
           await page.setViewportSize({ width, height: width < 600 ? 640 : 900 });
           await page.goto(route);
           await expect(page.locator('html')).toHaveAttribute('data-theme', theme.id);
-          await expect(page.getByRole('group', { name: 'Tema visual' })).toBeVisible();
+          const switcher = page.getByRole('group', { name: 'Tema visual' });
+          await (route === '/visual' ? expect(switcher).toBeVisible() : expect(switcher).toHaveCount(0));
           expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
           expect(await layoutShift(page)).toBeLessThan(0.1);
           expect(await axeBlocking(page)).toEqual([]);

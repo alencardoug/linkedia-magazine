@@ -17,7 +17,8 @@ test.describe('cover', () => {
     expect(response?.headers()['content-security-policy']).toContain("default-src 'none'");
     await expect(page.locator('html')).toHaveAttribute('data-cover', 'singularidade');
     await expect(page.locator('h1')).toHaveText('LinkedIA');
-    await expect(page.locator('footer a[rel="author"]')).toHaveText('Douglas Alencar');
+    await expect(page.locator('a[rel="author"]')).toHaveCount(0); // the editor is named on /sobre only
+    await expect(page.getByText('Textos gerados com IA')).toHaveCount(0); // the AI note is on /revista and the articles
     await expect(page.getByRole('link', { name: 'Outras capas' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Entrar na revista/ })).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-art', /./); // no WebGL: the HTML cover stays
@@ -42,10 +43,7 @@ test.describe('cover', () => {
   test('the fine-print links go where they say', async ({ page }) => {
     await page.goto(COVER);
     await page.getByRole('link', { name: 'Outras capas' }).click();
-    await expect(page).toHaveURL(/\/capas$/);
-    await page.goto(COVER);
-    await page.getByRole('link', { name: 'Como a Linkedia é feita' }).click();
-    await expect(page).toHaveURL(/\/sobre$/);
+    await expect(page).toHaveURL(/\/visual$/);
   });
 
   for (const key of ['Enter', 'Space', 'Escape']) {
@@ -74,7 +72,7 @@ test.describe('cover', () => {
     await page.goto(COVER);
     await page.getByRole('link', { name: 'Outras capas' }).focus();
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/\/capas$/);
+    await expect(page).toHaveURL(/\/visual$/);
   });
 
   test('a drag does not enter; the next tap does', async ({ page }) => {
@@ -139,16 +137,24 @@ test.describe('cover', () => {
 
   test('the archive lists the cover, which keeps its own page', async ({ page }) => {
     const errors = watchErrors(page);
-    await page.goto('/capas');
-    await expect(page.locator('h1')).toHaveText('Capas');
+    await page.goto('/visual');
+    await expect(page.locator('h1')).toHaveText('Visual');
     await page.getByRole('link', { name: 'Singularidade' }).click();
-    await expect(page).toHaveURL(/\/capas\/singularidade$/);
+    await expect(page).toHaveURL(/\/visual\/singularidade$/);
     await expect(page.locator('[data-cover-art="singularidade"]')).toBeVisible();
     await page.mouse.click(200, 200);
     await expect(page).toHaveURL(ENTERED);
-    await expect(page.getByRole('link', { name: 'Capas' })).toHaveAttribute('href', '/capas'); // header of the magazine
+    await expect(page.getByRole('link', { name: 'Visual' })).toHaveAttribute('href', '/visual'); // header of the magazine
     expect(errors).toEqual([]);
-    expect((await page.goto('/capas/nao-existe'))?.status()).toBe(404);
+    expect((await page.goto('/visual/nao-existe'))?.status()).toBe(404);
+  });
+
+  test('the old /capas addresses redirect to /visual for good', async ({ page }) => {
+    for (const [from, to] of [['/capas', '/visual'], ['/capas/singularidade', '/visual/singularidade']]) {
+      const response = await page.request.get(from, { maxRedirects: 0 });
+      expect(response.status(), from).toBe(301);
+      expect(new URL(response.headers().location, 'http://x').pathname, from).toBe(to);
+    }
   });
 
   test('320 px: no horizontal scroll, no serious axe violation, the entry link visible', async ({ page }) => {

@@ -76,7 +76,7 @@ html[data-cover] .cover-fine a {
   color: var(--cover-link);
 }
 
-/* Narrow or short screens: the cover's credit (also on /capas) gives its room to the art. */
+/* Narrow or short screens: the cover's credit (also on /visual) gives its room to the art. */
 @media (max-width: 600px), (max-height: 420px) {
   html[data-cover] .cover-credit {
     display: none;

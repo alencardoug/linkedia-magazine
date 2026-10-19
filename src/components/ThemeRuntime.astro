@@ -1,0 +1,11 @@
+---
+// Theme runtime (D-025, 1C-01): on every reading page once a lab theme exists (Base.astro), it starts the active
+// slot's enhancement and wires the switcher when the page has one (only `/visual`, ThemeSwitcher.astro).
+---
+
+<script>
+  import enhancements from 'virtual:linkedia-themes/enhancements';
+  import { startThemes } from '../lib/theme-runtime';
+
+  startThemes(enhancements);
+</script>

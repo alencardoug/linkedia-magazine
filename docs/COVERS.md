@@ -6,9 +6,11 @@ press anywhere enters the magazine. Reading pages keep their themes (`docs/VISUA
 
 ## Routes
 - `/`: the current cover (`CURRENT_COVER` in `src/covers/registry.ts`, rendered by `src/pages/index.astro`).
-- `/capas/<slug>`: every cover ever published, one static page each (`src/pages/capas/<slug>.astro`), so a page ships
-  only its own cover's CSS and JS. Unknown slugs get the 404 page.
-- `/capas`: the archive (reading layout): title, week and summary of each cover, newest first; "Capas" in the header.
+- `/visual/<slug>`: every cover ever published, one static page each (`src/pages/visual/<slug>.astro`), so a page
+  ships only its own cover's CSS and JS. Unknown slugs get the 404 page.
+- `/visual`: the reading theme switcher and the archive (reading layout): title, week and summary of each cover,
+  newest first; "Visual" in the header. It was `/capas` until 2026-10-19 (owner): `/capas` and `/capas/<slug>`
+  answer 301 to the new addresses (`firebase.json` redirects).
 - `/revista`: the edition home, the target of every cover. It was `/` before 3-01; the header brand and the 404 page
   link to it, so moving inside the site never shows the cover again.
 
@@ -30,8 +32,9 @@ no client code imports it.
 2. **The HTML is a complete cover.** Semantic text (one `<h1>`, the edition date and lead headlines as text) that reads
    well without JS, without WebGL, with reduced motion and in forced colours; the art enhances it and hides it only
    after its own first frame is verified (`html[data-art]`), keeping it in the accessibility tree.
-3. **Fine print** (shell): the cover's credit, "Outras capas", the AI note, `/sobre` and the editor — all real links
-   above the cover's link layer.
+3. **Fine print** (shell): the cover's credit and "Outras capas" (to `/visual`) — real links above the cover's link
+   layer. The AI note and the editor are not on covers (owner, 2026-10-19: the note is on `/revista` and the
+   articles, the editor on `/sobre`).
 4. **Safety floor.** The site CSP is unchanged (same-origin files only: no inline code, no fetch, no workers or wasm
    unless a decision adds them), no third-party requests, no images by default. The art must not lock up a weak
    device: adaptive resolution, a still frame below a frame-rate floor, nothing drawn while hidden, a lower rate and
@@ -41,7 +44,7 @@ no client code imports it.
    showed), so it keeps its own headlines; shared code it uses must stay backward compatible (or be copied into it).
 
 ## Adding the cover of the week
-1. Build the package under `src/covers/<slug>/`, add `src/pages/capas/<slug>.astro` (copy an existing one), add the
+1. Build the package under `src/covers/<slug>/`, add `src/pages/visual/<slug>.astro` (copy an existing one), add the
    registry entry at the top of `COVERS`.
 2. Archive the outgoing cover: set its `edition` to the latest edition date.
 3. Point `CURRENT_COVER` and the import in `src/pages/index.astro` at the new cover (`tests/build.test.mjs` checks

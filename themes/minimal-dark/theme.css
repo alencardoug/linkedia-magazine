@@ -350,6 +350,13 @@ button:hover {
   display: none !important;
 }
 
+/* On /visual the switcher sits near the top: until its script shows it, it keeps its room (invisible, also to
+   screen readers), so the page does not shift when it appears. */
+[data-theme-switcher][hidden] {
+  display: block !important;
+  visibility: hidden;
+}
+
 [data-theme-switcher] {
   margin: var(--space-3) 0 0;
   padding: var(--space-2) var(--space-3) var(--space-3);

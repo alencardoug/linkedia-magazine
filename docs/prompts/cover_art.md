@@ -21,9 +21,9 @@ A **pre-page (cover)** before the magazine's home page that is pure technologica
 ## Covers so far
 | Week | Cover | Notes |
 |---|---|---|
-| 2026-W42 | **Singularidade** (`/capas/singularidade`, `src/covers/singularidade/`) | Chosen by the owner over three Codex concepts. A real-time general-relativity black hole bends the light of the typographic cover; it follows the cursor or the finger and swallows the screen on entry. The owner prefers ONE hole that follows the cursor (no companion hole, no hole parked on "IA"). |
+| 2026-W42 | **Singularidade** (`/visual/singularidade`, `src/covers/singularidade/`) | Chosen by the owner over three Codex concepts. A real-time general-relativity black hole bends the light of the typographic cover; it follows the cursor or the finger and swallows the screen on entry. The owner prefers ONE hole that follows the cursor (no companion hole, no hole parked on "IA"). |
 
-The owner (2026-10-17) wants a new cover **every week** and every past cover easily reachable (`/capas`, D-067). The
+The owner (2026-10-17) wants a new cover **every week** and every past cover easily reachable (`/visual`, was `/capas`; D-067). The
 routine: `docs/prompts/weekly_cover.md`; the cover contract: `docs/COVERS.md`.
 
 ## Queue (owner, 2026-10-17: to build and show in the coming weeks)

@@ -1,7 +1,7 @@
 ---
-// Footer theme switcher (D-025, 1C-01): exactly three slots, rendered only once a lab theme exists (Base.astro).
-// Without JS it stays hidden and the build-time default (current) applies. The previous slot is disabled until
-// a second experiment exists.
+// Theme switcher (D-025, 1C-01): exactly three slots, on `/visual` only (owner, 2026-10-19), rendered only once a
+// lab theme exists; ThemeRuntime.astro (in Base.astro) wires it. Without JS it stays hidden and the build-time
+// default (current) applies. The previous slot is disabled until a second experiment exists.
 import slots from 'virtual:linkedia-themes/slots';
 import type { SlotName, ThemeSlot } from '../lib/theme-runtime';
 
@@ -32,9 +32,3 @@ const options: { slot: SlotName; label: string; theme: ThemeSlot | null }[] = [
   <p data-theme-status aria-live="polite" class="meta"></p>
 </fieldset>
 
-<script>
-  import enhancements from 'virtual:linkedia-themes/enhancements';
-  import { startThemes } from '../lib/theme-runtime';
-
-  startThemes(enhancements);
-</script>

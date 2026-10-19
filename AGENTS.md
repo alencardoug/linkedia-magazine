@@ -12,8 +12,8 @@ Status and tasks for this repository are tracked in the owner's private engine c
 - `contracts/*.schema.json` are copied from the engine on every export — change them there, not here. Exception: `theme_manifest.schema.json` is owned here.
 - The build fails on invalid content (`scripts/validate-content.mjs`, run as `prebuild`).
 - Accessibility: keyboard, screen readers, `prefers-reduced-motion`, 320 px layouts, AA contrast; full article reading without JS.
-- Themes: `minimal-dark` is the permanent baseline; experiments follow the theme contract in `docs/VISUAL_LAB.md`; the switcher has exactly three slots once experiments exist.
-- Covers: `/` is the weekly cover pre-page and `/revista` the edition home; every cover follows the contract in `docs/COVERS.md` (entry never depends on the art, complete HTML cover, fine print, CSP, no lock-up) and stays deployed at `/capas/<slug>`.
+- Themes: `minimal-dark` is the permanent baseline; experiments follow the theme contract in `docs/VISUAL_LAB.md`; the switcher has exactly three slots once experiments exist and lives on `/visual` only.
+- Covers: `/` is the weekly cover pre-page and `/revista` the edition home; every cover follows the contract in `docs/COVERS.md` (entry never depends on the art, complete HTML cover, fine print, CSP, no lock-up) and stays deployed at `/visual/<slug>` (`/capas/<slug>` redirects).
 - `content/**` normally changes only through engine commits; manual edits go through a reviewed PR.
 - Never commit `.env`, Firebase service-account JSON, tokens, or engine files other than exported content and public contracts.
 

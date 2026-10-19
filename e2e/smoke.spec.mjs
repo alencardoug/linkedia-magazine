@@ -8,8 +8,8 @@ const ARTICLE = '/materias/exemplo-de-materia-linkedia';
 const ROUTES = [
   '/',
   '/revista',
-  '/capas',
-  '/capas/singularidade',
+  '/visual',
+  '/visual/singularidade',
   '/edicoes',
   '/edicoes/2026-10-14',
   ARTICLE,
@@ -39,7 +39,8 @@ test.describe('routes', () => {
       expect(response?.url()).toMatch(new RegExp(`${path === '/' ? '/' : path}$`)); // no redirect
       expect(response?.headers()['content-security-policy']).toContain("default-src 'none'");
       await expect(page.locator('h1')).toHaveCount(1);
-      await expect(page.locator('footer a[rel="author"]')).toHaveText('Douglas Alencar');
+      // The editor is named on /sobre only (owner, 2026-10-19).
+      await expect(page.locator('a[rel="author"]')).toHaveCount(path === '/sobre' ? 1 : 0);
       // The theme stylesheet is applied (it is a same-origin file the CSP must allow).
       const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
       expect(bg).not.toBe('rgba(0, 0, 0, 0)');

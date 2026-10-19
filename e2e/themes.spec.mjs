@@ -1,4 +1,4 @@
-// Theme switcher (1C-01) on the fixture themes: baseline / previous (lab-2099-w01, light, CSS only) / current
+// Theme switcher (1C-01; on `/visual` only since 2026-10-19, the choice applies on every page) on the fixture themes: baseline / previous (lab-2099-w01, light, CSS only) / current
 // (lab-2099-w02, default, enhancement that needs motion and WebGL). Served by the Hosting emulator with the real CSP.
 // Headless Chromium has no WebGL, so every page gets a stand-in context unless a test opts out (`webgl: false`).
 import { expect, test as base } from '@playwright/test';
@@ -13,6 +13,7 @@ const test = base.extend({
 });
 
 const ARTICLE = '/materias/exemplo-de-materia-linkedia';
+const VISUAL = '/visual';
 const ENHANCE = '**/_astro/enhance.*.js';
 const THEMES = { baseline: 'minimal-dark', previous: 'lab-2099-w01', current: 'lab-2099-w02' };
 const LIGHT_BG = 'rgb(251, 250, 247)';
@@ -30,6 +31,9 @@ test('opens in the current slot with its enhancement and an operable switcher', 
   await expect(theme(page)).toHaveAttribute('data-theme', THEMES.current);
   await expect(theme(page)).toHaveAttribute('data-theme-enhanced', THEMES.current);
   await expect(page.locator('[data-theme-decor]')).toHaveCount(1);
+  await expect(page.locator('[data-theme-switcher]')).toHaveCount(0); // only on /visual
+  await page.goto(VISUAL);
+  await expect(theme(page)).toHaveAttribute('data-theme-enhanced', THEMES.current);
   await expect(page.getByRole('group', { name: 'Tema visual' })).toBeVisible();
   await expect(page.getByRole('radio')).toHaveCount(3);
   await expect(radio(page, 'Atual: Fixture Motion')).toBeChecked();
@@ -39,9 +43,9 @@ test('opens in the current slot with its enhancement and an operable switcher', 
 
 test('switches by keyboard, announces, persists and cleans up the enhancement', async ({ page }) => {
   const errors = watchErrors(page);
-  await page.goto(ARTICLE);
+  await page.goto(VISUAL);
   await expect(theme(page)).toHaveAttribute('data-theme-enhanced', THEMES.current);
-  await page.locator('footer a[rel="author"]').focus();
+  await page.getByRole('link', { name: 'Sobre' }).focus(); // last link of the header
   await page.keyboard.press('Tab'); // into the radio group, on the checked radio
   await expect(radio(page, 'Atual: Fixture Motion')).toBeFocused();
   const outline = await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle);
@@ -60,8 +64,9 @@ test('switches by keyboard, announces, persists and cleans up the enhancement', 
   await expect(theme(page)).toHaveAttribute('data-theme', THEMES.baseline);
   await expect(status(page)).toHaveText('Tema aplicado: Minimal Dark.');
 
-  await page.goto('/edicoes');
+  await page.goto('/edicoes'); // the choice applies on a page without the switcher
   await expect(theme(page)).toHaveAttribute('data-theme', THEMES.baseline);
+  await page.goto(VISUAL);
   await expect(radio(page, 'Base: Minimal Dark')).toBeChecked();
   await expect(status(page)).toHaveText(''); // nothing announced on load
   expect(errors).toEqual([]);
@@ -71,9 +76,12 @@ test('never changes the article content across switches and a fallback', async (
   await page.goto(ARTICLE);
   await expect(theme(page)).toHaveAttribute('data-theme-enhanced', THEMES.current);
   const before = await content(page);
-  for (const name of ['Anterior: Fixture Light', 'Base: Minimal Dark', 'Atual: Fixture Motion']) {
+  for (const [name, slot] of [['Anterior: Fixture Light', 'previous'], ['Base: Minimal Dark', 'baseline'], ['Atual: Fixture Motion', 'current']]) {
+    await page.goto(VISUAL);
     await radio(page, name).check();
     await expect(radio(page, name)).toBeChecked();
+    await page.goto(ARTICLE);
+    await expect(theme(page)).toHaveAttribute('data-theme', THEMES[slot]);
     expect(await content(page), name).toBe(before);
   }
   await expect(theme(page)).toHaveAttribute('data-theme-enhanced', THEMES.current);
@@ -83,9 +91,9 @@ test('never changes the article content across switches and a fallback', async (
 });
 
 test('the inline script alone applies the stored slot before the body is parsed', async ({ page }) => {
-  await page.goto(ARTICLE);
+  await page.goto(VISUAL);
   await radio(page, 'Anterior: Fixture Light').check();
-  await page.route('**/_astro/ThemeSwitcher*.js', (route) => route.abort());
+  await page.route('**/_astro/ThemeRuntime*.js', (route) => route.abort());
   await page.addInitScript(() => {
     new MutationObserver((_, observer) => {
       if (!document.body) return;
@@ -93,15 +101,17 @@ test('the inline script alone applies the stored slot before the body is parsed'
       observer.disconnect();
     }).observe(document, { childList: true, subtree: true });
   });
-  await page.reload();
+  await page.goto(ARTICLE);
   expect(await page.evaluate(() => window.__themeAtBody)).toBe(THEMES.previous);
   expect(await background(page)).toBe(LIGHT_BG);
+  await page.goto(VISUAL);
+  expect(await page.evaluate(() => window.__themeAtBody)).toBe(THEMES.previous);
   await expect(page.locator('[data-theme-switcher]')).toBeHidden(); // its script never ran
 });
 
 test('ignores a stored value that is not a slot', async ({ page }) => {
   await preset(page, THEMES.previous);
-  await page.goto(ARTICLE);
+  await page.goto(VISUAL);
   await expect(theme(page)).toHaveAttribute('data-theme', THEMES.current);
   await expect(radio(page, 'Atual: Fixture Motion')).toBeChecked();
 });
@@ -115,7 +125,7 @@ test('works when storage is blocked', async ({ page }) => {
       },
     }),
   );
-  await page.goto(ARTICLE);
+  await page.goto(VISUAL);
   await expect(theme(page)).toHaveAttribute('data-theme', THEMES.current);
   await radio(page, 'Base: Minimal Dark').check();
   await expect(theme(page)).toHaveAttribute('data-theme', THEMES.baseline);
@@ -129,9 +139,11 @@ test.describe('fallback to the baseline', () => {
     await page.goto(ARTICLE);
     await expect(theme(page)).toHaveAttribute('data-theme', THEMES.baseline);
     await expect(theme(page)).toHaveAttribute('data-theme-fallback', THEMES.current);
+    await expect(page.locator('h1')).toHaveText('Exemplo ilustrativo de matéria');
+    await page.goto(VISUAL);
+    await expect(theme(page)).toHaveAttribute('data-theme-fallback', THEMES.current);
     await expect(radio(page, 'Base: Minimal Dark')).toBeChecked();
     await expect(status(page)).toHaveText('O tema Fixture Motion falhou; voltamos ao Minimal Dark.');
-    await expect(page.locator('h1')).toHaveText('Exemplo ilustrativo de matéria');
     expect(await stored(page)).toBeNull(); // the reader's choice is not overwritten
   });
 
@@ -148,7 +160,7 @@ test.describe('fallback to the baseline', () => {
         };`,
       }),
     );
-    await page.goto(ARTICLE);
+    await page.goto(VISUAL);
     await expect(theme(page)).toHaveAttribute('data-theme-fallback', THEMES.current);
     await expect(theme(page)).toHaveAttribute('data-theme', THEMES.baseline);
     await expect(page.locator('[data-theme-decor]')).toHaveCount(0); // its cleanup ran
@@ -175,7 +187,7 @@ test.describe('reduced motion', () => {
   test('keeps the current theme CSS-only and never fetches its enhancement', async ({ page }) => {
     const requests = [];
     page.on('request', (r) => requests.push(r.url()));
-    await page.goto(ARTICLE);
+    await page.goto(VISUAL);
     await expect(theme(page)).toHaveAttribute('data-theme', THEMES.current);
     await expect(page.getByRole('group', { name: 'Tema visual' })).toBeVisible();
     await page.waitForLoadState('networkidle');
@@ -191,7 +203,7 @@ test.describe('without WebGL', () => {
     const errors = watchErrors(page);
     const requests = [];
     page.on('request', (r) => requests.push(r.url()));
-    await page.goto(ARTICLE);
+    await page.goto(VISUAL);
     await expect(theme(page)).toHaveAttribute('data-theme', THEMES.current);
     await expect(radio(page, 'Atual: Fixture Motion')).toBeChecked();
     await page.waitForLoadState('networkidle');
@@ -209,8 +221,9 @@ test.describe('without JavaScript', () => {
   test('reads in the build-time default theme with the switcher hidden', async ({ page }) => {
     await page.goto(ARTICLE);
     await expect(theme(page)).toHaveAttribute('data-theme', THEMES.current);
-    await expect(page.locator('[data-theme-switcher]')).toBeHidden();
     await expect(page.locator('#fonte-s1')).toBeVisible();
+    await page.goto(VISUAL);
+    await expect(page.locator('[data-theme-switcher]')).toBeHidden();
   });
 });
 
@@ -218,13 +231,15 @@ for (const [slot, id] of Object.entries(THEMES)) {
   test.describe(`slot ${slot} (${id})`, () => {
     test.beforeEach(({ page }) => preset(page, slot));
 
-    for (const path of ['/revista', ARTICLE]) {
-      test(`${path}: no serious axe violation, no horizontal scroll at 320 px, switcher visible`, async ({ page }) => {
+    for (const path of ['/revista', ARTICLE, VISUAL]) {
+      test(`${path}: no serious axe violation, no horizontal scroll at 320 px`, async ({ page }) => {
         await page.setViewportSize({ width: 320, height: 640 });
         await page.goto(path);
         await expect(theme(page)).toHaveAttribute('data-theme', id);
-        await expect(page.getByRole('group', { name: 'Tema visual' })).toBeVisible();
-        await expect(page.getByRole('radio', { checked: true })).toHaveAttribute('value', slot);
+        if (path === VISUAL) {
+          await expect(page.getByRole('group', { name: 'Tema visual' })).toBeVisible();
+          await expect(page.getByRole('radio', { checked: true })).toHaveAttribute('value', slot);
+        }
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
         expect(await axeBlocking(page)).toEqual([]);
       });

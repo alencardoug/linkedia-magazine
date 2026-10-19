@@ -2,21 +2,28 @@
 // Shared page shell. Markup is semantic and theme-agnostic with stable data-* hooks; the look comes from the
 // active theme's CSS (baseline `minimal-dark`, 1B-02; lab themes of the manifest's slots, 1C-01). Once a lab
 // theme exists, <html> names the three slots, the current one is the default, and a tiny inline script applies
-// the reader's stored slot before the first paint (its hash is in the CSP). Cover pages (`/`, `/capas/<slug>`)
-// do not use this shell: they have their own (CoverPage.astro, 3-01); the brand links to the edition home.
+// the reader's stored slot before the first paint (its hash is in the CSP) and ThemeRuntime starts the slot's
+// enhancement on every page; the switcher itself lives only on `/visual` (owner, 2026-10-19). The footer carries
+// the AI note only where `aiNote` is set (`/revista` and each article); the editor is named on `/sobre` only.
+// Cover pages (`/`, `/visual/<slug>`) do not use this shell: they have their own (CoverPage.astro, 3-01).
 import '../../themes/minimal-dark/theme.css';
 import 'virtual:linkedia-themes/styles';
 import slots from 'virtual:linkedia-themes/slots';
-import ThemeSwitcher from '../components/ThemeSwitcher.astro';
-import { AI_NOTE, EDITOR_NAME, EDITOR_URL } from '../lib/site';
+import ThemeRuntime from '../components/ThemeRuntime.astro';
+import { AI_NOTE } from '../lib/site';
 import { THEME_INIT_SCRIPT } from '../lib/theme-init';
 
 interface Props {
   title: string;
   description?: string;
+  /** Show the short AI note in the footer (only `/revista` and the article pages). */
+  aiNote?: boolean;
 }
-const { title, description = 'Revista diária sobre engenharia de IA, liderança em IA e conhecimento em IA.' } =
-  Astro.props;
+const {
+  title,
+  description = 'Revista diária sobre engenharia de IA, liderança em IA e conhecimento em IA.',
+  aiNote = false,
+} = Astro.props;
 const pageTitle = title === 'Linkedia' ? title : `${title} — Linkedia`;
 const lab = slots.current !== null;
 ---
@@ -43,19 +50,20 @@ const lab = slots.current !== null;
       <nav aria-label="Principal">
         <a href="/revista" data-brand><strong>Linkedia</strong></a>
         <a href="/edicoes">Edições</a>
-        <a href="/capas">Capas</a>
+        <a href="/visual">Visual</a>
         <a href="/sobre">Sobre</a>
       </nav>
     </header>
     <main id="conteudo">
       <slot />
     </main>
-    <footer data-site-footer>
-      <p class="meta">{AI_NOTE} <a href="/sobre">Como a Linkedia é feita</a>.</p>
-      <p data-author>
-        Editor: <a href={EDITOR_URL} rel="author">{EDITOR_NAME}</a>
-      </p>
-      {lab && <ThemeSwitcher />}
-    </footer>
+    {
+      aiNote && (
+        <footer data-site-footer>
+          <p class="meta">{AI_NOTE} <a href="/sobre">Como a Linkedia é feita</a>.</p>
+        </footer>
+      )
+    }
+    {lab && <ThemeRuntime />}
   </body>
 </html>

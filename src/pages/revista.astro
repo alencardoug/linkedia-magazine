@@ -11,7 +11,7 @@ const latest = loadContent().editions[0];
 const [lead, ...rest] = latest?.articles ?? [];
 ---
 
-<Base title="Linkedia">
+<Base title="Linkedia" aiNote>
   {
     latest ? (
       <section aria-labelledby="edicao" data-edition={latest.edition.edition_date}>
