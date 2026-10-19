@@ -75,29 +75,41 @@ describe('rollover', () => {
 });
 
 describe('npm run theme:rollover', () => {
-  // A Git repository holding a copy of the fixture themes, all committed.
+  // A Git repository holding a copy of the fixture themes, all committed: one commit per theme folder (so a ref
+  // lookup on the wrong folder shows), then an unrelated commit on top (so HEAD is never the right answer).
   function repo() {
     const dir = mkdtempSync(join(tmp, 'repo-'));
     cpSync(FIXTURES, dir, { recursive: true });
     const git = (...args) => execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8' }).trim();
+    const commit = (message) => git('-c', 'user.name=t', '-c', 'user.email=t@example.com', 'commit', '-q', '-m', message);
     git('init', '-q', '-b', 'main');
+    const refs = {};
+    for (const id of ['lab-2099-w01', 'lab-2099-w02']) {
+      git('add', id);
+      commit(id);
+      refs[id] = git('rev-parse', 'HEAD');
+    }
     git('add', '.');
-    git('-c', 'user.name=t', '-c', 'user.email=t@example.com', 'commit', '-q', '-m', 'fixtures');
-    return { dir, head: git('rev-parse', 'HEAD') };
+    commit('rest');
+    return { dir, refs, head: git('rev-parse', 'HEAD') };
   }
   const cli = (dir, ...args) =>
     spawnSync(process.execPath, [SCRIPT, ...args], { encoding: 'utf8', env: { ...process.env, LINKEDIA_THEMES_DIR: dir } });
   const manifest = (dir) => JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
 
   it('writes a valid rollover with a scaffold and the archived theme ref', () => {
-    const { dir, head } = repo();
+    const { dir, refs, head } = repo();
+    // Uncommitted work on the fixed theme does not block the rollover: only the archived theme must be committed.
+    writeFileSync(join(dir, 'lab-2099-w01', 'README.md'), '\nnota local\n', { flag: 'a' });
     const result = cli(dir, '--week', '2099-W03', '--title', 'Nova');
     expect(result.stderr).toBe('');
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain(`Arquivado: lab-2099-w02 @ ${head}`);
+    expect(refs['lab-2099-w02']).not.toBe(head);
+    expect(result.stdout).toContain(`Arquivado: lab-2099-w02 @ ${refs['lab-2099-w02']}`);
     expect(result.stdout).toContain('Fixo: lab-2099-w01');
     expect(manifest(dir)).toMatchObject({ previous_theme_id: 'lab-2099-w01', current_theme_id: 'lab-2099-w03' });
-    expect(manifest(dir).themes.find((t) => t.id === 'lab-2099-w02').git_ref).toBe(head);
+    expect(manifest(dir).themes.find((t) => t.id === 'lab-2099-w02').git_ref).toBe(refs['lab-2099-w02']);
+    expect(manifest(dir).themes.find((t) => t.id === 'lab-2099-w01')).toMatchObject({ status: 'active', git_ref: null });
     expect(existsSync(join(dir, 'lab-2099-w03', 'theme.css'))).toBe(true);
     expect(existsSync(join(dir, 'lab-2099-w03', 'README.md'))).toBe(true);
   });
@@ -108,6 +120,16 @@ describe('npm run theme:rollover', () => {
     const result = cli(dir, '--week', '2099-W03', '--title', 'Nova', '--dry-run');
     expect(result.status).toBe(0);
     expect(result.stdout).toContain('simulação');
+    expect(readFileSync(join(dir, 'manifest.json'), 'utf8')).toBe(before);
+    expect(existsSync(join(dir, 'lab-2099-w03'))).toBe(false);
+  });
+
+  it('undoes the manifest and removes its new scaffold when the result is invalid', () => {
+    const { dir } = repo();
+    const before = readFileSync(join(dir, 'manifest.json'), 'utf8');
+    const result = cli(dir, '--week', '2099-W03', '--title', 'x'.repeat(61)); // the schema allows 60 characters
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('rollover desfeito');
     expect(readFileSync(join(dir, 'manifest.json'), 'utf8')).toBe(before);
     expect(existsSync(join(dir, 'lab-2099-w03'))).toBe(false);
   });
