@@ -181,10 +181,10 @@ describe('static build', () => {
         '404.html',
       ].sort(),
     );
-    // The editor is named on /sobre only and the AI note is in the footer of /revista and the articles only (owner,
-    // 2026-10-19). No inline code anywhere. Reading pages: one theme and client JS only with copy buttons; cover
+    // The editor is named on /sobre only; the AI note is in the footer of /revista only, each article carries its own
+    // note instead (owner, 2026-10-19). No inline code anywhere. Reading pages: one theme and client JS only with copy buttons; cover
     // pages: their own shell and only their own cover's script.
-    const AI_NOTE_PAGES = ['revista.html', 'materias/exemplo-de-materia-linkedia.html'];
+    const AI_NOTE_PAGES = ['revista.html'];
     for (const page of htmlFiles(out)) {
       const html = readFileSync(join(out, page), 'utf8');
       expect(html.includes('rel="author"'), page).toBe(page === 'sobre.html');
@@ -244,6 +244,7 @@ describe('static build', () => {
     const article = readFileSync(join(out, 'materias/exemplo-de-materia-linkedia.html'), 'utf8');
     expect(article).toContain('Exemplo ilustrativo de matéria');
     expect(article).toContain('id="fonte-s1"');
+    expect(article).toMatch(/<p class="meta" data-ai-note>\s*Texto gerado com IA a partir das fontes abaixo/);
     expect(article).toContain('data-copy-status');
   }, 120_000);
 

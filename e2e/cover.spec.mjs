@@ -18,7 +18,7 @@ test.describe('cover', () => {
     await expect(page.locator('html')).toHaveAttribute('data-cover', 'singularidade');
     await expect(page.locator('h1')).toHaveText('LinkedIA');
     await expect(page.locator('a[rel="author"]')).toHaveCount(0); // the editor is named on /sobre only
-    await expect(page.getByText('Textos gerados com IA')).toHaveCount(0); // the AI note is on /revista and the articles
+    await expect(page.getByText('Textos gerados com IA')).toHaveCount(0); // the AI note is on /revista only
     await expect(page.getByRole('link', { name: 'Outras capas' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Entrar na revista/ })).toBeVisible();
     await expect(page.locator('html')).not.toHaveAttribute('data-art', /./); // no WebGL: the HTML cover stays

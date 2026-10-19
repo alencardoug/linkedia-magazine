@@ -33,8 +33,8 @@ no client code imports it.
    well without JS, without WebGL, with reduced motion and in forced colours; the art enhances it and hides it only
    after its own first frame is verified (`html[data-art]`), keeping it in the accessibility tree.
 3. **Fine print** (shell): the cover's credit and "Outras capas" (to `/visual`) — real links above the cover's link
-   layer. The AI note and the editor are not on covers (owner, 2026-10-19: the note is on `/revista` and the
-   articles, the editor on `/sobre`).
+   layer. The AI note and the editor are not on covers (owner, 2026-10-19: the note is on `/revista` and in each
+   article's text, the editor on `/sobre`).
 4. **Safety floor.** The site CSP is unchanged (same-origin files only: no inline code, no fetch, no workers or wasm
    unless a decision adds them), no third-party requests, no images by default. The art must not lock up a weak
    device: adaptive resolution, a still frame below a frame-rate floor, nothing drawn while hidden, a lower rate and

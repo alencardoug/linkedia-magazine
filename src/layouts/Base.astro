@@ -4,7 +4,7 @@
 // theme exists, <html> names the three slots, the current one is the default, and a tiny inline script applies
 // the reader's stored slot before the first paint (its hash is in the CSP) and ThemeRuntime starts the slot's
 // enhancement on every page; the switcher itself lives only on `/visual` (owner, 2026-10-19). The footer carries
-// the AI note only where `aiNote` is set (`/revista` and each article); the editor is named on `/sobre` only.
+// the AI note only where `aiNote` is set (`/revista`; each article has its own note); the editor is named on `/sobre` only.
 // Cover pages (`/`, `/visual/<slug>`) do not use this shell: they have their own (CoverPage.astro, 3-01).
 import '../../themes/minimal-dark/theme.css';
 import 'virtual:linkedia-themes/styles';
@@ -16,7 +16,7 @@ import { THEME_INIT_SCRIPT } from '../lib/theme-init';
 interface Props {
   title: string;
   description?: string;
-  /** Show the short AI note in the footer (only `/revista` and the article pages). */
+  /** Show the short AI note in the footer (only `/revista`; articles carry their own note). */
   aiNote?: boolean;
 }
 const {
