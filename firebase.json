@@ -6,8 +6,8 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "redirects": [
-      { "source": "/capas", "destination": "/visual", "type": 301 },
-      { "source": "/capas/:slug", "destination": "/visual/:slug", "type": 301 }
+      { "regex": "^/capas(?:\\.html)?/?$", "destination": "/visual", "type": 301 },
+      { "regex": "^/capas/([a-z0-9-]+)(?:\\.html)?/?$", "destination": "/visual/:1", "type": 301 }
     ],
     "headers": [
       {

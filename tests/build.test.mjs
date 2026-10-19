@@ -245,6 +245,8 @@ describe('static build', () => {
     expect(article).toContain('Exemplo ilustrativo de matéria');
     expect(article).toContain('id="fonte-s1"');
     expect(article).toMatch(/<p class="meta" data-ai-note>\s*Texto gerado com IA a partir das fontes abaixo/);
+    expect(article.match(/data-ai-note/g)).toHaveLength(1); // one note per article, never two
+    expect(article).not.toContain('Textos gerados com IA');
     expect(article).toContain('data-copy-status');
   }, 120_000);
 

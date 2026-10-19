@@ -2,7 +2,7 @@
 
 Static site of Linkedia, a Brazilian Portuguese daily magazine about AI engineering, AI leadership and broader AI knowledge. Articles are generated with AI from the sources they cite and selected by a human editor; every article lists its sources.
 
-Built with Astro and deployed to Firebase Hosting. Content lives in `content/` as JSON validated against `contracts/` at build time; there is no backend. Each week the site also hosts one visual-interface experiment next to a permanent minimal dark theme, and a new interactive cover at `/` (every cover stays at `/capas`; `docs/COVERS.md`).
+Built with Astro and deployed to Firebase Hosting. Content lives in `content/` as JSON validated against `contracts/` at build time; there is no backend. Each week the site also hosts one visual-interface experiment next to two fixed themes (the minimal dark baseline and Broadsheet), and a new interactive cover at `/` (every cover stays at `/visual`, with the theme choice; the old `/capas` addresses redirect there; `docs/COVERS.md`).
 
 **Status:** under construction — no edition published yet.
 

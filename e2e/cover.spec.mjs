@@ -149,12 +149,22 @@ test.describe('cover', () => {
     expect((await page.goto('/visual/nao-existe'))?.status()).toBe(404);
   });
 
-  test('the old /capas addresses redirect to /visual for good', async ({ page }) => {
-    for (const [from, to] of [['/capas', '/visual'], ['/capas/singularidade', '/visual/singularidade']]) {
+  test('the old /capas addresses redirect to /visual for good, in one hop', async ({ page }) => {
+    const cases = [
+      ['/capas', '/visual'],
+      ['/capas/', '/visual'],
+      ['/capas.html', '/visual'],
+      ['/capas/singularidade', '/visual/singularidade'],
+      ['/capas/singularidade/', '/visual/singularidade'],
+      ['/capas/singularidade.html', '/visual/singularidade'],
+    ];
+    for (const [from, to] of cases) {
       const response = await page.request.get(from, { maxRedirects: 0 });
       expect(response.status(), from).toBe(301);
       expect(new URL(response.headers().location, 'http://x').pathname, from).toBe(to);
+      expect((await page.request.get(to, { maxRedirects: 0 })).status(), to).toBe(200);
     }
+    expect((await page.goto('/capas/nao-existe'))?.status()).toBe(404); // redirected, then the 404 page
   });
 
   test('320 px: no horizontal scroll, no serious axe violation, the entry link visible', async ({ page }) => {

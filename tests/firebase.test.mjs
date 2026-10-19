@@ -34,6 +34,16 @@ describe('firebase.json', () => {
     expect(hosting.cleanUrls).toBe(true);
     expect(hosting.trailingSlash).toBe(false);
     expect(hosting.rewrites).toBeUndefined(); // static files only, no SPA fallback
+    // The only redirects: the old /capas addresses (D-069), with or without .html or a trailing slash.
+    const [archive, cover] = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
+    expect(hosting.redirects.every((r) => r.type === 301)).toBe(true);
+    for (const path of ['/capas', '/capas/', '/capas.html']) expect(archive.re.test(path), path).toBe(true);
+    for (const path of ['/capas/x', '/capas/x/', '/capas/x.html']) {
+      expect(path.replace(cover.re, cover.destination.replace(':1', '$1')), path).toBe('/visual/x');
+    }
+    for (const path of ['/capasx', '/visual', '/capas/x/y']) {
+      expect(archive.re.test(path) || cover.re.test(path), path).toBe(false);
+    }
   });
 
   it('sends a strict CSP that allows only same-origin scripts, styles and images, and the hashed theme script', () => {
