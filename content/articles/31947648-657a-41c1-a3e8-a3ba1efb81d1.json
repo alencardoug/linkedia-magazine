@@ -1,0 +1,201 @@
+{
+  "article_id": "31947648-657a-41c1-a3e8-a3ba1efb81d1",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Resposta curta à sua pergunta: não, pedir ao Codex 'não faça MCP, faça plugin' não reproduz o resultado do caso, e este artigo da OpenAI não traz informação suficiente para isso. O texto é um relato de sucesso, não um tutorial. Abaixo está o que ele afirma, o que ele não prova e um caminho seguro para você obter o ganho possível com a sua aplicação de IA.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia em resumo",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Em 15/10, a OpenAI publicou um estudo de caso sobre o Stack Overflow. Dois engenheiros, usando o Codex, teriam entregue o Stack Overflow for Agents em poucas semanas.",
+        "Segundo o relato, eles deram ao Codex um ambiente de desenvolvimento (um container) e um plano, e trabalharam com ele para construir o produto.",
+        "Um plugin no ChatGPT deixa o usuário descobrir e configurar o produto dentro do ChatGPT, com menos passos que uma configuração tradicional via MCP (Model Context Protocol, protocolo aberto que conecta modelos a ferramentas e dados). O entrevistado diz que os cadastros triplicaram de um dia para o outro e que a criação de agentes chegou a 10x, 'da última vez que verifiquei'.",
+        "No produto corporativo, um conector que levava 3 a 6 semanas teria sido feito em 4 dias com Codex, e depois em um dia."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A fonte é um estudo de caso publicado pela própria OpenAI, com um executivo do cliente como voz principal. Os números (3x, 10x, 87%) não têm verificação independente. O 87% é um máximo, não uma média, e o 10x é uma lembrança informal.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 2,
+      "text": "O que o artigo permite concluir e o que não permite",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Sustenta: o plugin reduziu passos de configuração em comparação com MCP, e os cadastros subiram depois dele, segundo o relato.",
+        "Sustenta: o fluxo de Codex era container mais plano, com dois engenheiros.",
+        "Não sustenta: que o plugin causou sozinho o 3x. O texto não separa o efeito do plugin da visibilidade de estar dentro do ChatGPT nem do peso da marca Stack Overflow.",
+        "Não informa: a base de cadastros (triplicar um número pequeno é diferente de triplicar um grande), a retenção, o custo, a revisão de segurança, nem o prompt, o plano ou as permissões usados com o Codex.",
+        "Não informa: como o plugin é construído ou publicado. Não há requisitos, formato nem processo de aprovação no texto."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O pacote não mostra se o plugin substitui o MCP ou o encapsula, nem se qualquer ferramenta pode virar plugin. Também não prova que o ganho veio do Codex e não de uma equipe sênior com um escopo bem definido.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: como chegar perto do mesmo efeito com a sua aplicação",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, não nas fontes citadas. Plugins, MCP e Codex mudam com frequência: confira a documentação oficial antes de implementar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "level": 3,
+      "text": "1. Separe dois problemas: construir e distribuir",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "O caso mistura duas alavancas. Construir mais rápido depende do seu fluxo com o Codex (contexto, plano, testes). Distribuir melhor depende do canal (onde o usuário já está e quantos passos precisa dar). Um pedido ao Codex só mexe na primeira. Dizer 'faça plugin, não MCP' é uma decisão de formato de distribuição, e o Codex só consegue cumprir se existir documentação oficial do formato e se ela estiver no contexto dele.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "2. Como pedir ao Codex sem chutar o formato",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Não presuma que o agente conhece a especificação atual de plugins: ela pode ser recente ou ter mudado. Cole a documentação oficial no repositório (ou aponte o arquivo), peça primeiro uma comparação de opções e só depois a implementação. Mantenha o núcleo da sua aplicação independente do formato: as capacidades ficam em uma camada de serviço, e MCP ou plugin são só adaptadores finos. Assim você pode oferecer os dois e medir qual funciona melhor.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Modelo ilustrativo de plano para o Codex, não do caso. Adapte ao seu repositório.",
+      "code": "PLANO.md\nObjetivo: expor as capacidades A, B e C da aplicação a usuários de um assistente de chat.\nContexto: docs oficiais do formato em docs/formato-oficial.md (leia antes de propor).\nEtapa 1 (sem código): comparar MCP x plugin: passos de instalação, autenticação, limites. Listar dúvidas.\nEtapa 2: criar camada de serviço com A, B, C, somente leitura, com testes.\nEtapa 3: adaptador no formato escolhido, sem lógica de negócio.\nSegurança: escopos mínimos; nenhuma credencial no repositório; ações de escrita exigem confirmação humana.\nAceite: testes passam; instalação em no máximo N passos; registrar o que não foi possível verificar.\nPare e pergunte se algo na documentação estiver ambíguo.",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "3. Segurança: que ataque cada controle evita",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Prompt injection indireta (texto malicioso dentro de um documento ou resposta que o agente lê e passa a obedecer): evite com ferramentas somente leitura por padrão, confirmação humana para escrita e separação entre dados lidos e instruções.",
+        "Vazamento por permissão excessiva (a ferramenta acessa mais do que precisa): aplique menor privilégio, com escopos mínimos e credenciais por usuário, não uma chave global.",
+        "Segredos expostos pelo agente de código: rode o Codex em ambiente isolado, sem chaves de produção; use credenciais de teste.",
+        "Código gerado sem revisão: a velocidade de 4 dias não elimina revisão humana de segurança nem testes com dados realistas.",
+        "Dados pessoais: se a ferramenta toca dados de terceiros, defina base legal, minimização e registro de acesso (LGPD) antes de abrir a outros usuários."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "4. Meça o ganho em vez de supor",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Conte os passos manuais de instalação da sua ferramenta hoje (via MCP).",
+        "Peça a duas ou três pessoas que instalem sem ajuda e anote onde travam.",
+        "Construa a segunda via (plugin) apenas se a documentação oficial confirmar que ela se aplica ao seu caso.",
+        "Compare o tempo até o primeiro resultado útil nas duas vias, com os mesmos usuários.",
+        "Só então decida; trate os números do caso como hipótese de direção."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "O que se replica é o método: container isolado, plano explícito, entregas pequenas e testáveis, núcleo separado do adaptador de distribuição e medição do funil de instalação. O que não se replica por um pedido é o 3x: ele depende de canal, marca e base de usuários que o artigo não revela.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escreva o PLANO.md acima para a sua aplicação, com a etapa 1 apenas de comparação e sem código. Leia a documentação oficial de plugins da plataforma que você usa e decida com base nela, não no título de um estudo de caso.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-20",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 2,
+    "generated_at": "2026-10-20T15:50:45Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "64ee5b6e-6944-4406-b264-e80e00de6a33",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Sou desenvolvedor que usa Codex e Claude Code diariamente e tenho uma aplicação de IA cujas capacidades quero expor a outros usuários. Explique a diferença entre servidor MCP e plugin de assistente de chat como canais de distribuição, como separar a camada de serviço dos adaptadores, riscos de segurança (prompt injection indireta, menor privilégio, credenciais) e como medir atrito de instalação. Indique o que devo conferir na documentação oficial."
+    },
+    {
+      "kind": "critic",
+      "label": "Criticar o estudo de caso",
+      "prompt": "Atue como analista cético. Um estudo de caso da própria OpenAI diz que um plugin do ChatGPT triplicou cadastros do Stack Overflow for Agents, gerou até 10x mais agentes criados e que o Codex reduziu a construção de um conector de 3-6 semanas para 4 dias. Liste vieses, dados ausentes, explicações alternativas e perguntas a fazer antes de replicar essa estratégia."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "stack-overflow-for-0014",
+  "sources": [
+    {
+      "accessed_at": "2026-10-19T17:53:59Z",
+      "language": "en",
+      "published_at": "2026-10-16T00:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s1",
+      "title": "Stack Overflow for Agents triples signups with ChatGPT plugin",
+      "url": "https://openai.com/index/stack-overflow-chatgpt-plugin"
+    }
+  ],
+  "summary": "Estudo de caso da OpenAI diz que um plugin no ChatGPT triplicou cadastros e que o Codex acelerou a construção do produto. Resposta direta: o artigo não ensina a replicar; veja o que ele sustenta e como aplicar com segurança.",
+  "tags": [
+    "topic:coding-agents",
+    "topic:mcp",
+    "topic:agents",
+    "risk:prompt-injection",
+    "risk:security",
+    "reason:career-utility",
+    "source:openai"
+  ],
+  "title": "Stack Overflow for Agents: dá para repetir o resultado só pedindo ao Codex 'plugin em vez de MCP'?"
+}

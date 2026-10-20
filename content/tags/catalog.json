@@ -52,6 +52,11 @@
       "label": "Uso indevido"
     },
     {
+      "key": "risk:prompt-injection",
+      "kind": "risk",
+      "label": "Injeção de prompt"
+    },
+    {
       "key": "risk:security",
       "kind": "risk",
       "label": "Segurança da informação"

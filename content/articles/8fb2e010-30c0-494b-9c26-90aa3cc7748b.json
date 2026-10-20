@@ -1,0 +1,149 @@
+{
+  "article_id": "8fb2e010-30c0-494b-9c26-90aa3cc7748b",
+  "blocks": [
+    {
+      "level": 2,
+      "text": "A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 17 de outubro de 2026, Simon Willison publicou a versão 0.1a2 do web-edit, que ele descreve como um pequeno app web para navegar e editar arquivos de uma pasta. O objetivo principal é editar arquivos em máquinas diferentes usando o Tailscale.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A novidade desta versão é uma opção de copiar para a área de transferência, tanto texto quanto imagem. A motivação veio de um uso real: ele rodava prompts do teste do pelicano em um laptop, a partir do celular, e queria copiar os logs resultantes para um Gist de forma fácil. O exemplo citado foi com o DeepSeek 4.1 Flash.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O texto-fonte é curto. Não diz como o app é implementado, como faz autenticação nem se passou por qualquer avaliação de segurança. A versão é alfa (0.1a2), então trate-a como experimental.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Como usar esse padrão no seu trabalho",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial de cada ferramenta, pois detalhes podem mudar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "A ideia central: quando você roda agentes ou prompts longos em outra máquina (um laptop em casa, um servidor), o gargalo é acompanhar e pegar os resultados de longe. Em vez de montar uma plataforma, você sobe uma ferramenta minúscula que só faz isso: listar arquivos, abrir, editar e copiar.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O que é o Tailscale, em uma frase",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Tailscale é uma VPN em malha (mesh): seus dispositivos entram em uma rede privada própria e se enxergam por nomes e endereços internos, sem expor portas à internet pública. Assim, um app web rodando no laptop fica acessível só para os seus dispositivos autorizados.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Por que isso importa para segurança",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Um editor web de arquivos é, na prática, acesso de leitura e escrita ao disco. Se exposto à internet, qualquer pessoa que o alcance pode ler chaves e alterar código. Manter o serviço acessível apenas dentro da rede privada evita o ataque mais comum: varredura de portas abertas e acesso não autenticado. Isso não substitui outras camadas.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Aponte a ferramenta para uma pasta dedicada (por exemplo, a de saídas dos experimentos), nunca para o diretório pessoal inteiro.",
+        "Faça o serviço escutar apenas na interface da rede privada, não em todas as interfaces.",
+        "Não deixe chaves de API, arquivos .env ou credenciais dentro da pasta servida.",
+        "Como a versão é alfa, não a use com dados sensíveis nem a exponha publicamente; reveja o código antes de confiar."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de até 2 horas",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Instale o Tailscale no laptop e no celular e entre na mesma conta.",
+        "No laptop, crie uma pasta saidas/ e configure seu script de prompts ou agente para gravar logs nela.",
+        "Suba um servidor simples de arquivos ou o próprio web-edit apontando para essa pasta, escutando só na rede privada (veja o README do projeto).",
+        "Pelo celular, abra o endereço do laptop na rede privada e confira se vê os logs.",
+        "Rode um prompt longo no laptop, acompanhe e copie o resultado para onde precisar (nota, Gist privado, chat)."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Padrão a levar: ferramenta pequena, privada e feita para uma dor concreta (ver e copiar saídas de modelos rodando em outra máquina), com rede privada como primeira barreira e uma pasta restrita como segunda.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Para esta semana: escolha um fluxo seu em que você hoje espera sentado no computador por um agente terminar, e monte a versão mínima para acompanhá-lo pelo celular. Se escrever a ferramenta com seu agente de código, peça que ele liste os riscos de segurança antes de rodar.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-20",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-19T17:55:30Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "64ee5b6e-6944-4406-b264-e80e00de6a33",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português como acessar com segurança arquivos e logs de um laptop a partir do celular usando Tailscale: o que é uma VPN em malha, como funciona o acesso só pela rede privada, riscos de expor um editor web de arquivos, boas práticas (pasta dedicada, escutar só na interface privada, não guardar segredos) e um passo a passo para um iniciante com experiência em agentes de código."
+    }
+  ],
+  "read_minutes": 3,
+  "schema_version": "1.0.0",
+  "slug": "web-edit-um-editor-0015",
+  "sources": [
+    {
+      "accessed_at": "2026-10-19T17:55:05Z",
+      "language": "en",
+      "published_at": "2026-10-17T13:16:49Z",
+      "publisher": "Simon Willison",
+      "source_id": "s1",
+      "title": "web-edit 0.1a2",
+      "url": "https://simonwillison.net/2026/Oct/17/web-edit"
+    }
+  ],
+  "summary": "Simon Willison lançou a versão 0.1a2 do web-edit, app web para navegar e editar arquivos de uma pasta via Tailscale, agora com copiar texto e imagem. Veja o padrão e como aplicá-lo com segurança.",
+  "tags": [
+    "topic:coding-agents",
+    "risk:security",
+    "topic:inference",
+    "reason:novelty",
+    "source:simon-willison"
+  ],
+  "title": "web-edit: um editor web mínimo para mexer em arquivos de outra máquina pelo celular"
+}
