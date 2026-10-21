@@ -1,0 +1,173 @@
+{
+  "article_id": "38f876de-7b18-4e32-a678-af1bb3ec3287",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Até pouco tempo, a web tinha dois tipos de visitante: pessoas e bots. Segundo a newsletter The Algorithm, da MIT Technology Review (19/10), agentes de IA pessoais, que fazem tarefas online por você, como reservar voos e hotéis, criaram uma terceira categoria. Depois de ler, você terá um roteiro para projetar um site ou protótipo que atenda humanos e agentes sem piorar a experiência de ninguém.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: um terceiro tipo de visitante",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O texto afirma que os agentes foram lançados em escala por apps como o Dots, da OpenAI, e o Muse, da Meta. O Muse teria sido baixado 5 milhões de vezes no primeiro mês, e o tráfego web de agentes triplicou de agosto para setembro. Agentes não são humanos, pois operam em velocidade de máquina. Também não são bots clássicos, pois agem em nome de uma pessoa, em tarefas legítimas.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Como os sistemas atuais não distinguem bem esse visitante, parte das plataformas, sobretudo as mais preocupadas com segurança, decidiu bloquear todos. O artigo cita relatos do TechCrunch sobre dificuldades em sites como Pizza Hut e Yelp, que não permite reservas feitas por IA. Cita ainda a Amazon, que bloqueou os agentes do Muse e briga na Justiça com a Perplexity. Um juiz decidiu a favor da Perplexity, e a Amazon recorreu. Ela argumenta que agentes dificultam separar anúncios vistos por humanos dos servidos a bots.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Por outro lado, a maior parte do tráfego de agentes vai para e-commerce, então há dinheiro em recebê-los. A Shopify, segundo o texto, já oferece aos agentes filas de checkout próprias, que não passam pelas páginas feitas para humanos. Ethan Mollick (Wharton) prevê que, se agentes passarem a pedir reembolsos e negociar preços em massa, o atendimento ao cliente pode ficar inutilizável para pessoas.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O risco apontado",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A tese do título é que otimizar a web para agentes pode piorá-la para humanos. O artigo imagina cenários, que são hipóteses e não fatos: sites abandonados como destino para pessoas, verificações constantes de que você é humano (talvez até leitura de íris), preços diferentes para o agente de cada pessoa e recomendações do seu agente influenciadas por anúncios ou comissões sem você saber. O contraponto é que agentes podem ajudar de verdade, por exemplo contestando cobranças médicas indevidas ou pesquisando seguro de carro mais barato. O resultado depende de regras ainda em disputa, como a possibilidade de empresas bloquearem agentes ou impedirem que eles negociem. Já proteger dados de cartão contra agentes é consenso.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O pacote traz apenas o texto da newsletter, sem os dados por trás dos números (5 milhões de downloads, triplicação do tráfego) nem detalhes técnicos do checkout da Shopify. Trate os números como alegação do artigo.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: projetando para humanos e agentes",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial das ferramentas mencionadas, pois detalhes mudam.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "A ideia central: separe a interface (feita para olhos) da capacidade (o que o sistema faz). Um agente que clica em botões numa página de humanos é frágil e lento. Uma interface própria para máquinas, como uma API (conjunto de endereços que devolvem dados estruturados) ou um servidor MCP (protocolo que expõe ferramentas a agentes), é mais robusta e controlável. É a mesma lógica das filas exclusivas de checkout descritas no artigo.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Liste as ações do seu site ou protótipo (buscar, comparar, reservar, pagar). Marque quais um agente pode fazer sozinho, quais exigem confirmação humana e quais ele nunca deve fazer.",
+        "Exponha as ações seguras como endpoints de API com autenticação própria para agentes, em vez de depender de scraping da página.",
+        "Dê ao agente uma credencial com escopo mínimo e prazo curto, separada da sessão do usuário. Isso reduz o dano se o agente for enganado.",
+        "Use o mesmo preço e as mesmas regras para ambos os canais. Preço diferenciado por tipo de visitante é o cenário que o artigo teme.",
+        "Registre logs que identifiquem o tráfego de agente, com quem o enviou e qual ação fez. Isso ajuda em auditoria e disputas.",
+        "Aplique limites de taxa (rate limit) por credencial para evitar que agentes sobrecarreguem o atendimento ou o backend."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Segurança: o ataque que você precisa ter em mente",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Se você constrói um agente que lê páginas, o principal risco é a injeção de prompt: um texto escondido na página diz ao modelo para ignorar suas instruções e, por exemplo, enviar dados. Mitigações: tratar todo conteúdo web como dado não confiável, nunca como instrução; limitar as ferramentas disponíveis; exigir confirmação humana antes de pagar ou enviar informação sensível; e nunca colocar o número do cartão no contexto do modelo. Prefira tokens de pagamento delegados pelo provedor de pagamento.",
+      "type": "paragraph"
+    },
+    {
+      "alt": "Fluxo de decisão para ações de um agente: leitura, compra com confirmação humana, ou bloqueio.",
+      "caption": "Política simples de ações para agentes",
+      "diagram_format": "mermaid",
+      "diagram_spec": "flowchart LR\n A[Agente do usuario] --> B{Acao}\n B -->|Leitura| C[API com escopo minimo]\n B -->|Compra| D[Confirmacao humana]\n D --> E[Checkout delegado]\n B -->|Fora da lista| F[Bloqueio e log]",
+      "long_description": "O agente do usuário envia uma ação. Se for leitura, usa uma API de escopo mínimo. Se for compra, passa por confirmação humana e então por um checkout delegado. Ações fora da lista permitida são bloqueadas e registradas em log.",
+      "source_ids": [],
+      "type": "diagram"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de até 2 horas",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Pegue um protótipo seu com um formulário ou lista de itens. Peça ao seu agente de código para: (1) criar um endpoint somente leitura que devolva os itens em JSON; (2) criar um endpoint de ação com token de escopo limitado e confirmação explícita; (3) escrever testes que simulem uma página com instrução maliciosa escondida e verifiquem que o agente de teste não executa a ação. Esse terceiro teste é o que transforma a leitura em capacidade nova.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Não adapte a página humana para o agente: dê ao agente um canal próprio, com escopo mínimo, confirmação humana em ações irreversíveis e as mesmas regras de preço que os humanos veem.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Para esta semana: escolha um projeto seu e classifique cada ação em três colunas (livre, com confirmação, proibida). Esse inventário é a base de qualquer política para agentes. Fique de olho também no recurso da Amazon contra a Perplexity, pois a decisão pode definir se sites podem bloquear agentes de consumidores.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_knowledge",
+  "edition_date": "2026-10-21",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-20T19:47:40Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "daebece5-3a42-491c-a092-36ef02d9446d",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português do Brasil, para um engenheiro que usa agentes de código no dia a dia, como a web está mudando com agentes de IA que navegam e compram em nome de pessoas. Cubra: diferença entre bot, agente e humano; por que sites bloqueiam agentes; APIs e MCP como canal próprio; autenticação delegada com escopo mínimo; injeção de prompt em páginas web; riscos de preço diferenciado por tipo de visitante. Termine com um exercício prático de duas horas para um protótipo pessoal."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "web-para-agentes-0018",
+  "sources": [
+    {
+      "accessed_at": "2026-10-20T19:47:10Z",
+      "language": "en",
+      "published_at": "2026-10-19T18:22:47Z",
+      "publisher": "MIT Technology Review",
+      "source_id": "s1",
+      "title": "Making the internet better for AI agents might make it worse for everyone else",
+      "url": "https://www.technologyreview.com/2026/10/19/1147186/making-the-internet-better-for-ai-agents-might-make-it-worse-for-everyone-else"
+    }
+  ],
+  "summary": "Agentes de IA já navegam e compram na web, e sites reagem bloqueando ou abrindo \"pistas\" exclusivas. Veja o que a MIT Technology Review aponta e como projetar seus sites e protótipos para humanos e agentes.",
+  "tags": [
+    "topic:agents",
+    "risk:security",
+    "risk:prompt-injection",
+    "theme:strategy",
+    "region:global",
+    "reason:novelty",
+    "source:mit-technology-review"
+  ],
+  "title": "Web para agentes de IA: quem ganha e quem perde quando bots viram usuários"
+}

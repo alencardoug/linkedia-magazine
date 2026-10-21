@@ -32,6 +32,11 @@
       "label": "China"
     },
     {
+      "key": "region:global",
+      "kind": "region",
+      "label": "Global"
+    },
+    {
       "key": "region:usa",
       "kind": "region",
       "label": "Estados Unidos"
@@ -70,6 +75,11 @@
       "key": "source:google-developers",
       "kind": "source",
       "label": "Google Developers Blog"
+    },
+    {
+      "key": "source:hugging-face",
+      "kind": "source",
+      "label": "Hugging Face"
     },
     {
       "key": "source:interconnects",
@@ -137,6 +147,11 @@
       "label": "Segurança de IA"
     },
     {
+      "key": "theme:strategy",
+      "kind": "theme",
+      "label": "Estratégia"
+    },
+    {
       "key": "topic:agent-evaluation",
       "kind": "topic",
       "label": "Avaliação de agentes"
@@ -145,6 +160,11 @@
       "key": "topic:agents",
       "kind": "topic",
       "label": "Agentes de IA"
+    },
+    {
+      "key": "topic:benchmarks",
+      "kind": "topic",
+      "label": "Benchmarks"
     },
     {
       "key": "topic:coding-agents",

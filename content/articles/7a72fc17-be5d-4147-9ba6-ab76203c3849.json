@@ -1,0 +1,224 @@
+{
+  "article_id": "7a72fc17-be5d-4147-9ba6-ab76203c3849",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Duas publicações da própria OpenAI, de 14 e 19 de outubro de 2026, são o que temos sobre a família GPT-6. Uma traz resultados de benchmark em linguagens de programação raras. A outra é um caso de cliente, a Amp, que usa GPT-6 Astra, o modo Ultrafast e o GPT-Live-1 em agentes. Depois de ler, você terá uma lista do que é sólido, do que é marketing e de testes reproduzíveis para rodar na sua conta.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: a notícia",
+      "type": "heading"
+    },
+    {
+      "level": 3,
+      "text": "O que a OpenAI mediu",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A OpenAI criou duas avaliações para linguagens com pouco código público, como COBOL, Fortran e Visual Basic. A primeira, MultiLangBench, pede que o modelo construa do zero um motor de banco de dados compatível com SQLite em 20 linguagens. O resultado é checado com o SQLite de referência, usando arquivos de banco como interface comum. A segunda avaliação pede a migração de programas COBOL para C++, Java, Kotlin, Python ou Rust, com paridade byte a byte nas saídas observáveis e testes ocultos.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "MultiLangBench, esforço máximo: GPT-6 Astra tem média de 87,4% de testes aprovados nas 20 linguagens, contra 26,8% do GPT-5.6 Sol. Em COBOL vai de 10,9% a 72,1%, e é a linguagem mais difícil para o Astra.",
+        "GPT-6 Luna, a opção mais barata: 40,3% de média, com custo estimado de US$ 0,77 por amostra contra US$ 3,48 do GPT-5.6 Sol (cerca de 78% menos).",
+        "Migração de COBOL: o GPT-6.1 Sol atinge 86,6% com esforço baixo (o GPT-5.6 Sol faz 5,4%) a 61% do custo, e 97,9% com esforço alto."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "O que a Amp relata",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "A Amp, que desenvolve um agente de software, diz que modelos da OpenAI respondem pela maioria dos tokens usados nela. O CEO, Quinn Slack, afirma que o login com ChatGPT dá mais tokens e deixa o usuário soltar o agente em tarefas maiores. O time de 20 pessoas usa um agente para marketing e documentação, e o Astra segue o estilo de escrita e design da empresa. O Ultrafast, com o Astra, é descrito como mais rápido, o que poderia reduzir o número de agentes em paralelo ou dar tempo para o agente se autoverificar. O GPT-Live-1 alimenta o Calling Puck, um assistente por voz em tempo real, até a partir de um relógio.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O que isso não prova",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "O material é todo de fornecedor. A OpenAI definiu e rodou a avaliação, e o relato da Amp é um caso de cliente publicado pela própria OpenAI. O packet não traz especificações, preços de tabela, janela de contexto nem benchmarks independentes. Também não traz comparação com modelos de outros laboratórios, então não dá para dizer o que o GPT-6 tem que os outros não têm. O que se sustenta é só a comparação com o GPT-5.6 Sol, dentro dos testes da OpenAI. Os modelos que aparecem são Astra, Luna e 6.1 Sol, e as fontes não explicam como a família se organiza.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Há dois pontos de cautela. Primeiro, o COBOL do MultiLangBench mede construir software, enquanto a migração mede preservar comportamento, e são habilidades diferentes. Segundo, a própria OpenAI diz que, em produção, a migração ainda exige revisão de especialistas e testes contra as regras de negócio. A OpenAI diz ter publicado a suíte do MultiLangBench no GitHub com resultados por linguagem, o que torna a parte de código verificável por você.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: o que você pode fazer com isso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial da OpenAI e da sua ferramenta para disponibilidade, nomes de modelos e custos, que podem mudar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "level": 3,
+      "text": "1. Trate os números como hipótese e reproduza no seu caso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Um benchmark de fornecedor diz onde olhar, não o que você vai obter. O desenho do MultiLangBench é aproveitável: um oráculo externo (o SQLite real) decide se o resultado está certo, sem depender da opinião de um modelo. Você pode copiar essa ideia em qualquer tarefa sua: escolha algo que tenha uma resposta de referência executável e meça pela saída.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "2. Teste de caracterização: o diferencial que a OpenAI destaca",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O exemplo da OpenAI é que o ponto fixo do COBOL trunca casas decimais, e uma reescrita que arredonda roda sem erro mas gera valores financeiros diferentes. Você pode treinar isso sem COBOL. Teste de caracterização é um teste que registra o que o código atual faz, certo ou errado, para provar que a reescrita se comporta igual.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Pegue um módulo pequeno e antigo do seu repositório, de preferência com cálculo numérico, datas ou tratamento de registros ausentes.",
+        "Peça ao agente apenas para gerar entradas variadas e gravar as saídas atuais como arquivos esperados, sem alterar o código.",
+        "Em outra sessão, peça a migração para outra linguagem ou estrutura, com o critério de igualdade byte a byte nessas saídas.",
+        "Rode os testes você mesmo, fora do agente. Registre aprovação, número de tentativas, tokens e tempo.",
+        "Repita com o mesmo prompt em dois modelos ou dois níveis de esforço de raciocínio."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "3. Comparação justa entre modelos",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Como você já usa Claude Code e Codex, o ganho está em controlar variáveis. Use a mesma tarefa, o mesmo repositório em estado limpo, o mesmo harness e o mesmo critério de aceite. Mude uma coisa por vez: o modelo ou o esforço de raciocínio. Rode pelo menos três vezes cada configuração, porque agentes variam entre execuções. Monte uma tabela simples com taxa de aprovação, custo e tempo por tarefa. É isso que responde se o Astra tem algo a mais para o seu trabalho. As fontes não respondem.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Modelo de planilha de experimento",
+      "code": "tarefa: migrar modulo X para Y, saidas identicas\nconfigs: A = modelo 1, esforco baixo\n         B = modelo 1, esforco alto\n         C = modelo 2, esforco baixo\nrepeticoes: 3 por config\nmetricas: testes ocultos aprovados (s/n), tokens, minutos, intervencoes manuais\nregra: testes ocultos nao ficam visiveis ao agente",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "4. Testar a velocidade (Ultrafast) e a autoverificação",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "A hipótese da Amp é que mais velocidade permite dar ao agente tempo para checar o próprio trabalho. Dá para testar: compare uma execução normal com uma rápida, e depois uma rápida com um passo explícito de verificação (rodar testes, reler o diff). Meça se o tempo total e a taxa de acerto melhoram. Verifique antes na sua conta se o modo existe e como é cobrado, pois o packet não informa.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "5. Agentes além do código, com controle",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "A Amp usa um agente para documentação e marketing. Experimento pequeno: dê ao agente um guia de estilo seu e peça três rascunhos de uma página de documentação. Avalie às cegas, com uma lista de critérios, contra o texto que você escreveria. Risco real: dar mais autonomia e tokens ilimitados aumenta o dano de um erro ou de uma prompt injection (instrução maliciosa escondida em conteúdo que o agente lê). Mitigue com permissões mínimas, revisão do diff antes de publicar e sem credenciais de produção no ambiente do agente.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta semana: escolha um módulo seu, grave o comportamento atual como testes de caracterização e faça a mesma migração em duas configurações de modelo. Se o novo modelo vencer em aprovação por custo no seu código, você tem evidência própria. Se não, o benchmark do fornecedor não se aplica ao seu caso.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "O que acompanhar: benchmarks independentes, a tabela oficial de preços e a documentação dos modelos Astra, Luna e Sol, que ainda não aparecem no packet.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-10-21",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-20T19:45:02Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "daebece5-3a42-491c-a092-36ef02d9446d",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como avaliar um modelo de IA para engenharia de software de forma reproduzível: testes de caracterização, oráculo externo (como o SQLite de referência), testes ocultos, controle de variáveis (modelo, esforço de raciocínio, harness), repetições por variância e métricas de custo e tempo. Dê um exemplo prático de migração de um módulo pequeno entre linguagens e explique como desconfiar de benchmarks publicados por fornecedores."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "gpt-6-astra-o-0016",
+  "sources": [
+    {
+      "accessed_at": "2026-10-20T19:44:11Z",
+      "language": "en",
+      "published_at": "2026-10-19T12:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s1",
+      "title": "Advancing coding in low‑resource programming languages",
+      "url": "https://openai.com/index/low-resource-programming-languages"
+    },
+    {
+      "accessed_at": "2026-10-20T19:44:13Z",
+      "language": "en",
+      "published_at": "2026-10-14T12:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s2",
+      "title": "Amp puts AI agents to work beyond code with OpenAI models",
+      "url": "https://openai.com/index/amp-beyond-coding"
+    }
+  ],
+  "summary": "Duas publicações da OpenAI trazem números fortes para o GPT-6 Astra em código de linguagens raras e relatos de uso na Amp. Falta benchmark independente, preço e especificação. Veja o que é sólido e um roteiro de testes.",
+  "tags": [
+    "topic:coding-agents",
+    "topic:benchmarks",
+    "topic:agent-evaluation",
+    "topic:llm-evaluation",
+    "topic:agents",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:popularity",
+    "source:openai"
+  ],
+  "title": "GPT-6 Astra: o que as fontes sustentam, o que falta e como testar na sua conta"
+}

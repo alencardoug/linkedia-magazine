@@ -1,0 +1,197 @@
+{
+  "article_id": "6aa36712-8819-41e8-a2c9-af2504e4ad04",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A IBM Research publicou no Hugging Face o ALTK-Evolve, uma técnica de memória aprendida para agentes. Em vez de treinar o modelo, ela analisa tentativas passadas do agente, extrai regras curtas de comportamento e as anexa ao prompt de sistema. Depois deste texto, você terá um roteiro para testar a mesma ideia num agente seu, com um conjunto de tarefas e uma medida de confiabilidade.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que a IBM relata",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O benchmark é o τ²-bench, da Sierra. Cada tarefa junta o agente a um cliente simulado por LLM, ferramentas (consultar pedido, reembolsar, remarcar voo) e um documento de política que o agente deve seguir. A tarefa só conta como resolvida se o estado final do banco de dados bater com o esperado, uma recompensa binária e estrita. Há dois domínios: varejo (retail) e companhia aérea (airline).",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O método: o GPT-4.1, modelo mais antigo e sem raciocínio, roda nas tarefas de treino. O mesmo modelo destila sucessos e falhas em regras, por exemplo autenticar o cliente antes de agir, resumir e pedir aprovação explícita antes de alterar dados, e dar uma ação por passo. Essas regras entram como lista em markdown depois da política, no scaffold ReAct padrão do benchmark. Não há atualização de pesos nem anotação humana.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Varejo, GPT-4.1, tarefas de teste retidas (40): Pass^4 foi de 57,5% (sem regras) para 67,5% (todas as 292 regras). A acurácia média foi de 78,1% para 82,5%.",
+        "Aérea, GPT-4.1 (20 tarefas): Pass^4 foi de 35% para 45% com o núcleo de 14 regras mais apoiadas; com as 101 regras, 40%.",
+        "Aérea com GPT-5.5 como agente e extrator: Pass^4 de 55% para 70%.",
+        "Placar completo (base split): varejo em 1º com 67,5%, acima do RAFT-30B-A3B (61,4%), um modelo ajustado com dados sintéticos. Aérea em 1º com GPT-5.5 (82,0%) e em 8º com GPT-4.1 (44%)."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Pass^4 é a fração de tarefas resolvidas nas quatro tentativas independentes. É uma métrica de confiabilidade: um agente que acerta 3 de 4 reembolsos ainda falha com um quarto dos clientes.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Custo: as regras aumentam os tokens de entrada. O custo por conversa no varejo foi de US$ 0,084 para US$ 0,139 (+65%) com todas as regras; na aérea, de US$ 0,081 para US$ 0,107 (+32%). Nas tarefas resolvidas em ambos os cenários, as conversas não ficaram mais longas, e sim ligeiramente mais curtas. Os autores dizem que prompt caching recuperaria boa parte do custo; isso é afirmação deles, não medida no texto.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Ressalvas: é relato do próprio autor, sem reprodução independente. Os conjuntos de teste são pequenos (40 e 20 tarefas), então um ponto percentual é meia tarefa ou menos. Os próprios números mostram ruído: na aérea, o conjunto menor (sup3) bateu o completo em Pass^4, e os autores citam que a confiabilidade do baseline oscilou entre reruns. O simulador de cliente é o GPT-5.5, o que também afeta a comparação com placares que usem outro. O trecho do texto disponível termina antes da conclusão, e não vi o placar nem o código.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Não dá para confirmar pelo material disponível se o código do ALTK-Evolve é aberto nem como ele consolida e conta o suporte das regras. O texto cita um trabalho anterior com agentes de código, mas não o detalha.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: imitar a ideia no seu agente",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial das ferramentas que usar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "A ideia central é que memória não precisa ser banco vetorial nem fine-tuning. Pode ser um arquivo de regras curtas, gerado a partir de falhas e acertos reais, que entra no contexto. Você já faz algo parecido à mão quando atualiza o AGENTS.md ou o CLAUDE.md depois de um erro do agente. O que o trabalho acrescenta é automatizar e medir: extrair as regras de muitas execuções, contar quantas tarefas distintas sustentam cada uma (o suporte) e validar em tarefas que o agente não viu.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Receita em cinco passos",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Monte 20 a 40 tarefas do seu domínio com checagem automática do resultado final (arquivo gerado, estado do banco, teste passando). Sem verificador objetivo, não há aprendizado confiável.",
+        "Separe em treino e teste retido. Não deixe nenhuma tarefa de teste vazar para a extração de regras.",
+        "Rode o agente várias vezes por tarefa (4, como no relato) e guarde as transcrições, com sucesso ou falha.",
+        "Peça a um modelo para ler as transcrições e propor regras curtas e acionáveis. Para cada regra, registre em quantas tarefas distintas ela apareceu. Descarte as de suporte 1 num primeiro experimento, ou compare com e sem elas.",
+        "Anexe as regras ao prompt e meça no conjunto de teste: acurácia média e, principalmente, a taxa de tarefas que passam em todas as tentativas."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Esboço de prompt de extração de regras (adapte ao seu caso).",
+      "code": "Você receberá transcrições de um agente, com resultado (sucesso/falha).\nProduza regras de comportamento curtas, no imperativo, que expliquem\nsucessos ou evitem falhas. Para cada regra, indique os IDs das tarefas\nque a sustentam. Não cite dados específicos de um cliente.\nSaída: JSON com campos regra e tarefas.",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Decisões e riscos que vale pensar",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Quantidade de regras é um botão: o relato mostra o conjunto completo ganhando no varejo e o compacto ganhando em confiabilidade na aérea. Teste duas ou três doses em vez de fixar uma.",
+        "Custo: regras são tokens de entrada em toda chamada. Meça custo por tarefa, não só acurácia.",
+        "Contaminação por dados pessoais: transcrições reais podem conter dados de clientes. Anonimize antes de extrair regras, por causa da LGPD.",
+        "Regras erradas viram política: uma regra aprendida de um caso isolado pode contradizer a política oficial. Revise as regras com um humano e mantenha a política como fonte de verdade.",
+        "Prompt injection: se as transcrições incluem texto de terceiros, um atacante pode plantar instruções que viram regra. Trate transcrições como dados não confiáveis e revise as regras antes de ativá-las."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Antes de pagar por um modelo maior, tente um ciclo barato: rodar, extrair regras de falhas, testar em tarefas retidas e comparar a confiabilidade (todas as tentativas passam). Se o ganho sumir no seu teste, você descobre isso por poucos dólares.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha um fluxo repetitivo do seu repositório, escreva 20 tarefas com verificador automático e meça seu agente de código quatro vezes cada, sem regras. Esse baseline já é útil por si só. Depois extraia regras das falhas e compare em tarefas retidas.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-21",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-20T19:44:10Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "daebece5-3a42-491c-a092-36ef02d9446d",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português, para quem usa agentes de código no dia a dia mas não opera agentes em produção, a ideia de memória aprendida em prompt (guidelines extraídas de trajetórias de um agente) como no ALTK-Evolve da IBM Research. Cubra: o que é o τ²-bench, a diferença entre acurácia média e Pass^k, o que é suporte de uma regra, por que a quantidade de regras importa, e como montar um experimento pequeno com treino e teste retido para validar se isso melhora um agente meu. Inclua riscos (dados pessoais, prompt injection, regras erradas)."
+    },
+    {
+      "kind": "critic",
+      "label": "Criticar o resultado",
+      "prompt": "Atue como revisor cético de um relato de pesquisa que afirma que um agente GPT-4.1 com regras aprendidas anexadas ao prompt lidera o τ²-bench de varejo, com 40 tarefas de teste e 20 na aérea, 4 tentativas por tarefa. Liste ameaças à validade (tamanho da amostra, variância entre reruns, simulador de usuário, comparação com placar de terceiros, vazamento treino-teste) e proponha testes concretos para checar cada uma."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "altk-evolve-regras-aprendidas-0017",
+  "sources": [
+    {
+      "accessed_at": "2026-10-20T19:43:40Z",
+      "language": "en",
+      "published_at": "2026-10-20T15:19:48Z",
+      "publisher": "Hugging Face",
+      "source_id": "s1",
+      "title": "ALTK-Evolve: How learned memory tops the τ²-bench leaderboard on customer service tasks without a frontier model",
+      "url": "https://huggingface.co/blog/ibm-research/altk-evolve-bc"
+    }
+  ],
+  "summary": "A IBM Research relata que anexar ao prompt regras destiladas das próprias tentativas do agente elevou a confiabilidade num benchmark de atendimento. Veja o que é sólido, o que é relato do autor e como imitar a ideia no seu agente.",
+  "tags": [
+    "topic:agents",
+    "topic:agent-evaluation",
+    "topic:benchmarks",
+    "topic:context-engineering",
+    "topic:token-efficiency",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:hugging-face"
+  ],
+  "title": "ALTK-Evolve: regras aprendidas no prompt levam um agente GPT-4.1 ao topo do τ²-bench"
+}
