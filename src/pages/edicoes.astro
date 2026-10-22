@@ -1,5 +1,5 @@
 ---
-// `/edicoes`: archive by date, newest first.
+// `/edicoes`: archive by date, newest first, each date with its story titles.
 import Base from '../layouts/Base.astro';
 import { loadContent } from '../lib/content';
 import { longDate } from '../lib/labels';
@@ -19,8 +19,13 @@ const { editions } = loadContent();
             <a href={`/edicoes/${edition.edition_date}`}>
               <time datetime={edition.edition_date}>{longDate(edition.edition_date)}</time>
             </a>
-            {' — '}
-            {edition.title} <span class="meta">({articles.length} matéria(s))</span>
+            <ul>
+              {articles.map((a) => (
+                <li>
+                  <a href={`/materias/${a.slug}`}>{a.title}</a>
+                </li>
+              ))}
+            </ul>
           </li>
         ))}
       </ol>

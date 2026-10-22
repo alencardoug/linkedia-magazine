@@ -5,7 +5,7 @@ import Base from '../layouts/Base.astro';
 import '../covers/view-transition.css';
 import ArticleCard from '../components/ArticleCard.astro';
 import { loadContent } from '../lib/content';
-import { longDate } from '../lib/labels';
+import { publishedLabel } from '../lib/labels';
 
 const latest = loadContent().editions[0];
 const [lead, ...rest] = latest?.articles ?? [];
@@ -15,9 +15,9 @@ const [lead, ...rest] = latest?.articles ?? [];
   {
     latest ? (
       <section aria-labelledby="edicao" data-edition={latest.edition.edition_date}>
-        <h1 id="edicao">{latest.edition.title}</h1>
+        <h1 id="edicao" class="visually-hidden">{latest.edition.title}</h1>
         <p class="meta">
-          Edição de <time datetime={latest.edition.edition_date}>{longDate(latest.edition.edition_date)}</time>
+          <time datetime={latest.edition.published_at}>{publishedLabel(latest.edition)}</time>
         </p>
         {latest.edition.summary && <p>{latest.edition.summary}</p>}
         {lead && <ArticleCard article={lead} lead />}

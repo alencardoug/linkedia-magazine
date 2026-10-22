@@ -224,6 +224,20 @@ describe('static build', () => {
     // `/revista` is the edition home that `/` used to be; `/` is the current cover, with the edition's text.
     const home = read(out, 'revista.html');
     expect(home).toContain('data-edition="2026-10-14"');
+    // On screen, only a small line with the publication date and time; the edition's h1 is for screen readers only.
+    const dateline =
+      '<p class="meta"><time datetime="2026-10-14T19:05:00-03:00">Publicada em 14 de outubro de 2026, às 19:05</time></p>';
+    for (const page of [home, read(out, 'edicoes/2026-10-14.html')]) {
+      expect(page).toContain(dateline);
+      expect(page).toMatch(/<h1 (id="edicao" )?class="visually-hidden">/);
+    }
+    // `/edicoes`: each date links once and lists its stories' titles.
+    const editions = read(out, 'edicoes.html');
+    expect(editions).toContain(
+      '<li><a href="/edicoes/2026-10-14"><time datetime="2026-10-14">14 de outubro de 2026</time></a><ul><li>' +
+        '<a href="/materias/exemplo-de-materia-linkedia">Exemplo ilustrativo de matéria</a></li></ul></li>',
+    );
+    expect(editions).not.toContain('matéria(s)');
     const cover = read(out, 'index.html');
     expect(cover).toContain(`<html lang="pt-BR" data-cover="${CURRENT_COVER}">`);
     expect(cover).toContain(`data-cover-art="${CURRENT_COVER}"`); // the page imports the registry's current cover

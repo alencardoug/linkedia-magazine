@@ -1,5 +1,5 @@
 // pt-BR labels and formatting shared by pages (public UI is pt-BR).
-import type { Channel } from '../types/contracts';
+import type { Channel, Edition } from '../types/contracts';
 
 export const CHANNEL_LABELS: Record<Channel, string> = {
   ai_engineering: 'Engenharia de IA',
@@ -35,6 +35,24 @@ export function longDate(isoDate: string): string {
   return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeZone: 'UTC' }).format(
     new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)),
   );
+}
+
+/** "Publicada em 21 de outubro de 2026, às 18:08": an edition's `published_at` in its time zone. */
+export function publishedLabel(edition: Pick<Edition, 'published_at' | 'timezone'>): string {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: edition.timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(new Date(edition.published_at))
+      .map((p) => [p.type, p.value]),
+  );
+  return `Publicada em ${longDate(`${parts.year}-${parts.month}-${parts.day}`)}, às ${parts.hour}:${parts.minute}`;
 }
 
 // Number shown for a source (`s7` → `7`), in citations and in the source list alike.
