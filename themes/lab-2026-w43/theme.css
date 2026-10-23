@@ -123,11 +123,6 @@
   margin-right: 0.35em;
 }
 
-:root[data-theme='lab-2026-w43'] [data-edition] > .meta {
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--lab-2026-w43-rule);
-}
-
 /* Cards: between pale rules, like the cover's headline list; the lead under a gradient rule. */
 :root[data-theme='lab-2026-w43'] [data-card] {
   padding: var(--space-3) 0;
