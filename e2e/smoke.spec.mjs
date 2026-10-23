@@ -17,6 +17,7 @@ const ROUTES = [
   '/categorias/engenharia-de-ia',
   '/categorias/lideranca-de-ia',
   '/categorias/conhecimento-de-ia',
+  '/especiais/governanca-de-ia',
   '/sobre',
 ];
 const PROMPT = 'Explique como avaliar criticamente uma notícia sobre inteligência artificial, com fontes e exemplos.';

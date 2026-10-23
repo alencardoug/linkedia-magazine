@@ -8,10 +8,11 @@ On opening the homepage, lead with one extraordinary presentation of **today's p
   `/revista` (3-01, D-067, `docs/COVERS.md`). Until 3-01 `/` was the edition home.
 - `/revista`: most recent available edition, not necessarily today's calendar date (the header brand links here).
 - `/visual`: the reading theme switcher and every weekly cover, newest first; `/visual/{slug}`: each cover, reachable for good (`/capas` and `/capas/{slug}` until 2026-10-19, now 301 redirects).
-- `/edicoes`: simple archive by date, with filters for channels/tags when useful.
+- `/edicoes`: "Conteúdos especiais" first (D-075), then "Edições diárias", the simple archive by date, with filters for channels/tags when useful.
 - `/edicoes/YYYY-MM-DD`: fixed daily edition.
 - `/materias/{slug}`: article permalink.
 - `/categorias/{canal}`: published articles of one channel, pt-BR slugs `engenharia-de-ia`, `lideranca-de-ia`, `conhecimento-de-ia` (1B-01).
+- `/especiais/{slug}`: special content (D-075, owner 2026-10-23) — reference guides written for the magazine outside the daily editions, registered in `src/lib/specials.ts` and listed on `/edicoes`. Hand-written pages, not engine exports (nothing in `content/**`, no contract change), on the article hooks (`data-article`, `data-block`) so every theme dresses them; diagrams are HTML/CSS on the theme tokens (no Mermaid: the CSP forbids inline styles) and read in order without CSS; tables stack into cards under 34rem (`SpecialTable.astro`).
 - `/sobre`: how editions are made (AI disclosure, D-028), privacy, editor, licenses (1B-02).
 - Any unknown path: `404.html` with status 404 ("Página não encontrada", links to `/` and `/edicoes`; 1B-03).
 - `/tags/{tag}` may be added when useful; avoid complexity in phase 1B.

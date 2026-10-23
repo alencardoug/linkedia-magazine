@@ -17,7 +17,7 @@ const pages = (dir) =>
     .map((f) => `/${dir}/${f.slice(0, -'.html'.length)}`);
 const NOT_FOUND = '/pagina-que-nao-existe';
 const ARTICLES = pages('materias').slice(0, 3);
-const ROUTES = ['/revista', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, '/sobre', '/visual', NOT_FOUND];
+const ROUTES = ['/revista', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, ...pages('especiais'), '/sobre', '/visual', NOT_FOUND];
 const WIDTHS = [1100, 320];
 const SLOTS = Object.entries(slots(readManifest())).filter(([, theme]) => theme !== null);
 const ENHANCE = '/enhance.';

@@ -1,0 +1,1872 @@
+---
+// `/especiais/governanca-de-ia`: special content (D-075). Hand-written on the article hooks (data-article,
+// data-block) so every theme dresses it like an article. Diagrams are HTML and CSS on the theme tokens: the CSP
+// forbids inline styles, so no Mermaid; each one reads in order as plain text without CSS.
+import Base from '../../layouts/Base.astro';
+import SpecialTable from '../../components/SpecialTable.astro';
+import { longDate } from '../../lib/labels';
+import { special } from '../../lib/specials';
+
+const page = special('governanca-de-ia');
+
+const TOC = [
+  ['fundamentos', 'Fundamentos'],
+  ['arquitetura', 'Arquitetura integrada'],
+  ['diferencas', 'Corporativa × técnica'],
+  ['corporativa', 'Parte I — Governança corporativa'],
+  ['tecnica', 'Parte II — Governança técnica'],
+  ['integracao', 'Camada de integração'],
+  ['codigo', 'Governança como código'],
+  ['gates', 'Ciclo de vida e gates'],
+  ['exemplo', 'Exemplo aplicado'],
+  ['responsabilidades', 'Responsabilidades'],
+  ['roadmap', 'Roadmap de 90 dias'],
+  ['indicadores', 'Indicadores e maturidade'],
+  ['ferramentas', 'Ferramentas'],
+  ['referencias', 'Referências'],
+];
+
+const PILLARS = {
+  corp: ['Estratégia e políticas', 'Estrutura organizacional', 'Privacidade e conformidade', 'IA responsável', 'Terceiros e custos', 'Auditoria e melhoria contínua'],
+  tec: ['Dados', 'Modelos', 'Segurança de IA', 'Qualidade e avaliação', 'Operação e monitoramento', 'Agentes e autonomia'],
+  ponte: ['Inventário de IA', 'Gestão de riscos'],
+};
+
+const LIFECYCLE = ['Concepção', 'Aquisição ou desenvolvimento', 'Validação', 'Produção', 'Operação', 'Desativação'];
+
+const DIFFERENCES = [
+  ['Pergunta-chave', 'O que pode ser feito e em que condições?', 'Como construir, validar e comprovar?'],
+  ['Quem conduz', 'Liderança, negócio, jurídico, riscos, privacidade e comitê', 'Engenharia, arquitetura, segurança, qualidade e operações'],
+  ['Unidade de gestão', 'Portfólio, casos de uso e sistemas de IA', 'Código, modelos, componentes, artefatos e versões'],
+  ['Como controla', 'Políticas, procedimentos, alçadas e decisões', 'Autorização, testes, avaliações, deploy, alertas e rollback'],
+  ['Entregáveis', 'Políticas, inventário, registro de riscos, pareceres e atas', 'System Cards, especificações, testes, traces e pipelines'],
+  ['Aprovar significa', 'Autorizar o uso e aceitar o risco residual', 'Demonstrar adequação técnica e liberar uma versão com controle'],
+  ['Ritmo de revisão', 'Periódico e diante de eventos relevantes', 'A cada mudança e deploy, e na operação contínua'],
+];
+
+const FRONTS = [
+  [
+    'Estratégia e política',
+    'Finalidade, princípios e escopo (sistemas próprios, APIs externas, IA de fornecedores e dos colaboradores); usos permitidos, condicionados e proibidos; regras de supervisão humana, transparência, vieses, privacidade e segurança.',
+    ['GOV-01 Política corporativa de IA'],
+  ],
+  [
+    'Estrutura decisória',
+    'Patrocinador, comitê multidisciplinar, um owner de negócio e um responsável técnico por sistema; quem aprova, suspende e desativa.',
+    ['GOV-02 Regimento do comitê', 'GOV-03 Matriz RACI'],
+  ],
+  ['Inventário', 'Cada uso de IA registrado com finalidade, dono, tecnologia, dados, terceiros, risco e estado.', ['GOV-04 Inventário corporativo de IA']],
+  [
+    'Riscos e impactos',
+    'Critérios (probabilidade, gravidade, escala, reversibilidade, sensibilidade dos dados, autonomia) e os controles exigidos por classe de risco.',
+    ['GOV-05 Metodologia de risco e impacto', 'GOV-06 Catálogo de controles'],
+  ],
+  [
+    'Homologação e terceiros',
+    'Evidências obrigatórias por classe, quem aprova a produção, exceções e mudanças; due diligence e contratos de fornecedores.',
+    ['GOV-07 Procedimento de homologação', 'GOV-08 Política de terceiros'],
+  ],
+  [
+    'Supervisão e auditoria',
+    'Indicadores, incidentes e ações corretivas; auditorias proporcionais ao risco; revisão do programa.',
+    ['GOV-09 Procedimento de incidentes', 'GOV-10 Indicadores e auditoria'],
+  ],
+] as const;
+
+const RECORD = [
+  ['ID', 'AI-023'],
+  ['Nome', 'Assistente de atendimento'],
+  ['Finalidade', 'Responder dúvidas administrativas e fazer agendamentos permitidos'],
+  ['Owner de negócio', 'Gerência de atendimento'],
+  ['Responsável técnico', 'Engenharia de IA'],
+  ['Arquitetura', 'LLM + RAG + agente'],
+  ['Dados', 'Documentos institucionais e dados pessoais, conforme o fluxo'],
+  ['Terceiros', 'Provedor do LLM e serviços externos'],
+  ['Classe de risco', 'Alto (hipótese a confirmar na avaliação formal)'],
+  ['Ambiente e estado', 'Produção, com a versão implantada registrada'],
+  ['Última avaliação', 'Data, versão e link do relatório'],
+  ['Próxima revisão', 'Data ou evento que exige reavaliação'],
+];
+
+const RISK_CLASSES = [
+  ['Baixo', 'Apoio à redação de texto não sensível', 'Política de uso e cadastro simples'],
+  ['Moderado', 'Consulta a documentos corporativos', 'Controle de acesso, validação e monitoramento'],
+  ['Alto', 'Influência relevante em decisões operacionais', 'Avaliação formal, testes reforçados e aprovação'],
+  ['Crítico', 'Possível impacto direto sobre saúde ou segurança', 'Especialistas, limites rígidos e supervisão humana adequada'],
+];
+
+const DISCIPLINES = [
+  ['Arquitetura e ciclo de vida', 'Arquitetura de referência, ambientes segregados, mudanças versionadas, critérios de deploy', ['TEC-01 System Card e arquitetura', 'TEC-08 Pipelines de validação e deploy']],
+  ['Dados', 'Contratos, qualidade, linhagem, classificação, permissões e retenção', ['TEC-02 Inventário técnico de dados']],
+  ['Modelos e LLMs', 'Registro de versões, parâmetros, fornecedor, limitações e métricas', ['TEC-03 Registro de modelos (Model Card ou equivalente)']],
+  ['Segurança', 'IAM, autenticação, gestão de secrets, prompt injection, testes adversariais', ['TEC-04 Threat model']],
+  ['RAG e agentes', 'Autorização na recuperação, fontes, contratos de ferramentas, limites de autonomia, confirmação', ['TEC-05 Especificação de controles de segurança e autonomia']],
+  ['Qualidade e avaliação', 'Datasets, critérios de aceite, regressão, robustez, revisão humana quando necessária', ['TEC-06 Datasets e plano de avaliação', 'TEC-07 Relatórios de avaliação']],
+  ['Operação', 'Traces, logs protegidos, alertas, incidentes, custos, rollback e desativação', ['TEC-09 Telemetria e indicadores', 'TEC-10 Runbooks operacionais']],
+] as const;
+
+const TREE = `ai-project/
+├── governance/          system-card.md, risk-assessment.md,
+│                        control-mapping.yaml, approvals/
+├── architecture/        architecture.md, adrs/
+├── data/                data-contracts/, lineage.md
+├── models/              model-registry.yaml
+├── evaluations/         datasets/, metrics.yaml, reports/
+├── tests/               security/, rag/, agents/
+├── observability/       alert-rules.yaml
+├── operations/          incident-runbook.md, rollback.md
+└── .github/workflows/   ai-governance-gates.yml`;
+
+const CHAIN = [
+  ['Política', 'POL-PRIV-01', 'Acesso a dados só por usuários autorizados'],
+  ['Risco', 'RISK-023-01', 'Exposição cruzada de dados de pacientes'],
+  ['Controle', 'CTRL-ACCESS-01', 'Autorização no backend e filtros na recuperação'],
+  ['Implementação', null, 'IAM, verificação por recurso e consultas autorizadas'],
+  ['Teste', 'TEST-ACCESS-01', 'Tentativas de acesso cruzado e casos negativos'],
+  ['Evidência', 'EVID-2026-001', 'Resultado, commit, versão, ambiente e responsável'],
+  ['Decisão', null, 'Aceitar o risco residual ou corrigir'],
+];
+
+const BRIDGE = [
+  ['Política de IA', 'System Card e padrões de arquitetura'],
+  ['Inventário corporativo', 'Inventários de modelos, dados e componentes'],
+  ['Metodologia de riscos', 'Avaliação de riscos e threat model'],
+  ['Catálogo de controles', 'Mapeamento de controles, código e configuração'],
+  ['Procedimento de homologação', 'Relatórios de avaliação e CI/CD'],
+  ['Política de terceiros', 'Registro de modelos, SBOM e APIs'],
+  ['Procedimento de incidentes', 'Traces, alertas e runbooks'],
+  ['Auditoria e painel corporativo', 'Histórico de versões, métricas e decisões'],
+];
+
+const YAML = `system_id: AI-023
+system_name: assistente-atendimento
+risk_level: alto
+business_owner: gerencia-atendimento
+technical_owner: engenharia-ia
+
+controls:
+  - id: CTRL-ACCESS-01
+    source_policy: POL-PRIV-01
+    risk_ids: [RISK-023-01]
+    description: "Isolamento de dados por usuário"
+    mandatory: true
+    implementation:
+      component: retrieval_api
+      enforcement: backend_authorization
+    validation:
+      test: tests/security/test_data_isolation.py
+      evidence: evaluations/reports/access-control.json
+    review_trigger: "troca de modelo, mudança no RAG ou incidente"
+
+  - id: CTRL-AGENT-02
+    source_policy: POL-AUT-01
+    risk_ids: [RISK-023-02]
+    description: "Confirmação explícita para agendamentos"
+    mandatory: true
+    implementation:
+      component: scheduling_service
+      enforcement: explicit_user_confirmation
+    validation:
+      test: tests/agents/test_confirm_action.py
+      evidence: evaluations/reports/agent-control.json
+    review_trigger: "nova ferramenta ou permissão do agente"`;
+
+const AUTOMATE = [
+  'Checar se o sistema tem system_id, responsáveis e classe de risco.',
+  'Conferir os controles obrigatórios para o tipo de sistema e a classe.',
+  'Rodar testes de segurança, RAG, agente e regressão.',
+  'Gerar relatório com commit, ambiente, data e versão do modelo.',
+  'Bloquear o release em falha crítica e pedir aprovação humana nos gates previstos.',
+  'Registrar os resultados no inventário e na aprovação.',
+];
+
+const HUMAN = [
+  'Aceitar formalmente um risco residual significativo.',
+  'Avaliar impactos sobre direitos e sobre a segurança de pessoas.',
+  'Interpretar a lei e as obrigações regulatórias.',
+  'Decidir suspensões, exceções e lançamentos de alto risco.',
+  'Fazer a validação clínica ou setorial, quando exigida.',
+];
+
+const GATES_BEFORE = [
+  ['G0', 'Registro', 'Identificar a finalidade e o dono.', 'Formulário e inventário', 'Negócio + governança', 'Mapear'],
+  ['G1', 'Avaliação', 'Classificar o risco e escolher os controles.', 'Avaliação de risco e plano de controles', 'Riscos, segurança, privacidade e negócio', 'Mapear'],
+  ['G2', 'Validação', 'Implementar e testar os requisitos.', 'Relatórios e evidências técnicas', 'Engenharia + especialistas', 'Medir'],
+];
+const GATES_AFTER = [
+  ['G3', 'Produção', 'Avaliar o risco residual e autorizar a operação.', 'Aprovação formal vinculada à versão', 'Autoridade definida na política', 'Gerenciar'],
+  ['G4', 'Operação', 'Monitorar, corrigir, revisar ou suspender.', 'Métricas, incidentes e reavaliações', 'Operações + negócio + governança', 'Gerenciar'],
+];
+
+const ARCH_FLOW = [
+  ['Usuário autenticado', null],
+  ['API de atendimento', 'Identidade, sessão, limite de requisições e autorização'],
+  ['Orquestração de IA', 'Prompt, modelo, políticas e roteamento'],
+];
+const ARCH_BRANCHES = [
+  ['RAG', 'Documentos aprovados, ACL, metadados e fontes', 'Repositório documental autorizado'],
+  ['Agente', 'Ferramentas permitidas, limites e confirmação', 'Serviço de agendamento'],
+];
+
+const CASE_DECISIONS = [
+  'Aprovar a finalidade e os limites do assistente.',
+  'Avaliar impactos assistenciais, de privacidade, de segurança e de operação.',
+  'Definir quem aprova e atualiza os documentos usados como fonte.',
+  'Fixar as bases legais e as condições para tratar dados pessoais.',
+  'Definir quando o atendimento passa para uma pessoa e os critérios mínimos para operar.',
+  'Determinar quando interromper, restringir ou reavaliar o sistema.',
+];
+
+const CASE_CONTROLS = [
+  [
+    'RAG',
+    [
+      'Documentos com dono, classificação, versão, vigência e status de aprovação.',
+      'Autorização checada antes de o conteúdo chegar ao LLM, com as permissões do usuário.',
+      'Citação de fontes e abstenção quando falta base; testes de recuperação e grounding.',
+      'Proteção contra instruções maliciosas embutidas nos documentos.',
+    ],
+  ],
+  [
+    'Agente de agendamento',
+    [
+      'Ferramentas permitidas por papel e contexto; leitura e escrita com permissões distintas.',
+      'Identidade e autorização verificadas também pelo serviço de destino.',
+      'Confirmação explícita antes de criar, alterar ou cancelar; bloqueio de duplicidade.',
+      'Registro auditável de cada chamada de ferramenta.',
+    ],
+  ],
+  [
+    'Modelo e avaliações',
+    [
+      'Modelo, versão, configuração e prompts versionados.',
+      'Datasets com casos típicos, adversariais e críticos.',
+      'Regressão a cada mudança; avaliação humana por amostragem e nos cenários críticos.',
+    ],
+  ],
+  [
+    'Operação',
+    [
+      'Traces de etapas, erros, latência, custo e sinais de qualidade.',
+      'Alertas quando um controle essencial falha.',
+      'Runbook para rollback, suspensão do agente ou modo somente leitura.',
+    ],
+  ],
+] as const;
+
+const HOMOLOGATION = [
+  ['Perguntas institucionais', 'Dataset validado e relatório', 'Ex.: ≥ 95% de acurácia factual no dataset definido'],
+  ['Citação de fontes', 'Comparação entre resposta e documento', 'Fontes corretas nos casos elegíveis'],
+  ['Acesso cruzado entre pacientes', 'Testes negativos de integração', 'Nenhuma exposição nos testes obrigatórios'],
+  ['Pedidos clínicos fora do escopo', 'Avaliação por especialistas', 'Bloqueio ou encaminhamento nos casos críticos'],
+  ['Agendamentos', 'Testes de ferramentas e de confirmação', 'Nenhuma escrita sem autorização e confirmação'],
+  ['Prompt injection', 'Testes adversariais', 'Nenhuma violação crítica nos cenários testados'],
+  ['Troca de modelo', 'Avaliação de regressão', 'Nenhuma regressão além dos limites aprovados'],
+];
+
+const PILOT_EVIDENCE = [
+  'AI-023 no inventário, com owner de negócio e responsável técnico, e o mesmo ID em todos os registros.',
+  'Avaliação de riscos e impactos aprovada.',
+  'Controles obrigatórios com ID, ligados às políticas e aos riscos, e um teste para cada um.',
+  'Dataset de avaliação e critérios de aceite definidos.',
+  'Relatório de qualidade, segurança e regressão da versão de fato avaliada.',
+  'Traces e logs protegidos funcionando; responsáveis por incidentes e rollback definidos.',
+  'Aprovação para produção e aceite de risco registrados e vinculados à versão.',
+  'Gatilhos de revisão definidos: mudanças relevantes e incidentes.',
+];
+
+const DECISIONS = [
+  ['Adequação técnica', 'Arquitetura, engenharia, segurança e especialistas técnicos.'],
+  ['Aceite do risco residual', 'O owner de negócio autorizado, conforme a metodologia de riscos.'],
+  ['Autorização para produção', 'A autoridade formal definida na política de IA.'],
+];
+
+const RACI = [
+  ['Política corporativa', 'Governança de IA', 'Comitê e liderança'],
+  ['Finalidade e resultados', 'Negócio', 'Governança'],
+  ['Classificação de risco', 'Riscos e governança', 'Especialistas da área'],
+  ['Arquitetura e implementação', 'Engenharia de IA', 'Arquitetura e segurança'],
+  ['Privacidade', 'Jurídico e privacidade', 'Encarregado (DPO) e instâncias competentes'],
+  ['Controles e testes', 'Engenharia e QA', 'Especialistas e revisores designados'],
+  ['Incidentes e monitoramento', 'Operações e segurança', 'Governança, nos casos relevantes'],
+  ['Auditoria independente', 'Auditoria interna', 'Instância de supervisão'],
+];
+
+const ROADMAP = [
+  ['Dias 1–15', 'Escopo, patrocinador, papéis e levantamento inicial', 'Mapeamento dos sistemas e da arquitetura existente', 'Inventário inicial com IDs únicos'],
+  ['Dias 16–30', 'Política mínima, RACI e metodologia de riscos', 'Modelos de System Card e de documentação', 'Classificação de risco por aplicação'],
+  ['Dias 31–45', 'Catálogo de controles e critérios de homologação', 'Controles e datasets do piloto', 'Mapa risco → controle → teste'],
+  ['Dias 46–60', 'Fluxo de aprovações e exceções', 'CI/CD, testes, relatórios e evidências', 'Gates de homologação funcionando'],
+  ['Dias 61–75', 'Indicadores, supervisão e processo de incidentes', 'Tracing, alertas, runbooks e rollback', 'Painel de indicadores de governança'],
+  ['Dias 76–90', 'Revisão e primeiros achados de auditoria', 'Correção de lacunas e simulação de incidente', 'Primeira revisão integrada do programa'],
+];
+
+const SUCCESS = [
+  'Patrocínio e responsáveis formalizados.',
+  'Política e metodologia de riscos mínimas aprovadas.',
+  'Inventário corporativo inicial em uso.',
+  'Catálogo de controles com IDs estáveis.',
+  'Um piloto rastreável de ponta a ponta: política → controle → teste.',
+  'Evidências técnicas e decisão formal de implantação.',
+  'Monitoramento em operação e procedimento de incidentes.',
+  'Backlog priorizado para expandir o programa.',
+];
+
+const KPIS = [
+  [
+    'Cobertura',
+    [
+      ['% de sistemas inventariados', 'Conhecemos nosso universo de IA?'],
+      ['% com responsável definido', 'Há prestação de contas?'],
+      ['% com avaliação de risco', 'A gestão de riscos cobre o portfólio?'],
+    ],
+  ],
+  [
+    'Controle',
+    [
+      ['% com controles testados', 'Os controles são demonstráveis?'],
+      ['% com validação documentada', 'Há evidência de qualidade?'],
+      ['% de agentes com permissões revisadas', 'A autonomia está sob controle?'],
+    ],
+  ],
+  [
+    'Operação',
+    [
+      ['% com monitoramento ativo', 'Os sistemas seguem supervisionados?'],
+      ['Incidentes por classe e severidade', 'Que riscos estão se materializando?'],
+      ['Tempo médio de resposta e resolução', 'Com que rapidez reagimos?'],
+      ['% de revisões no prazo', 'A governança se sustenta ao longo do tempo?'],
+    ],
+  ],
+  ['Valor', [['Benefício realizado × custo', 'A IA gera valor para a empresa?']]],
+] as const;
+
+const MATURITY = [
+  ['Inicial', 'Sem política nem inventário confiáveis', 'Controles pontuais, sem padrão'],
+  ['Básica', 'Responsáveis definidos e avaliação inicial de riscos', 'Documentação e testes mínimos'],
+  ['Definida', 'Política, critérios e homologação padronizados', 'Controles e avaliações reproduzíveis'],
+  ['Gerenciada', 'Indicadores, supervisão e auditoria periódica', 'Gates no CI/CD, traces, alertas e rollback'],
+  ['Otimizada', 'Revisão contínua guiada por riscos e resultados', 'Controles amplamente automatizados e melhoria baseada em evidências'],
+];
+
+const STACK = [
+  ['Inventário e GRC', 'Jira, ServiceNow, plataforma de GRC ou sistema interno'],
+  ['Código e versionamento', 'GitHub'],
+  ['Políticas declarativas', 'YAML com validadores próprios; OPA quando fizer sentido'],
+  ['Integração e deploy', 'GitHub Actions ou Cloud Build'],
+  ['Testes e avaliação', 'pytest e avaliações específicas de LLM, RAG e agentes'],
+  ['Tracing e avaliação contínua', 'LangSmith, Langfuse, OpenTelemetry'],
+  ['Registro de modelos', 'MLflow, Vertex AI Model Registry ou equivalente'],
+  ['Identidade e secrets', 'IAM corporativo ou Cloud IAM, Secret Manager'],
+  ['Operação e alertas', 'Cloud Logging e Cloud Monitoring'],
+  ['Painel de gestão', 'BigQuery com Looker ou Power BI'],
+];
+
+const REFERENCES = [
+  ['https://www.iso.org/standard/81230.html', 'ISO/IEC 42001:2023', 'sistema de gestão de IA (AIMS): política, papéis, controles, avaliação e melhoria.'],
+  ['https://www.nist.gov/itl/ai-risk-management-framework', 'NIST AI RMF 1.0', 'gestão de riscos de IA em quatro funções: Governar, Mapear, Medir e Gerenciar.'],
+  ['https://airc.nist.gov/airmf-resources/playbook/', 'NIST AI RMF Playbook', 'ações sugeridas para cada função do AI RMF.'],
+  ['https://www.iso.org/standard/77304.html', 'ISO/IEC 23894:2023', 'como integrar a gestão de riscos de IA à gestão de riscos da organização.'],
+  ['https://www.iso.org/standard/42005', 'ISO/IEC 42005:2025', 'avaliação de impacto de sistemas de IA sobre pessoas, grupos e sociedade.'],
+  ['https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence', 'NIST AI 600-1', 'perfil de riscos do AI RMF para IA generativa.'],
+  ['https://genai.owasp.org/llm-top-10/', 'OWASP Top 10 para aplicações com LLM (2025)', 'riscos e controles técnicos para LLMs.'],
+  ['https://genai.owasp.org/', 'OWASP GenAI Security Project', 'segurança de aplicações de IA generativa e de agentes.'],
+  ['https://www.gov.br/anpd/pt-br/canais_atendimento/agente-de-tratamento/relatorio-de-impacto-a-protecao-de-dados-pessoais-ripd', 'ANPD — Relatório de Impacto à Proteção de Dados Pessoais (RIPD)', 'quando e como elaborar o RIPD previsto na LGPD.'],
+];
+
+const cells = (n: number) => Array.from({ length: n }, (_, i) => i);
+---
+
+<Base title={page.title} description={page.summary}>
+  <article data-article="especial-governanca-de-ia" data-special>
+    <header>
+      <p class="meta">
+        Conteúdo especial · <time datetime={page.date}>{longDate(page.date)}</time> · {page.readMinutes} min de leitura
+      </p>
+      <h1>Governança de IA: como implementar em ambientes corporativos</h1>
+      <p data-summary>
+        Da estratégia ao software de IA: como ligar as políticas, os riscos e as decisões da empresa aos controles, testes
+        e evidências que a engenharia produz.
+      </p>
+    </header>
+
+    <p data-block="paragraph">
+      Governança de IA é o conjunto de políticas, papéis, processos e controles que permite adotar, construir, operar e
+      desligar sistemas de IA com segurança e alinhados ao negócio. Na prática, são dois sistemas que precisam conversar.
+      A <strong>governança corporativa</strong> define o que é permitido, exigido e aceitável. A{' '}
+      <strong>governança técnica</strong> mostra como implementar, testar e comprovar. Este guia explica como montar os
+      dois e, principalmente, a ponte entre eles.
+    </p>
+
+    <aside data-block="callout" data-variant="note">
+      <p>
+        <strong>Como ler este guia:</strong> um único caso acompanha o texto do começo ao fim, o{' '}
+        <strong>AI-023</strong>: assistente de atendimento de um hospital que responde dúvidas com RAG e marca exames
+        por meio de um agente. Os códigos (GOV-01, TEC-04, CTRL-ACCESS-01…), os gates G0–G4 e os limites numéricos são
+        uma proposta de organização, não identificadores nem exigências de normas.
+      </p>
+    </aside>
+
+    <nav class="gv-toc" aria-labelledby="sumario">
+      <p class="gv-label" id="sumario">Neste guia</p>
+      <ol>
+        {TOC.map(([id, label]) => (
+          <li>
+            <a href={`#${id}`}>{label}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <h2 id="fundamentos" data-block="heading">1. Fundamentos: o que a governança precisa responder</h2>
+    <p>
+      A diretoria — e qualquer auditor — vai fazer seis perguntas. A governança existe para que as respostas estejam
+      prontas e documentadas:
+    </p>
+    <ol class="gv-questions">
+      <li>Que soluções de IA usamos, para quê e quem responde por cada uma?</li>
+      <li>Que modelos, dados, fornecedores, integrações e agentes estão envolvidos?</li>
+      <li>Que riscos toleramos e quem pode aceitá-los?</li>
+      <li>Como provamos, com evidências, que segurança, privacidade e qualidade foram atendidas?</li>
+      <li>Quem autoriza a entrada em produção e quem pode interromper a operação?</li>
+      <li>Como detectamos incidentes, reavaliamos riscos e auditamos decisões?</li>
+    </ol>
+
+    <h3 data-block="heading">1.1 Os 14 pilares, divididos entre as duas governanças</h3>
+    <p>
+      Uma forma prática de organizar o território (não a lista de uma norma) é repartir 14 pilares entre as duas
+      governanças, com dois deles fazendo a ponte:
+    </p>
+    <figure data-block="diagram" class="gv-fig">
+      <div class="gv-pillars">
+        <div data-side="corp">
+          <p class="gv-label">Governança corporativa</p>
+          <ul class="gv-chips">{PILLARS.corp.map((p) => <li>{p}</li>)}</ul>
+        </div>
+        <div data-side="tec">
+          <p class="gv-label">Governança técnica</p>
+          <ul class="gv-chips">{PILLARS.tec.map((p) => <li>{p}</li>)}</ul>
+        </div>
+        <div data-side="ponte">
+          <p class="gv-label">Na ponte entre as duas</p>
+          <ul class="gv-chips">{PILLARS.ponte.map((p) => <li>{p}</li>)}</ul>
+        </div>
+      </div>
+      <figcaption>As partes I e II transformam cada grupo em frentes de trabalho e entregáveis.</figcaption>
+    </figure>
+
+    <aside data-block="callout" data-variant="note">
+      <p>
+        <strong>Princípio central:</strong> a governança não termina na aprovação do projeto. Ela acompanha o sistema por
+        todo o ciclo de vida.
+      </p>
+      <ol class="gv-steps" aria-label="Ciclo de vida de um sistema de IA">{LIFECYCLE.map((s) => <li>{s}</li>)}</ol>
+    </aside>
+
+    <p>
+      O modelo se apoia na ISO/IEC 42001, no NIST AI RMF e no OWASP GenAI, entre outras{' '}
+      <a href="#referencias">referências</a>.
+    </p>
+
+    <h2 id="arquitetura" data-block="heading">2. Arquitetura integrada: duas governanças e uma ponte</h2>
+    <p>
+      São três camadas: no topo, o sistema de gestão de IA da empresa (o AIMS da ISO/IEC 42001); na base, a plataforma
+      onde os sistemas são construídos e operados; no meio, um catálogo comum que traduz obrigações em controles e
+      devolve evidências para a decisão.
+    </p>
+    <figure data-block="diagram" class="gv-fig">
+      <div class="gv-layers">
+        <div class="gv-layer" data-side="corp">
+          <p class="gv-layer-title">Governança corporativa</p>
+          <p class="gv-layer-sub">AIMS · define o que é permitido, exigido e aceitável</p>
+          <ul class="gv-chips">
+            <li>Estratégia e políticas</li>
+            <li>Comitê e papéis</li>
+            <li>Risco, conformidade e critérios</li>
+            <li>Aprovação e auditoria</li>
+          </ul>
+        </div>
+        <div class="gv-flows">
+          <p><span class="gv-arrow" data-dir="down" aria-hidden="true"></span><span class="visually-hidden">Desce:</span> obrigações e apetite a risco</p>
+          <p><span class="gv-arrow" data-dir="up" aria-hidden="true"></span><span class="visually-hidden">Sobe:</span> indicadores e propostas de decisão</p>
+        </div>
+        <div class="gv-layer" data-side="ponte">
+          <p class="gv-layer-title">Camada de integração</p>
+          <p class="gv-layer-sub">Catálogo corporativo · liga cada obrigação à sua prova</p>
+          <ul class="gv-chips">
+            <li>Inventário de sistemas e responsáveis</li>
+            <li>Riscos e catálogo de controles</li>
+            <li>Testes, evidências e decisões</li>
+          </ul>
+        </div>
+        <div class="gv-flows">
+          <p><span class="gv-arrow" data-dir="down" aria-hidden="true"></span><span class="visually-hidden">Desce:</span> requisitos e controles aplicáveis</p>
+          <p><span class="gv-arrow" data-dir="up" aria-hidden="true"></span><span class="visually-hidden">Sobe:</span> resultados e evidências</p>
+        </div>
+        <div class="gv-layer" data-side="tec">
+          <p class="gv-layer-title">Governança técnica</p>
+          <p class="gv-layer-sub">Plataforma técnica · implementa, testa e comprova</p>
+          <ul class="gv-chips">
+            <li>Arquitetura, dados e modelos</li>
+            <li>LLM, RAG, prompts e agentes</li>
+            <li>Segurança e avaliações</li>
+            <li>CI/CD, telemetria e incidentes</li>
+          </ul>
+        </div>
+      </div>
+      <figcaption>As obrigações descem como requisitos; as evidências sobem como indicadores e propostas de decisão.</figcaption>
+    </figure>
+    <p>
+      Integrar não é centralizar tudo em um comitê. É padronizar regras e rastreabilidade, deixando cada decisão com quem
+      tem autoridade para tomá-la. Em uma frase:
+    </p>
+    <p class="gv-thesis">
+      A governança corporativa estabelece a obrigação. A engenharia implementa o controle. A avaliação produz a evidência.
+      A governança usa a evidência para decidir. A operação mostra se o controle continua eficaz.
+    </p>
+
+    <h2 id="diferencas" data-block="heading">3. Corporativa × técnica: quem faz o quê</h2>
+    <SpecialTable
+      label="Diferenças entre as governanças corporativa e técnica"
+      columns={['Dimensão', 'Governança corporativa', 'Governança técnica']}
+      rows={DIFFERENCES}
+      hideRowHeaderTitle
+    />
+    <aside data-block="callout" data-variant="note">
+      <p>
+        <strong>Na prática:</strong> o documento corporativo diz que “dados só podem ser acessados por usuários
+        autorizados”. O artefato técnico mostra <em>como</em> a autorização foi aplicada e <em>qual teste</em> confirmou
+        que ela funciona.
+      </p>
+    </aside>
+
+    <h2 id="corporativa" data-block="heading">4. Parte I — Governança corporativa</h2>
+    <p>A parte corporativa responde quem decide, com que critérios e com que registros.</p>
+    <h3 data-block="heading">4.1 Seis frentes e seus entregáveis</h3>
+    <p>
+      Cada frente produz entregáveis com código estável (GOV-01 a GOV-10), que depois serão citados pelos controles e
+      pelas evidências.
+    </p>
+    <SpecialTable
+      label="Frentes da governança corporativa e entregáveis"
+      columns={['Frente', 'O que definir', 'Entregáveis']}
+      rows={FRONTS.map(([front, what, deliverables], i) => [`${i + 1}. ${front}`, what, deliverables])}
+      wide
+    />
+    <p>
+      O resultado esperado: a diretoria consegue explicar quais soluções existem, por que foram autorizadas, que
+      controles se aplicam e como os riscos são supervisionados.
+    </p>
+
+    <h3 data-block="heading">4.2 O inventário na prática</h3>
+    <p>O inventário é a base de tudo: sem ele não há como saber o que governar. Um registro mínimo, para o caso do guia:</p>
+    <figure data-block="diagram" class="gv-fig gv-record">
+      <p class="gv-label">Inventário corporativo · registro</p>
+      <dl>
+        {
+          RECORD.map(([field, value]) => (
+            <div>
+              <dt>{field}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <figcaption>Ficha do inventário corporativo (GOV-04). O mesmo ID aparece em todos os outros registros do sistema.</figcaption>
+    </figure>
+
+    <h3 data-block="heading">4.3 Classes de risco</h3>
+    <p>A metodologia (GOV-05) traduz critérios em classes, e cada classe define o mínimo de controles. Um exemplo de política interna:</p>
+    <figure data-block="diagram" class="gv-fig">
+      <ol class="gv-risk">
+        {
+          RISK_CLASSES.map(([name, example, control], i) => (
+            <li>
+              <p class="gv-risk-name">
+                <span class="gv-meter" data-level={i + 1} aria-hidden="true">
+                  {cells(4).map(() => (
+                    <i />
+                  ))}
+                </span>
+                {name}
+              </p>
+              <p>
+                <span class="gv-k">Caso típico</span> {example}
+              </p>
+              <p>
+                <span class="gv-k">Controle típico</span> {control}
+              </p>
+            </li>
+          ))
+        }
+      </ol>
+      <figcaption>
+        Classes ilustrativas de uma política interna: não equivalem automaticamente às de leis ou regulamentos. A classe
+        depende da finalidade concreta e da avaliação de riscos.
+      </figcaption>
+    </figure>
+
+    <h2 id="tecnica" data-block="heading">5. Parte II — Governança técnica</h2>
+    <p>A parte técnica transforma cada exigência em controle implementado, testado e com evidência guardada.</p>
+    <h3 data-block="heading">5.1 Sete disciplinas e seus entregáveis</h3>
+    <p>
+      Do lado da engenharia, os controles se organizam em sete disciplinas, cada uma com artefatos que servem de
+      evidência (TEC-01 a TEC-10). Aplique-os na proporção do risco: um classificador estatístico, um assistente de
+      documentos e um agente que altera registros pedem controles diferentes.
+    </p>
+    <SpecialTable
+      label="Disciplinas da governança técnica e entregáveis"
+      columns={['Disciplina', 'Práticas e controles', 'Entregáveis']}
+      rows={DISCIPLINES}
+      wide
+    />
+
+    <h3 data-block="heading">5.2 Um repositório que já nasce governado</h3>
+    <p>Uma estrutura de referência põe os artefatos de governança ao lado do código, versionados juntos:</p>
+    <figure data-block="code">
+      <pre tabindex="0"><code data-language="text">{TREE}</code></pre>
+    </figure>
+    <aside data-block="callout" data-variant="warning">
+      <p>
+        <strong>Evidência não é dado sensível:</strong> segredos, dados pessoais e logs sensíveis não vão para o Git.
+        Relatórios protegidos ficam em armazenamento controlado; o repositório guarda identificadores, referências e
+        hashes.
+      </p>
+    </aside>
+
+    <h2 id="integracao" data-block="heading">6. Camada de integração: riscos, controles e evidências</h2>
+    <h3 data-block="heading">6.1 O fio da rastreabilidade</h3>
+    <p>
+      O catálogo de controles (GOV-06) é o elo entre as duas governanças: cada controle aponta a política de origem, os
+      riscos que mitiga, quem o implementa, como se comprova e onde fica a evidência. No AI-023, o isolamento de dados
+      de pacientes fica assim:
+    </p>
+    <figure data-block="diagram" class="gv-fig">
+      <ol class="gv-numbered">
+        {
+          CHAIN.map(([kind, id, text]) => (
+            <li>
+              <span class="gv-k">{kind}</span>
+              {id && <code>{id}</code>}
+              <span>{text}</span>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="gv-loop"><span class="gv-loop-icon" aria-hidden="true"></span>Se o teste falhar, a implementação é corrigida e reavaliada antes da decisão.</p>
+      <figcaption>
+        Do requisito à decisão: cada elo tem um ID, então qualquer teste responde por que existe, que exigência atende e
+        que decisão apoiou.
+      </figcaption>
+    </figure>
+
+    <h3 data-block="heading">6.2 Cada documento tem seu par técnico</h3>
+    <p>A mesma lógica vale para os entregáveis: cada documento corporativo tem um artefato técnico que o comprova.</p>
+    <figure data-block="diagram" class="gv-fig">
+      <div class="gv-bridge">
+        <p class="gv-bridge-row gv-bridge-head" aria-hidden="true">
+          <span data-side="corp">Corporativo</span><span data-side="tec">Técnico</span>
+        </p>
+        <ul>
+          {
+            BRIDGE.map(([corp, tec]) => (
+              <li class="gv-bridge-row">
+                <span data-side="corp">{corp}</span>
+                <span class="visually-hidden">, comprovado por: </span>
+                <span data-side="tec">{tec}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </figure>
+    <aside data-block="callout" data-variant="note">
+      <p>
+        <strong>Regra de desenho:</strong> uma política pode gerar vários controles, e um teste pode comprovar vários
+        controles. Guarde essas relações N:N no catálogo, em vez de exigir um documento para cada ligação.
+      </p>
+    </aside>
+
+    <h2 id="codigo" data-block="heading">7. Governança como código</h2>
+    <p>
+      Governança como código não é entregar a scripts o julgamento ético ou jurídico. É automatizar as verificações
+      objetivas e reservar as pessoas para o que exige julgamento.
+    </p>
+    <h3 data-block="heading">7.1 Os controles declarados junto do código</h3>
+    <p>O ponto de partida é um arquivo, no repositório de cada sistema, com os controles que se aplicam a ele:</p>
+    <figure data-block="code">
+      <pre tabindex="0"><code data-language="yaml">{YAML}</code></pre>
+      <figcaption>
+        <code>governance/control-mapping.yaml</code> do AI-023. O arquivo declara controles e verificações; a proteção
+        acontece no sistema e é comprovada pelos testes.
+      </figcaption>
+    </figure>
+
+    <h3 data-block="heading">7.2 O que automatizar e o que manter com pessoas</h3>
+    <div class="gv-split">
+      <div data-side="tec">
+        <p class="gv-label">Automatize</p>
+        <ul>{AUTOMATE.map((item) => <li>{item}</li>)}</ul>
+      </div>
+      <div data-side="corp">
+        <p class="gv-label">Mantenha com pessoas</p>
+        <ul>{HUMAN.map((item) => <li>{item}</li>)}</ul>
+      </div>
+    </div>
+
+    <h2 id="gates" data-block="heading">8. Ciclo de vida e gates de aprovação</h2>
+    <p>
+      Cinco gates levam um sistema da ideia à operação. Cada um tem propósito, evidência e responsável definidos, e a
+      operação realimenta a avaliação.
+    </p>
+    <figure data-block="diagram" class="gv-fig">
+      <ol class="gv-gates">
+        {
+          GATES_BEFORE.map(([id, name, purpose, evidence, who, nist]) => (
+            <li>
+              <span class="gv-gate-id">{id}</span>
+              <div>
+                <p class="gv-gate-name">
+                  {name} <span class="gv-nist">NIST: {nist}</span>
+                </p>
+                <p>{purpose}</p>
+                <dl class="gv-pairs">
+                  <div>
+                    <dt>Evidência</dt>
+                    <dd>{evidence}</dd>
+                  </div>
+                  <div>
+                    <dt>Quem</dt>
+                    <dd>{who}</dd>
+                  </div>
+                </dl>
+              </div>
+            </li>
+          ))
+        }
+        <li data-decision>
+          <span class="gv-gate-id" aria-hidden="true">?</span>
+          <div>
+            <p class="gv-gate-name">Decisão: critérios atendidos e risco residual aceito?</p>
+            <p>
+              <strong>Sim:</strong> segue para o G3. <strong>Não:</strong> corrigir, mitigar ou reavaliar, e voltar ao G2.
+            </p>
+          </div>
+        </li>
+        {
+          GATES_AFTER.map(([id, name, purpose, evidence, who, nist]) => (
+            <li>
+              <span class="gv-gate-id">{id}</span>
+              <div>
+                <p class="gv-gate-name">
+                  {name} <span class="gv-nist">NIST: {nist}</span>
+                </p>
+                <p>{purpose}</p>
+                <dl class="gv-pairs">
+                  <div>
+                    <dt>Evidência</dt>
+                    <dd>{evidence}</dd>
+                  </div>
+                  <div>
+                    <dt>Quem</dt>
+                    <dd>{who}</dd>
+                  </div>
+                </dl>
+                {id === 'G4' && (
+                  <p class="gv-loop">
+                    <span class="gv-loop-icon" aria-hidden="true" />
+                    Mudança relevante ou incidente: o sistema volta ao G1.
+                  </p>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+      <figcaption>
+        Os gates G0–G4 e a correspondência aproximada com as funções do NIST AI RMF; a quarta função, Governar, atravessa
+        todos eles.
+      </figcaption>
+    </figure>
+    <aside data-block="callout" data-variant="warning">
+      <p>
+        <strong>Exceções:</strong> exigem base na política, justificativa, aprovação de quem tem alçada, prazo de
+        validade, riscos documentados e controles compensatórios. Nunca autorizam descumprir obrigação legal ou requisito
+        essencial de segurança.
+      </p>
+    </aside>
+
+    <h2 id="exemplo" data-block="heading">9. Exemplo aplicado: RAG com agente de agendamento</h2>
+    <h3 data-block="heading">9.1 O caso</h3>
+    <div class="gv-case">
+      <p class="gv-label">AI-023 · Assistente de atendimento</p>
+      <dl>
+        <div>
+          <dt>Finalidade</dt>
+          <dd>
+            Esclarecer dúvidas administrativas e de preparo para exames com fontes institucionais aprovadas, e agendar
+            por ferramentas autorizadas.
+          </dd>
+        </div>
+        <div>
+          <dt>Limites</dt>
+          <dd>Não diagnostica, não prescreve, não indica tratamento e não substitui profissionais de saúde.</dd>
+        </div>
+        <div>
+          <dt>Classificação inicial</dt>
+          <dd>Alto risco, como hipótese a confirmar na avaliação formal.</dd>
+        </div>
+      </dl>
+    </div>
+
+    <h3 data-block="heading">9.2 Arquitetura</h3>
+    <figure data-block="diagram" class="gv-fig">
+      <div class="gv-arch">
+        <div class="gv-arch-main">
+          {
+            ARCH_FLOW.map(([name, detail]) => (
+              <div class="gv-node">
+                <p class="gv-node-name">{name}</p>
+                {detail && <p class="gv-node-detail">{detail}</p>}
+              </div>
+            ))
+          }
+          <div class="gv-arch-branches">
+            {
+              ARCH_BRANCHES.map(([name, detail, target]) => (
+                <div class="gv-arch-branch">
+                  <div class="gv-node">
+                    <p class="gv-node-name">{name}</p>
+                    <p class="gv-node-detail">{detail}</p>
+                  </div>
+                  <div class="gv-node" data-store>
+                    <p class="gv-node-name">{target}</p>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+        <div class="gv-node gv-arch-obs">
+          <p class="gv-node-name">Observabilidade e governança técnica</p>
+          <p class="gv-node-detail">Traces, avaliações, auditoria e alertas, com sinais da API, da orquestração, do RAG e do agente</p>
+        </div>
+      </div>
+      <figcaption>
+        A orquestração consulta o RAG ou aciona o agente; cada caminho só alcança o que o usuário pode ver ou fazer, e
+        todas as camadas enviam sinais para a observabilidade.
+      </figcaption>
+    </figure>
+
+    <h3 data-block="heading">9.3 O que a governança corporativa decide</h3>
+    <ol>{CASE_DECISIONS.map((item) => <li>{item}</li>)}</ol>
+    <aside data-block="callout" data-variant="warning">
+      <p>
+        <strong>No setor de saúde:</strong> dados de saúde são dados pessoais sensíveis na LGPD. A avaliação de impacto de
+        IA (ISO/IEC 42005) e o RIPD, quando cabível, não substituem um ao outro. E é preciso verificar se a finalidade
+        enquadra o produto nas regras da Anvisa para software como dispositivo médico.
+      </p>
+    </aside>
+
+    <h3 data-block="heading">9.4 Como a engenharia implementa os controles</h3>
+    <div class="gv-cards">
+      {
+        CASE_CONTROLS.map(([title, items]) => (
+          <div class="gv-card">
+            <p class="gv-label">{title}</p>
+            <ul>{items.map((item) => <li>{item}</li>)}</ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <h3 data-block="heading">9.5 Matriz de homologação</h3>
+    <SpecialTable
+      label="Matriz de homologação do AI-023"
+      columns={['Cenário', 'Evidência', 'Critério (exemplo)']}
+      rows={HOMOLOGATION}
+      wide
+    />
+    <p class="meta">
+      Os limites são exemplos: os reais dependem de risco, impacto e contexto. E passar nos testes não garante ausência de
+      falhas futuras.
+    </p>
+
+    <h3 data-block="heading">9.6 Evidências mínimas do piloto</h3>
+    <ul class="gv-check">{PILOT_EVIDENCE.map((item) => <li>{item}</li>)}</ul>
+
+    <h2 id="responsabilidades" data-block="heading">10. Responsabilidades e modelo organizacional</h2>
+    <p>Três decisões não devem ficar com as mesmas pessoas:</p>
+    <ol class="gv-numbered" data-compact>
+      {
+        DECISIONS.map(([decision, who]) => (
+          <li>
+            <span class="gv-k">{decision}</span>
+            <span>{who}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <SpecialTable label="Responsabilidades por atividade" columns={['Atividade', 'Conduz', 'Valida ou aprova']} rows={RACI} />
+
+    <h3 data-block="heading">10.1 Como evitar burocracia</h3>
+    <ul>
+      <li>O comitê não revisa cada commit ou deploy de rotina.</li>
+      <li>Decisões de baixo risco são delegadas por critérios documentados.</li>
+      <li>Testes e relatórios são automatizados sempre que o requisito permite.</li>
+      <li>A análise humana fica para impactos relevantes, exceções e riscos residuais, com revisões na medida do risco.</li>
+    </ul>
+
+    <h2 id="roadmap" data-block="heading">11. Roadmap de 90 dias</h2>
+    <p>
+      A meta é avançar nas duas governanças em paralelo, com uma ou duas aplicações reais como piloto. Com equipe enxuta,
+      a ordem não muda: inventário e donos, política e matriz de riscos, catálogo de controles, um piloto com testes
+      reais, gate de homologação e, por fim, telemetria e incidentes.
+    </p>
+    <figure data-block="diagram" class="gv-fig">
+      <ol class="gv-rows">
+        {
+          ROADMAP.map(([period, corp, tec, milestone], i) => (
+            <li>
+              <p class="gv-row-head">
+                <span class="gv-meter" data-level={i + 1} aria-hidden="true">
+                  {cells(6).map(() => (
+                    <i />
+                  ))}
+                </span>
+                {period}
+              </p>
+              <div class="gv-lanes">
+                <p data-side="corp">
+                  <span class="gv-k">Corporativa</span> {corp}
+                </p>
+                <p data-side="tec">
+                  <span class="gv-k">Técnica</span> {tec}
+                </p>
+              </div>
+              <p class="gv-milestone">
+                <span class="gv-k">Entrega integrada:</span> {milestone}
+              </p>
+            </li>
+          ))
+        }
+      </ol>
+    </figure>
+
+    <h3 data-block="heading">11.1 Critérios de sucesso aos 90 dias</h3>
+    <ul class="gv-check">{SUCCESS.map((item) => <li>{item}</li>)}</ul>
+    <p class="meta">
+      Um programa mínimo em 90 dias não equivale a certificação nem a conformidade integral com a ISO/IEC 42001: é o
+      primeiro conjunto de processos e controles funcionando.
+    </p>
+
+    <h2 id="indicadores" data-block="heading">12. Indicadores e maturidade</h2>
+    <h3 data-block="heading">12.1 Indicadores</h3>
+    <div class="gv-cards">
+      {
+        KPIS.map(([group, items]) => (
+          <div class="gv-card" data-wide={items.length === 1 ? '' : undefined}>
+            <p class="gv-label">{group}</p>
+            <dl class="gv-kpis">
+              {items.map(([kpi, question]) => (
+                <div>
+                  <dt>{kpi}</dt>
+                  <dd>{question}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))
+      }
+    </div>
+    <p>
+      Atenção à leitura: um aumento inicial de incidentes registrados costuma indicar detecção melhor, não necessariamente
+      mais falhas.
+    </p>
+
+    <h3 data-block="heading">12.2 Maturidade em duas dimensões</h3>
+    <figure data-block="diagram" class="gv-fig">
+      <ol class="gv-rows">
+        {
+          MATURITY.map(([level, corp, tec], i) => (
+            <li>
+              <p class="gv-row-head">
+                <span class="gv-meter" data-level={i + 1} aria-hidden="true">
+                  {cells(5).map(() => (
+                    <i />
+                  ))}
+                </span>
+                {i + 1} · {level}
+              </p>
+              <div class="gv-lanes">
+                <p data-side="corp">
+                  <span class="gv-k">Corporativa</span> {corp}
+                </p>
+                <p data-side="tec">
+                  <span class="gv-k">Técnica</span> {tec}
+                </p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </figure>
+    <aside data-block="callout" data-variant="note">
+      <p>
+        <strong>Duas réguas, não uma:</strong> a empresa pode estar em níveis diferentes em cada dimensão. Engenharia
+        madura não substitui governança institucional, e políticas sofisticadas não provam segurança sem testes.
+      </p>
+    </aside>
+
+    <h2 id="ferramentas" data-block="heading">13. Ferramentas: uma stack de referência</h2>
+    <p>
+      Nenhuma ferramenta é obrigatória. O que não pode faltar é um fio de rastreabilidade comum entre sistema, risco,
+      controle, evidência e decisão. Exemplos por capacidade:
+    </p>
+    <dl class="gv-stack">
+      {
+        STACK.map(([capability, tools]) => (
+          <div>
+            <dt>{capability}</dt>
+            <dd>{tools}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <h2 id="referencias" data-block="heading">14. Referências</h2>
+    <ul class="gv-refs">
+      {
+        REFERENCES.map(([url, name, use]) => (
+          <li>
+            <a href={url} rel="noopener noreferrer">
+              {name}
+            </a>
+            : {use}
+          </li>
+        ))
+      }
+    </ul>
+    <p>
+      Normas e guias são fontes de orientação; a conformidade depende da avaliação de cada organização e do escopo
+      regulatório aplicável.
+    </p>
+
+    <footer>
+      <p class="meta" data-ai-note>
+        Guia organizado pelo editor da Linkedia, com texto condensado e diagramas feitos com apoio de IA e revisão
+        humana.{' '}
+        <a href="/sobre">Saiba como a Linkedia é feita</a>.
+      </p>
+    </footer>
+  </article>
+  <p><a href="/edicoes">Voltar às edições</a></p>
+</Base>
+
+<style>
+  /* Shared pieces. Colours come only from the active theme's tokens; [data-side] picks the lane tone, and every
+     lane also says its name in text, so colour never carries meaning alone. */
+  [data-side='corp'] {
+    --gv-tone: var(--accent);
+  }
+  [data-side='tec'] {
+    --gv-tone: var(--warning);
+  }
+  [data-side='ponte'] {
+    --gv-tone: var(--fg);
+  }
+
+  .gv-label {
+    margin: 0 0 var(--space-2);
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .gv-k {
+    display: block;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .gv-fig {
+    margin-bottom: var(--space-4);
+  }
+
+  .gv-fig figcaption {
+    margin-top: var(--space-3);
+  }
+
+  .gv-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gv-chips li {
+    padding: 0.1rem 0.6rem;
+    border: 1px solid var(--gv-tone, var(--border));
+    border-radius: calc(var(--radius) * 99);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  /* Table of contents: two columns where there is room. */
+  .gv-toc {
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .gv-toc ol {
+    margin: 0;
+    padding-left: var(--space-4);
+    columns: 2 15rem;
+    column-gap: var(--space-5);
+    font-size: var(--text-sm);
+  }
+
+  .gv-toc li {
+    break-inside: avoid;
+    margin-bottom: var(--space-1);
+  }
+
+  .gv-questions li {
+    margin-bottom: var(--space-1);
+  }
+
+  /* 1.1 pillars */
+  .gv-pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space-3);
+  }
+
+  .gv-pillars > div {
+    padding: var(--space-3);
+    border-top: 3px solid var(--gv-tone);
+    background: var(--surface);
+  }
+
+  .gv-pillars > [data-side='ponte'] {
+    grid-column: 1 / -1;
+  }
+
+  /* Lifecycle strip: steps joined by chevrons. */
+  .gv-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .gv-steps li:not(:last-child)::after {
+    content: '';
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-left: 0.7rem;
+    border-top: 2px solid var(--muted);
+    border-right: 2px solid var(--muted);
+    vertical-align: 0.1em;
+    transform: rotate(45deg);
+  }
+
+  /* 2 layers */
+  .gv-layer {
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gv-tone);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .gv-layer-title {
+    margin: 0;
+    font-weight: 800;
+  }
+
+  .gv-layer-sub {
+    margin: 0 0 var(--space-2);
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+
+  .gv-flows {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    color: var(--muted);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+
+  .gv-flows p {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+  }
+
+  /* An arrow drawn with borders: a shaft and a head, pointing down or up. */
+  .gv-arrow {
+    position: relative;
+    flex: none;
+    width: 2px;
+    height: 1.6rem;
+    margin: 0 0.35rem;
+    background: var(--fg);
+  }
+
+  .gv-arrow::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid var(--fg);
+    border-bottom: 2px solid var(--fg);
+  }
+
+  .gv-arrow[data-dir='down']::after {
+    bottom: 0;
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .gv-arrow[data-dir='up']::after {
+    top: 0;
+    transform: translateX(-50%) rotate(-135deg);
+  }
+
+  .gv-thesis {
+    padding: var(--space-3) var(--space-4);
+    border-left: 4px solid var(--accent);
+    background: var(--surface);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  /* 4.2 inventory record */
+  .gv-record dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    column-gap: var(--space-4);
+    margin: 0;
+  }
+
+  .gv-record dl > div,
+  .gv-case dl > div {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .gv-record dt,
+  .gv-case dt,
+  .gv-pairs dt,
+  .gv-stack dt {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .gv-record dd,
+  .gv-case dd {
+    margin: 0;
+  }
+
+  .gv-record dl > div:first-child dd {
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
+  /* Meters: N of M cells lit (risk class, roadmap fortnight, maturity level). Decorative; the text says the level. */
+  .gv-meter {
+    display: inline-flex;
+    gap: 3px;
+    margin-right: var(--space-2);
+    vertical-align: middle;
+  }
+
+  .gv-meter i {
+    width: 0.9rem;
+    height: 0.45rem;
+    background: var(--border);
+  }
+
+  .gv-meter[data-level='1'] i:nth-child(-n + 1),
+  .gv-meter[data-level='2'] i:nth-child(-n + 2),
+  .gv-meter[data-level='3'] i:nth-child(-n + 3),
+  .gv-meter[data-level='4'] i:nth-child(-n + 4),
+  .gv-meter[data-level='5'] i:nth-child(-n + 5),
+  .gv-meter[data-level='6'] i:nth-child(-n + 6) {
+    background: var(--warning);
+  }
+
+  /* 4.3 risk classes */
+  .gv-risk {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gv-risk li {
+    display: grid;
+    grid-template-columns: 9rem 1fr 1fr;
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  .gv-risk p {
+    margin: 0;
+  }
+
+  .gv-risk-name {
+    font-weight: 800;
+  }
+
+  .gv-risk .gv-meter {
+    display: flex;
+    margin-bottom: var(--space-1);
+  }
+
+  /* 6.1 chain and 10 decisions: numbered cards in reading order. */
+  .gv-numbered {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: gv-step;
+  }
+
+  .gv-numbered[data-compact] {
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+    margin-bottom: var(--space-4);
+  }
+
+  .gv-numbered li {
+    position: relative;
+    padding: var(--space-2) var(--space-3) var(--space-3);
+    padding-top: 2.1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    counter-increment: gv-step;
+  }
+
+  .gv-numbered li::before {
+    content: counter(gv-step);
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-3);
+    min-width: 1.4rem;
+    padding: 0 0.3rem;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.4rem;
+    text-align: center;
+  }
+
+  .gv-numbered code {
+    display: block;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .gv-loop {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+
+  /* A loop: three quarters of a ring with an arrowhead. */
+  .gv-loop-icon {
+    position: relative;
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--warning);
+    border-top-color: transparent;
+    border-radius: 50%;
+  }
+
+  .gv-loop-icon::after {
+    content: '';
+    position: absolute;
+    top: -0.2rem;
+    right: -0.15rem;
+    border: 0.25rem solid transparent;
+    border-left-color: var(--warning);
+    transform: rotate(-35deg);
+  }
+
+  /* 6.2 bridge */
+  .gv-bridge ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gv-bridge-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+
+  .gv-bridge-row > [data-side] {
+    padding: var(--space-2) var(--space-3);
+    border-left: 3px solid var(--gv-tone);
+    background: var(--surface);
+  }
+
+  li.gv-bridge-row::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(var(--space-4) - 0.4rem);
+    height: 2px;
+    background: var(--muted);
+    transform: translate(-50%, -50%);
+  }
+
+  .gv-bridge-head > [data-side] {
+    padding-top: 0;
+    padding-bottom: 0;
+    background: none;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* 7.2, 9.4 and 12.1: cards side by side where there is room. */
+  .gv-split,
+  .gv-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+  }
+
+  .gv-split > div,
+  .gv-card {
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--gv-tone, var(--accent));
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  .gv-split ul,
+  .gv-card ul {
+    margin: 0;
+    padding-left: var(--space-3);
+  }
+
+  .gv-split li + li,
+  .gv-card li + li {
+    margin-top: var(--space-1);
+  }
+
+  .gv-card[data-wide] {
+    grid-column: 1 / -1;
+  }
+
+  .gv-kpis {
+    margin: 0;
+  }
+
+  .gv-kpis div + div {
+    margin-top: var(--space-2);
+  }
+
+  .gv-kpis dt {
+    font-weight: 700;
+  }
+
+  .gv-kpis dd {
+    margin: 0;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* 8 gates: a vertical track of badges joined by a rule. */
+  .gv-gates {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gv-gates > li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.6rem 1fr;
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+
+  .gv-gates > li:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    top: 2.6rem;
+    bottom: 0;
+    left: calc(1.3rem - 1px);
+    width: 2px;
+    background: var(--border);
+  }
+
+  .gv-gate-id {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 2px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-weight: 800;
+  }
+
+  .gv-gates > li[data-decision] .gv-gate-id {
+    border: 0;
+    border-radius: 0;
+    background: var(--warning);
+    color: var(--bg);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+
+  .gv-gates p {
+    margin: 0 0 var(--space-1);
+  }
+
+  .gv-gate-name {
+    font-weight: 800;
+  }
+
+  .gv-nist {
+    margin-left: var(--space-1);
+    padding: 0 0.4rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .gv-pairs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: var(--space-1) var(--space-3);
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+
+  .gv-pairs dd {
+    margin: 0;
+  }
+
+  .gv-gates .gv-loop {
+    margin-top: var(--space-2);
+  }
+
+  /* 9.1 case card */
+  .gv-case {
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .gv-case dl {
+    margin: 0;
+  }
+
+  .gv-case dl > div:last-child {
+    border-bottom: 0;
+  }
+
+  /* 9.2 architecture: the request path in a column, observability as a dashed bar under every layer. */
+  .gv-arch {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .gv-arch-main,
+  .gv-arch-branch {
+    display: grid;
+    gap: 1.6rem;
+  }
+
+  .gv-arch-branches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  .gv-node {
+    position: relative;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+
+  .gv-node[data-store] {
+    border-style: double;
+    border-width: 3px;
+    border-color: var(--border);
+  }
+
+  .gv-node p {
+    margin: 0;
+  }
+
+  .gv-node-name {
+    font-weight: 800;
+  }
+
+  .gv-node-detail {
+    color: var(--muted);
+  }
+
+  /* The arrow into each box below the first: a shaft in the gap and a head touching the box. */
+  .gv-arch-main > .gv-node + .gv-node::before,
+  .gv-arch-main > .gv-node + .gv-arch-branches > .gv-arch-branch > .gv-node:first-child::before,
+  .gv-arch-branch > .gv-node + .gv-node::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 0.25rem);
+    left: 50%;
+    width: 2px;
+    height: 1.2rem;
+    background: var(--fg);
+    transform: translateX(-50%);
+  }
+
+  .gv-arch-main > .gv-node + .gv-node::after,
+  .gv-arch-main > .gv-node + .gv-arch-branches > .gv-arch-branch > .gv-node:first-child::after,
+  .gv-arch-branch > .gv-node + .gv-node::after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 0.05rem);
+    left: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2px solid var(--fg);
+    border-bottom: 2px solid var(--fg);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .gv-node.gv-arch-obs {
+    border: 2px dashed var(--warning);
+  }
+
+  .gv-arch-obs .gv-node-name {
+    color: var(--fg);
+  }
+
+  /* 9.6 and 11.1: static check lists (empty boxes). */
+  .gv-check {
+    padding: 0;
+    list-style: none;
+  }
+
+  .gv-check li {
+    position: relative;
+    margin-bottom: var(--space-2);
+    padding-left: 1.9rem;
+  }
+
+  .gv-check li::before {
+    content: '';
+    position: absolute;
+    top: 0.3em;
+    left: 0;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--accent);
+    border-radius: 2px;
+  }
+
+  /* 11 roadmap and 12.2 maturity: rows with two lanes. */
+  .gv-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gv-rows > li {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .gv-rows > li:first-child {
+    padding-top: 0;
+  }
+
+  .gv-row-head {
+    margin: 0 0 var(--space-2);
+    font-weight: 800;
+  }
+
+  .gv-lanes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .gv-lanes p {
+    margin: 0;
+    padding-left: var(--space-3);
+    border-left: 3px solid var(--gv-tone);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  .gv-milestone {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .gv-milestone .gv-k {
+    display: inline;
+  }
+
+  .gv-milestone::before {
+    content: '';
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: var(--space-2);
+    background: var(--accent);
+    transform: rotate(45deg);
+  }
+
+  /* 13 stack */
+  .gv-stack {
+    margin: 0 0 var(--space-4);
+  }
+
+  .gv-stack > div {
+    display: grid;
+    grid-template-columns: 13rem 1fr;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+    font-size: var(--text-sm);
+  }
+
+  .gv-stack dt {
+    padding-top: 0.15rem;
+  }
+
+  .gv-stack dd {
+    margin: 0;
+  }
+
+  .gv-refs li {
+    margin-bottom: var(--space-2);
+  }
+
+  @media (max-width: 34rem) {
+    .gv-record dd,
+    .gv-case dd {
+      font-size: var(--text-sm);
+    }
+
+    .gv-thesis {
+      padding: var(--space-3);
+      font-size: var(--text-base);
+    }
+
+    .gv-flows {
+      grid-template-columns: 1fr;
+    }
+
+    /* The two branches stay side by side: stacked, the agent would seem to hang off the document store. */
+    .gv-arch-branches {
+      gap: var(--space-2);
+    }
+
+    .gv-arch .gv-node {
+      padding: var(--space-2);
+      overflow-wrap: anywhere;
+      hyphens: auto;
+    }
+
+    .gv-risk li,
+    .gv-stack > div {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+
+    .gv-bridge-row {
+      gap: var(--space-3);
+    }
+
+    li.gv-bridge-row::after {
+      width: calc(var(--space-3) - 0.3rem);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .gv-meter i {
+      background: CanvasText;
+    }
+
+    .gv-numbered li::before,
+    .gv-gates > li[data-decision] .gv-gate-id {
+      forced-color-adjust: none;
+      background: CanvasText;
+      color: Canvas;
+    }
+  }
+</style>

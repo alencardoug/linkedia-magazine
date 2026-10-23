@@ -9,6 +9,7 @@ import { build } from 'astro';
 import { afterAll, describe, expect, it } from 'vitest';
 import { validateContent } from '../scripts/validate-content.mjs';
 import { COVERS, CURRENT_COVER } from '../src/covers/registry';
+import { SPECIALS } from '../src/lib/specials';
 import { THEME_INIT_SCRIPT } from '../src/lib/theme-init';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -178,6 +179,7 @@ describe('static build', () => {
         'categorias/engenharia-de-ia.html',
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
+        'especiais/governanca-de-ia.html',
         'sobre.html',
         '404.html',
       ].sort(),
@@ -253,6 +255,25 @@ describe('static build', () => {
         '<a href="/materias/exemplo-de-materia-linkedia">Exemplo ilustrativo de matéria</a></li></ul></li>',
     );
     expect(editions).not.toContain('matéria(s)');
+    // Special content (D-075): listed first under its own heading, then the daily archive under another.
+    for (const s of SPECIALS) {
+      expect(editions).toContain(`<a href="/especiais/${s.slug}">${s.title}</a>`);
+      expect(editions.indexOf(`/especiais/${s.slug}`)).toBeLessThan(editions.indexOf('data-archive'));
+    }
+    expect(editions).toMatch(/<h2 id="especiais"[^>]*>Conteúdos especiais<\/h2>[\s\S]*<h2 id="por-data"[^>]*>Edições diárias<\/h2>/);
+    const special = read(out, 'especiais/governanca-de-ia.html');
+    expect(special).toContain('data-article="especial-governanca-de-ia"');
+    expect(special).toContain('<title>Governança de IA: como implementar em ambientes corporativos');
+    expect(special).toContain('data-ai-note');
+    expect(special.match(/<h1[\s>]/g)).toHaveLength(1);
+    // Every in-page link lands on an id of the page; every outside link opens without referrer or opener.
+    const ids = new Set([...special.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
+    const anchors = [...special.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]);
+    expect(anchors.length).toBeGreaterThanOrEqual(14);
+    for (const id of anchors) expect(ids.has(id), id).toBe(true);
+    const outside = [...special.matchAll(/<a href="https:[^"]*"([^>]*)>/g)].map((m) => m[1]);
+    expect(outside.length).toBeGreaterThan(0);
+    for (const attrs of outside) expect(attrs).toContain('rel="noopener noreferrer"');
     const cover = read(out, 'index.html');
     expect(cover).toContain(`<html lang="pt-BR" data-cover="${CURRENT_COVER}">`);
     expect(cover).toContain(`data-cover-art="${CURRENT_COVER}"`); // the page imports the registry's current cover
@@ -341,7 +362,7 @@ describe('static build', () => {
   it('ships three slots with lab themes: pre-paint script, runtime everywhere, switcher on /visual, lazy enhancement', async () => {
     const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
     const pages = htmlFiles(out);
-    expect(pages).toHaveLength(11 + COVERS.length);
+    expect(pages).toHaveLength(12 + COVERS.length);
     for (const page of pages.filter((p) => !isCover(p))) {
       const html = read(out, page);
       expect(html, page).toContain(
@@ -410,6 +431,7 @@ describe('static build', () => {
         'categorias/engenharia-de-ia.html',
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
+        'especiais/governanca-de-ia.html',
         'sobre.html',
         '404.html',
       ].sort(),

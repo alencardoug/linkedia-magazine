@@ -1,14 +1,29 @@
 ---
-// `/edicoes`: archive by date, newest first, each date with its story titles.
+// `/edicoes`: special content first (D-075), then the archive by date, newest first, each date with its story titles.
 import Base from '../layouts/Base.astro';
 import { loadContent } from '../lib/content';
 import { longDate } from '../lib/labels';
+import { SPECIALS } from '../lib/specials';
 
 const { editions } = loadContent();
 ---
 
 <Base title="Edições">
   <h1>Edições</h1>
+  <section data-specials aria-labelledby="especiais">
+    <h2 id="especiais">Conteúdos especiais</h2>
+    <ul>
+      {
+        SPECIALS.map((s) => (
+          <li>
+            <a href={`/especiais/${s.slug}`}>{s.title}</a>
+            <p class="meta">{s.summary}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+  <h2 id="por-data">Edições diárias</h2>
   {
     editions.length === 0 ? (
       <p class="meta">Nenhuma edição publicada ainda.</p>
@@ -32,3 +47,21 @@ const { editions } = loadContent();
     )
   }
 </Base>
+
+<style is:global>
+  /* Global on purpose: a scoped style would stamp its attribute on the archive markup too. The hook scopes it. */
+  [data-specials] ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  [data-specials] li {
+    margin-bottom: var(--space-3);
+    font-weight: 600;
+  }
+
+  [data-specials] .meta {
+    margin: var(--space-1) 0 0;
+    font-weight: 400;
+  }
+</style>
