@@ -227,9 +227,11 @@ describe('static build', () => {
     // On screen, only a small line with the publication date and time; the edition's h1 is for screen readers only.
     const dateline =
       '<p class="meta"><time datetime="2026-10-14T19:05:00-03:00">Publicada em 14 de outubro de 2026, às 19:05</time></p>';
+    // Both carry the `data-edition` hook, so themes style the dateline the same on either page.
     for (const page of [home, read(out, 'edicoes/2026-10-14.html')]) {
+      expect(page).toContain('data-edition="2026-10-14"');
       expect(page).toContain(dateline);
-      expect(page).toMatch(/<h1 (id="edicao" )?class="visually-hidden">/);
+      expect(page).toContain('<h1 id="edicao" class="visually-hidden">');
     }
     // `/edicoes`: each date links once and lists its stories' titles.
     const editions = read(out, 'edicoes.html');

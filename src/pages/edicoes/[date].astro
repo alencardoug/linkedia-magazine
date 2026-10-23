@@ -18,12 +18,14 @@ const [lead, ...rest] = articles;
 ---
 
 <Base title={edition.title}>
-  <h1 class="visually-hidden">{edition.title}</h1>
-  <p class="meta">
-    <time datetime={edition.published_at}>{publishedLabel(edition)}</time>
-  </p>
-  {edition.summary && <p>{edition.summary}</p>}
-  {lead && <ArticleCard article={lead} lead />}
-  {rest.map((a) => <ArticleCard article={a} />)}
-  <p><a href="/edicoes">Todas as edições</a></p>
+  <section aria-labelledby="edicao" data-edition={edition.edition_date}>
+    <h1 id="edicao" class="visually-hidden">{edition.title}</h1>
+    <p class="meta">
+      <time datetime={edition.published_at}>{publishedLabel(edition)}</time>
+    </p>
+    {edition.summary && <p>{edition.summary}</p>}
+    {lead && <ArticleCard article={lead} lead />}
+    {rest.map((a) => <ArticleCard article={a} />)}
+    <p><a href="/edicoes">Todas as edições</a></p>
+  </section>
 </Base>
