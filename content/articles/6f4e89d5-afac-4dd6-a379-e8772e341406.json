@@ -1,0 +1,214 @@
+{
+  "article_id": "6f4e89d5-afac-4dd6-a379-e8772e341406",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Se você usa um LLM para dar nota às respostas de outro LLM (prática chamada de LLM-as-a-judge, ou LLM-juiz), essa nota é uma medição, e medições precisam ser calibradas. Um post do Google Cloud defende isso e propõe três pilares de auditoria. Depois de ler, você terá um roteiro para testar o seu próprio juiz com poucos scripts.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: juízes de LLM também têm vieses",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O autor, consultor técnico do Google Cloud, parte de uma ideia: trocar revisores humanos subjetivos por IA não gera objetividade, porque LLMs também carregam vieses. O post cita cinco.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Verbosidade: o juiz tende a preferir respostas longas e confiantes, mesmo com fatos errados.",
+        "Posição: trocar a ordem de duas opções pode inverter o veredito em mais de 75% das vezes, segundo o post.",
+        "Efeito halo: gramática e formatação limpas podem render nota máxima em precisão e esconder erros.",
+        "Concordância (agreeableness): o juiz reconhece bem trabalho válido, mas pode deixar passar até 75% das saídas incorretas, com bugs ou inseguras.",
+        "Autopreferência: avaliadores superestimam saídas geradas por eles mesmos ou pela mesma família de modelos."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Os três pilares propostos",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Estabilidade interna: rodar várias passagens do juiz sobre a mesma saída e calcular a variância. Se a nota oscila com entrada idêntica, a rubrica (critério de avaliação) é ambígua.",
+        "Alinhamento humano com métricas corrigidas pelo acaso: um dataset com maioria de respostas válidas faz um juiz leniente parecer ótimo. Métricas que descontam concordância por sorte ou leniência mostram se ele concorda com especialistas ao detectar erros.",
+        "Ensembles e prompts decompostos: um juiz especializado por critério (por exemplo, precisão factual ou tom) e pelo menos dois modelos diferentes avaliando a mesma saída. Se o consenso se desfaz, há sinal de degradação."
+      ],
+      "ordered": true,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A fonte é de um fornecedor, e o post termina convidando o leitor a contratar a Delta para pipelines de avaliação. Os números (75%) aparecem sem estudo, dataset ou método citado no texto disponível, então trate-os como ordem de grandeza. O post também não detalha métricas nem procedimentos, apenas os nomeia. Os vieses descritos, porém, são plausíveis e fáceis de testar por conta própria.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: auditando o seu juiz",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial das ferramentas que usar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você não precisa de plataforma de avaliação. Um script que chama o modelo juiz com sua rubrica, mais um pequeno conjunto de casos rotulados por você, já cobre os três pilares. Peça ao seu agente de código (Claude Code ou Codex) para montar o script a partir dos testes abaixo.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Teste 1: estabilidade (10 minutos)",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Pegue 20 saídas reais. Peça ao juiz a nota de cada uma 5 vezes, com a mesma rubrica e a mesma configuração. Calcule o desvio-padrão por item. Notas que variam um ponto inteiro numa escala de 1 a 5 indicam rubrica vaga: reescreva com critérios observáveis (por exemplo, 'cita o número exato do contrato') e meça de novo. Reduzir a temperatura ajuda, mas não substitui rubrica clara.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Teste 2: viés de posição e de verbosidade (20 minutos)",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Posição: em comparações A contra B, rode cada par nas duas ordens. A taxa de pares em que o vencedor muda é seu índice de viés. Se for alta, avalie sempre nas duas ordens e só conte vitórias consistentes.",
+        "Verbosidade: pegue respostas corretas e crie versões infladas, com enrolação e tom confiante, sem acrescentar fatos. Se a nota sobe, o juiz premia tamanho. Crie também uma versão curta e correta para ver se perde.",
+        "Erro plantado: insira um erro factual numa resposta bem formatada. Se o juiz não percebe, o efeito halo está ativo."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Teste 3: concordância com você, corrigida pelo acaso (30 minutos)",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Rotule à mão cerca de 50 casos como válido ou inválido, garantindo que haja muitos inválidos (inclua os plantados). Compare com o veredito do juiz. Não use só a porcentagem de acerto: com 90% de casos válidos, um juiz que aprova tudo acerta 90%. Use o kappa de Cohen, métrica que desconta a concordância esperada por acaso, e olhe também o recall de inválidos, isto é, quantos erros reais o juiz pegou. Esse é o caso que o post descreve como leniência.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Esboço do kappa de Cohen para dois rótulos (0 = inválido, 1 = válido). Serve para entender a ideia.",
+      "code": "def cohen_kappa(humano, juiz):\n    n = len(humano)\n    po = sum(h == j for h, j in zip(humano, juiz)) / n\n    pe = 0\n    for classe in (0, 1):\n        ph = sum(h == classe for h in humano) / n\n        pj = sum(j == classe for j in juiz) / n\n        pe += ph * pj\n    return (po - pe) / (1 - pe) if pe != 1 else 1.0\n\ndef recall_invalidos(humano, juiz):\n    invalidos = [(h, j) for h, j in zip(humano, juiz) if h == 0]\n    return sum(j == 0 for _, j in invalidos) / len(invalidos)",
+      "language": "python",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Teste 4: decompor e usar um segundo juiz",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Em vez de um prompt que dá uma nota geral, crie um prompt por critério (fatos, completude, tom), cada um com saída em JSON e justificativa curta. Depois, passe os mesmos itens por um segundo modelo, de preferência de outra família, o que também reduz a autopreferência. Registre a taxa de divergência entre os dois: se ela subir depois de uma troca de modelo ou prompt, investigue antes de confiar no relatório.",
+      "type": "paragraph"
+    },
+    {
+      "alt": "Fluxograma de auditoria de um LLM-juiz em quatro etapas",
+      "caption": "Ordem sugerida dos testes de auditoria.",
+      "diagram_format": "mermaid",
+      "diagram_spec": "flowchart TD\nA[Casos rotulados por você] --> B[Juiz: 5 passagens]\nB --> C{Variância alta?}\nC -- sim --> D[Reescrever rubrica]\nC -- nao --> E[Trocar ordem e inflar texto]\nE --> F{Nota muda?}\nF -- sim --> G[Mitigar: duas ordens, critérios por prompt]\nF -- nao --> H[Kappa e recall de invalidos]\nH --> I[Segundo juiz e taxa de divergencia]",
+      "long_description": "O fluxo começa com casos rotulados por humanos. O juiz avalia cada um cinco vezes; se a variância é alta, reescreve-se a rubrica. Se não, testam-se troca de ordem e texto inflado; se a nota muda, aplicam-se mitigações. Se não muda, calculam-se kappa e recall de inválidos e, por fim, compara-se com um segundo juiz.",
+      "source_ids": [],
+      "type": "diagram"
+    },
+    {
+      "source_ids": [],
+      "text": "Antes de usar nota de LLM-juiz para escolher modelo ou prompt, valide: variância em 5 passagens, taxa de inversão ao trocar a ordem, queda de nota com texto longo e vazio, e kappa mais recall de inválidos contra 50 casos seus. Se falhar, ajuste a rubrica antes de comparar modelos.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Limites e decisões",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Cinquenta casos dão uma estimativa grosseira; use-a para detectar problemas grandes, não diferenças pequenas.",
+        "Se o juiz falha em recall de inválidos em tarefas de segurança, não o use sozinho como barreira: mantenha revisão humana amostral nesses casos.",
+        "Reavalie o juiz quando trocar o modelo juiz, a rubrica ou o tipo de saída."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: escolha um eval que você já usa, rotule 30 casos (com pelo menos 10 ruins) e rode só o teste de troca de ordem e o recall de inválidos. Dá para fazer em menos de uma hora e costuma mostrar se vale confiar no restante.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-23",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-20T19:43:39Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "daebece5-3a42-491c-a092-36ef02d9446d",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português do Brasil como auditar um LLM-as-a-judge: vieses de verbosidade, posição, halo, concordância e autopreferência; consistência entre passagens; kappa de Cohen e recall de classes raras; decomposição de critérios e ensembles de juízes. Dê exemplos de código em Python e um plano de teste com 50 casos rotulados à mão, para quem usa agentes de código no dia a dia."
+    },
+    {
+      "kind": "lab",
+      "label": "Montar o script de auditoria",
+      "prompt": "Crie um script Python que receba um CSV com colunas pergunta, resposta e rotulo_humano, chame um modelo juiz 5 vezes por item, calcule desvio-padrão, kappa de Cohen e recall de inválidos, e teste viés de posição em pares. Use uma interface genérica de chamada ao LLM que eu possa trocar."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "quem-julga-o-0022",
+  "sources": [
+    {
+      "accessed_at": "2026-10-20T19:42:51Z",
+      "language": "en",
+      "published_at": "2026-10-19T16:00:00Z",
+      "publisher": "Google Cloud Blog",
+      "source_id": "s1",
+      "title": "Who judges the judge? Three helpful ways to audit your LLM evaluators",
+      "url": "https://cloud.google.com/blog/topics/consulting/three-ways-to-audit-your-llm-evaluators"
+    }
+  ],
+  "summary": "Um post do Google Cloud lista vieses de LLMs usados como juízes e propõe três pilares de auditoria. Aqui está o que a fonte sustenta e um roteiro prático para testar o seu juiz em uma tarde.",
+  "tags": [
+    "topic:llm-evaluation",
+    "topic:agent-evaluation",
+    "risk:bias",
+    "topic:prompt-engineering",
+    "reason:career-utility",
+    "reason:learning-value",
+    "source:google-cloud"
+  ],
+  "title": "Quem julga o juiz? Como auditar seu LLM-as-a-judge antes de confiar nas notas"
+}

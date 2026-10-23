@@ -1,0 +1,202 @@
+{
+  "article_id": "b255e0ce-8e4b-4753-80c6-655b9e68a50a",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Decision models são modelos pequenos que recebem um texto e critérios e devolvem rapidamente uma probabilidade (0 a 1) de algo ser verdadeiro, por exemplo 'este log de conversa contém uma falha'. Hamel Husain os comparou em evals automáticos. Depois deste texto você saberá como testar, com seus próprios dados, se vale trocar seu LLM-juiz por um deles.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o post, vários decision models surgiram em sequência: Jev (TypeSafe), Decider (Perplexity), d1 (Liquid), Clef (Cloudflare) e a Decisions API da OpenAI. Prometem classificação rápida e barata. O autor ressalta que muita gente usa o limiar padrão de 0,50 sem verificar se ele serve para a tarefa, o que desperdiça desempenho.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O teste usou 100 traces (logs de conversas e ações) de um agente de locação de apartamentos. A tarefa era achar traces com erro, como reserva falha ou transferência a humano não feita. Os rótulos vieram de revisão humana. Comparou-se desempenho (precisão, recall e F1) e custo de API calculado por tokens.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Com limiar ajustado e mínimo de 80% de precisão e de recall, passaram Perplexity Decider, Liquid d1-ultra e OpenAI Decisions (GPT-6 Luna). Liquid d1 e Clef Flash ficaram abaixo do mínimo.",
+        "Perplexity foi o mais barato: 0,82 centavo por 100 execuções de eval, com F1 de 0,79.",
+        "OpenAI chegou a F1 de 0,87 por 3,72 centavos, cerca de 4,5 vezes mais caro.",
+        "Na calibração, Perplexity, d1 e Clef melhoraram com Platt scaling. Jev e d1-ultra já eram bem calibrados. Nas probabilidades da OpenAI, o Platt piorou levemente."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "O vLLM 0.32.0 lançou um endpoint POST /v1/systemone, servido por padrão, que responde perguntas de escolha e de score sobre um estado estruturado. Ele roda com Cloudflare/clef-omni e LiquidAI/d1-3B, segundo as notas de release. Isso indica que dá para hospedar esses modelos por conta própria, mas as notas não trazem detalhes de uso nem de desempenho.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Limites: são só 100 traces, de um domínio e de um agente. O próprio autor diz que o desempenho varia muito entre tarefas e que é preciso medir. A tarefa era ampla; com juízes por modo de falha, ele espera que as diferenças diminuam. Não li o texto completo do post (o excerto é curto) nem a documentação do endpoint do vLLM.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: como decidir e testar com seus dados",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Conceitos mínimos. Precisão: dos traces que o juiz marcou como falha, quantos realmente eram. Recall: das falhas reais, quantas ele achou. F1: média harmônica dos dois. Limiar: a nota a partir da qual você chama de falha. Calibração: se uma nota 0,8 corresponde mesmo a cerca de 80% de falhas.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Intuição sobre o limiar: se todas as falhas recebem 0,40 e todos os traces bons recebem 0,10, o corte em 0,50 não pega nada, mas o corte em 0,30 acerta tudo. Por isso o limiar é um parâmetro a ser ajustado, não um padrão a ser aceito.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Roteiro de um fim de semana",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Rotule à mão 100 a 200 traces dos seus projetos como passa ou falha. Sem rótulos humanos não há comparação válida.",
+        "Escreva critérios para um único modo de falha. Juízes estreitos tendem a diminuir a diferença entre modelos.",
+        "Defina o mínimo aceitável, por exemplo 80% de precisão e de recall se o eval alimentar alertas. Descarte quem não chega lá.",
+        "Rode cada candidato uma vez, salve as notas e reutilize. Inclua seu LLM-juiz atual como referência.",
+        "Ajuste o limiar com validação cruzada, em vez de escolher na mesma amostra em que mede.",
+        "Calcule o custo por 100 execuções e compare com a perda de F1. Compare só quem passou do mínimo.",
+        "Se for usar a nota como confiança, teste calibração e confira se melhorou, em vez de assumir."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O post sugere pedir ao agente de código que faça o ajuste e a calibração sobre as notas salvas, sem novas chamadas de modelo. Você já faz isso com Claude Code ou Codex. Um prompt adaptado do post:",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Prompt para o agente de código, adaptado do post (S1)",
+      "code": "Usando minhas notas salvas e rótulos binários (1 = falha), ajuste o limiar de decisão para maximizar F1 exigindo pelo menos 80% de precisão e 80% de recall. Use validação cruzada estratificada de 5 folds: escolha o limiar no treino e meça no restante, com os mesmos splits para todos os modelos. Se nenhum limiar qualificar, reporte isso em vez de relaxar a exigência. Compare com o limiar 0,50. Não faça novas chamadas de modelo.",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Como decidir",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Se um decision model barato passa no seu mínimo, a troca costuma compensar quando você roda evals em volume.",
+        "Se só o modelo mais caro passa, o post sugere que tarefas mais difíceis podem justificar pagar mais. Em uma comparação citada de Randy Olson, decision models empataram com LLMs em classificação e roteamento, e LLMs se destacaram em tarefas de conhecimento e raciocínio.",
+        "Uma estratégia do autor: comece com um modelo maior que funcione e teste modelos menores para ver se igualam.",
+        "Hospedar por conta própria (vLLM) só vale se você tiver GPU e volume. Confira a documentação oficial, pois só vi as notas de release."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Nunca compare modelos pelo limiar padrão de 0,50. Salve as notas, ajuste o limiar em validação cruzada, aplique seus mínimos de precisão e recall e só então compare custo. Os números do post são de um dataset de 100 traces; reproduza com os seus.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: pegue um modo de falha do seu agente, rotule 100 traces e rode seu LLM-juiz atual e um decision model. Descubra se o barato chega ao seu mínimo.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-23",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-20T19:42:51Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "daebece5-3a42-491c-a092-36ef02d9446d",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique decision models (classificadores pequenos que devolvem probabilidade) usados como alternativa a LLM-juízes em evals de agentes. Cubra: limiar de decisão, precisão, recall, F1, F-beta, calibração e Platt scaling, validação cruzada estratificada e fronteira de Pareto custo versus desempenho. Dê um exemplo com 100 traces rotulados e um roteiro em Python para ajustar o limiar e medir o Brier score."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "decision-models-nos-0021",
+  "sources": [
+    {
+      "accessed_at": "2026-10-20T19:42:26Z",
+      "language": "en",
+      "published_at": "2026-10-20T07:00:00Z",
+      "publisher": "Hamel Husain",
+      "source_id": "s1",
+      "title": "How To Use Decision Models for Evals",
+      "url": "https://hamel.dev/blog/posts/decision-model-evals"
+    },
+    {
+      "accessed_at": "2026-10-20T19:42:27Z",
+      "language": "en",
+      "published_at": "2026-10-18T10:23:45Z",
+      "publisher": "vLLM (GitHub releases)",
+      "source_id": "s2",
+      "title": "v0.32.0",
+      "url": "https://github.com/vllm-project/vllm/releases/tag/v0.32.0"
+    }
+  ],
+  "summary": "Hamel Husain testou cinco decision models contra LLM-juízes em 100 traces. O que importa: ajustar o limiar de decisão, medir custo e calibrar. Veja como repetir o teste com seus dados.",
+  "tags": [
+    "topic:llm-evaluation",
+    "topic:agent-evaluation",
+    "topic:inference",
+    "theme:roi",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:hamel-husain",
+    "source:github"
+  ],
+  "title": "Decision models nos evals: quando trocar o LLM-juiz por um classificador barato"
+}

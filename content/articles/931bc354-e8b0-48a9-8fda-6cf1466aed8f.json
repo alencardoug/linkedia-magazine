@@ -1,0 +1,169 @@
+{
+  "article_id": "931bc354-e8b0-48a9-8fda-6cf1466aed8f",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 19/10, o blog AI as Normal Technology divulgou o paper Emerging Trends in AI Agent Evaluation, de Felix Chen, Stephan Rabanser, Sayash Kapoor e Arvind Narayanan, com colaboradores de outras instituições. Depois de ler este texto, você terá uma lista de perguntas para cobrar de um fornecedor de agentes e um teste simples para rodar nos seus próprios projetos.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que o paper afirma",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O grupo de Princeton diz trabalhar com avaliação de agentes há cerca de três anos. Segundo o post, ele se uniu a pesquisadores de Stanford, do UK AI Security Institute e da Brookings. O paper sintetiza tendências em três eixos: ciência e métodos, agenda de pesquisa e ecossistema de avaliação. O objetivo declarado é ajudar quem está entrando na área e dar a avaliadores, financiadores e ao público perguntas para fazer e recomendações acionáveis.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Um agente, aqui, é um modelo de linguagem que usa ferramentas e age em um ambiente por vários passos. Os pontos centrais do post são estes:",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "É preciso examinar a trajetória inteira do agente, não só o resultado final. Por exemplo: o agente tomou atalhos, já que tem acesso a ferramentas e ambientes?",
+        "Fica mais difícil atribuir uma melhora ou piora a um componente específico do agente.",
+        "Avaliar custa cada vez mais. Vários agentes no benchmark ExploitBench custaram dezenas de milhares de dólares em créditos, sem contar a infraestrutura de avaliação.",
+        "O volume de traces (registros dos passos do agente) é enorme. Os avaliadores usam outros agentes para inspecioná-los, e essas ferramentas também precisam ser avaliadas. No incidente OpenAI-HuggingFace, esse método foi usado e os próprios avaliadores reconheceram limitações e vieses.",
+        "Resultado de laboratório não se traduz automaticamente para o uso real. O post cita o estudo randomizado da METR, em que o uso de agentes de programação aumentou o tempo total de conclusão das tarefas, ao contrário do esperado.",
+        "Há duas lentes complementares: o agente automatiza a tarefa ou aumenta o trabalho humano? Olhar só para a automação não mostra como pessoas e agentes colaboram melhor.",
+        "Independência importa: custo, acesso aos modelos e acesso aos traces de raciocínio (laboratórios agora liberam resumos, não os traces brutos) afetam quem consegue avaliar."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Só o post de divulgação está na nossa base, não o paper completo. Detalhes metodológicos, recomendações específicas e a lista completa de autores e afiliações precisam ser conferidos na fonte original.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: como usar isso ao avaliar um agente",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você não opera agentes em produção, mas usa agentes de código todo dia. Isso já basta para praticar o essencial: desconfiar de uma nota única e olhar o que o agente fez no caminho. As ideias do post podem virar um roteiro de perguntas.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Perguntas para cobrar de um fornecedor",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Os resultados vêm de tarefas parecidas com as minhas ou só de benchmarks públicos? Qual a distância entre os dois?",
+        "Vocês avaliam a trajetória (ferramentas chamadas, arquivos alterados, tentativas) ou só o resultado final? Posso ver exemplos de traces reais, incluindo falhas?",
+        "Como vocês detectam atalhos, como o agente passar no teste sem resolver o problema?",
+        "Quando a versão muda (modelo, prompt, ferramentas), o que é reavaliado? Dá para isolar qual componente causou a mudança?",
+        "Quem avaliou: o próprio fornecedor ou terceiros independentes? Que acesso eles tiveram?",
+        "Se usam um agente para revisar traces de outros agentes, qual a taxa de erro dessa revisão, medida contra revisão humana?",
+        "Qual o custo para rodar a avaliação de novo, e quem paga?",
+        "Há medição do efeito sobre o tempo e a qualidade do trabalho das pessoas, não só da tarefa isolada?"
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Um exercício de uma tarde",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha 10 tarefas reais do seu repositório, com resultado verificável (um teste que passa, uma consulta SQL com resposta conhecida). Rode seu agente de código em cada uma e guarde o log completo. Depois, em vez de olhar só se passou, leia as trajetórias e marque três coisas: se houve atalho (editar o teste em vez do código, por exemplo), quantas tentativas foram necessárias e se o resultado correto veio por um caminho razoável. Repita com uma segunda configuração, trocando só um componente, como o prompt ou o modelo. Se você mudar tudo junto, não saberá o que causou a diferença, que é a dificuldade de atribuição que o paper descreve.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Para verificar o revisor automático, pegue as mesmas trajetórias, peça a um modelo que aponte problemas e compare com a sua leitura. A divergência mostra o quanto confiar nesse tipo de monitor.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Se um fornecedor só apresenta uma nota agregada de benchmark, trate isso como marketing até ver trajetórias, tarefas parecidas com as suas e dados de uso real. Uma nota alta não prova que o agente funcionará no seu contexto.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [],
+      "text": "Avaliar agente é avaliar o caminho, o contexto e o efeito em pessoas, não só a resposta final. Use as perguntas acima antes de aprovar qualquer agente e rode o exercício das 10 tarefas esta semana.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: monte as 10 tarefas, rode uma configuração e leia as trajetórias. Depois, leia o paper original para conferir as recomendações que este resumo não cobre.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-10-23",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-20T19:45:49Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "daebece5-3a42-491c-a092-36ef02d9446d",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique avaliação de agentes de IA para um engenheiro que usa agentes de código no dia a dia, mas nunca operou agentes em produção. Cubra: diferença entre avaliar o resultado final e a trajetória, traces, atalhos (reward hacking), atribuição de mudanças a componentes, validade de benchmarks versus uso real, avaliação de automação versus aumento do trabalho humano e custo de avaliar. Dê exemplos práticos e um roteiro para montar um conjunto pequeno de avaliações próprias."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "avaliar-agentes-de-0023",
+  "sources": [
+    {
+      "accessed_at": "2026-10-20T19:45:24Z",
+      "language": "en",
+      "published_at": "2026-10-19T20:11:55Z",
+      "publisher": "AI as Normal Technology",
+      "source_id": "s1",
+      "title": "New paper: Emerging trends in AI agent evaluation",
+      "url": "https://www.normaltech.ai/p/new-paper-emerging-trends-in-ai-agent"
+    }
+  ],
+  "summary": "Pesquisadores de Princeton e parceiros publicaram um paper sobre tendências na avaliação de agentes. Com base no post de divulgação, o texto mostra o que mudou e como transformar isso em perguntas e testes práticos para fornecedores.",
+  "tags": [
+    "topic:agent-evaluation",
+    "topic:agents",
+    "topic:benchmarks",
+    "theme:governance",
+    "topic:observability",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:ai-as-normal-technology"
+  ],
+  "title": "Avaliar agentes de IA: perguntas que o novo paper de Princeton ajuda a fazer"
+}

@@ -67,6 +67,16 @@
       "label": "Segurança da informação"
     },
     {
+      "key": "source:ai-as-normal-technology",
+      "kind": "source",
+      "label": "AI as Normal Technology"
+    },
+    {
+      "key": "source:github",
+      "kind": "source",
+      "label": "GitHub"
+    },
+    {
       "key": "source:google-cloud",
       "kind": "source",
       "label": "Google Cloud Blog"
@@ -75,6 +85,11 @@
       "key": "source:google-developers",
       "kind": "source",
       "label": "Google Developers Blog"
+    },
+    {
+      "key": "source:hamel-husain",
+      "kind": "source",
+      "label": "Hamel Husain"
     },
     {
       "key": "source:hugging-face",
