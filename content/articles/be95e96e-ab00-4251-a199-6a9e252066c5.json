@@ -1,0 +1,208 @@
+{
+  "article_id": "be95e96e-ab00-4251-a199-6a9e252066c5",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Resumo rápido: um texto publicado em 20/10 na MIT Technology Review diz que, quando a IA vira infraestrutura, a pergunta da empresa deixa de ser \"podemos usar?\" e passa a ser \"com que eficiência usamos?\". Depois de ler, você terá uma métrica simples, custo por resultado útil, e um roteiro para calculá-la nos seus projetos com agentes de código e propô-la a um gestor.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O texto é conteúdo patrocinado, produzido pela HPE, e não pela redação da MIT Technology Review. A HPE vende uma plataforma de IA privada, então o enquadramento favorece a tese de que ter infraestrutura própria compensa.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: o que o artigo diz",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A analogia central é a eletricidade. No começo poucas máquinas a usam e ninguém se preocupa com eficiência. Quando ela vira infraestrutura, todo processo depende dela e importa o quanto se aproveita. Para a IA corporativa, o autor diz que o foco sai do preço do token ou da hora de GPU e vai para a eficiência com que a capacidade paga vira resultado de negócio.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A métrica proposta é o custo efetivo por resultado útil: o custo total de plataforma, modelo, operação e capacidade para concluir um trabalho que o negócio realmente aproveita, como uma solicitação resolvida ou um fluxo concluído.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Stack própria (bespoke): flexível, mas exige revalidar o ambiente sempre que modelos e políticas mudam.",
+        "Consumo sob demanda (hyperscalers): menos montagem e adequado a demanda baixa ou incerta, mas a cobrança sobe a cada prompt ou ação de agente.",
+        "Plataforma privada integrada: capacidade própria ou dedicada com stack validada. A vantagem citada não é inferência grátis, e sim controle de alavancas como agendamento, escolha de modelo, particionamento de GPU e gestão de cache."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Dois pontos do argumento são sólidos. Primeiro, GPU ociosa e modelo grande demais encarecem cada resultado. Segundo, ter infraestrutura não melhora a economia por si só: sem demanda e disciplina operacional, ela vira capital parado. O texto também recomenda rotear tarefas ao modelo mais barato que atenda à qualidade exigida e reaproveitar contexto com gestão de KV-cache.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A parte de marketing é a promoção do HPE Private Cloud AI, que inclui 90 dias com engenheiros da HPE, e um teste independente encomendado pela própria HPE. Segundo o texto, nele uma plataforma integrada com alta utilização teve custo por token menor que alugar capacidade equivalente repetidamente. O texto admite que o resultado varia conforme a mistura de cargas e a utilização. O packet não traz números, metodologia nem o nome de quem testou, então não dá para reproduzir nem verificar essa comparação.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Não há valores, cargas de trabalho nem detalhes do teste no texto disponível. Trate a conclusão de que a plataforma integrada sai mais barata como hipótese do fornecedor, não como fato.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: como usar isso no seu trabalho",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você não opera GPUs próprias, mas a ideia vale em escala pequena: medir quanto custa cada tarefa concluída com sucesso, e não só o total de tokens. Isso responde a perguntas reais, como se vale usar um modelo maior no revisor ou se uma skill gasta contexto à toa.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Passo 1: defina o que é um resultado útil",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha uma unidade concreta. Exemplos: um PR aceito sem retrabalho, uma consulta SQL que passou nos testes, uma resposta de RAG avaliada como correta. Tarefa falha ou descartada conta no custo, mas não no denominador. É por isso que a métrica é diferente de custo por token.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Passo 2: registre custo e sucesso por tarefa",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Para cada execução, anote tokens de entrada e saída, modelo usado, número de tentativas e se o resultado foi aceito. Muitas ferramentas e APIs expõem o uso de tokens; confira na documentação oficial do que você usa. Uma planilha ou uma tabela SQLite já bastam.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Esquema hipotético: a tabela execucoes guarda uma linha por tentativa, com custo_usd calculado a partir dos tokens e aceito igual a 0 ou 1.",
+      "code": "-- custo efetivo por resultado útil, por tipo de tarefa e modelo\nSELECT tarefa, modelo,\n       SUM(custo_usd) AS custo_total,\n       SUM(aceito) AS resultados_uteis,\n       SUM(custo_usd) * 1.0 / NULLIF(SUM(aceito), 0) AS custo_por_resultado_util\nFROM execucoes\nGROUP BY tarefa, modelo\nORDER BY custo_por_resultado_util;",
+      "language": "sql",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Passo 3: teste as alavancas que o artigo cita",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Roteamento: rode as mesmas tarefas com um modelo menor e outro maior. Compare o custo por resultado útil, não o preço por token. O modelo barato pode errar mais e sair mais caro.",
+        "Reaproveitamento de contexto: prompts com prefixo estável podem se beneficiar de cache no provedor. Verifique na documentação se e como o recurso funciona.",
+        "Tamanho do contexto: skills e arquivos de instrução longos são carregados em toda execução. Meça o efeito de enxugá-los.",
+        "Tentativas: agentes que repetem até acertar escondem custo. Registre o número de tentativas por resultado."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Passo 4: leve ao gestor com controles",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Proponha a métrica junto com limites: cota de tokens por equipe ou por tarefa, alerta quando o custo por resultado útil sobe, e revisão mensal dos modelos por tipo de tarefa. A cota sozinha controla o gasto, mas não diz se ele gerou valor; a métrica faz isso. Isso evita o caso em que a equipe corta custo e perde qualidade sem perceber.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Como ler a tese de comprar ou alugar",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A lógica de que capacidade própria só compensa com alta utilização é uma regra de bom senso: custo fixo diluído em mais trabalho. Para decidir de verdade, você precisa do volume atual, da projeção de crescimento e do custo de operar. O artigo sugere olhar de 12 a 18 meses à frente, e que APIs seguem razoáveis para demanda baixa e imprevisível.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta semana: escolha um fluxo seu com agente, defina o que é resultado útil, registre 20 execuções e calcule o custo por resultado útil com dois modelos. Com esse número em mãos, a conversa com o gestor sai do campo da opinião.",
+      "type": "callout",
+      "variant": "takeaway"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-10-22",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-20T19:46:17Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "daebece5-3a42-491c-a092-36ef02d9446d",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português do Brasil a métrica 'custo efetivo por resultado útil' para IA corporativa. Cubra: diferença para custo por token, utilização de GPU, roteamento de modelos, cache de contexto (KV-cache), comparação entre API sob demanda e infraestrutura própria, e como montar uma planilha simples para medir isso em fluxos com agentes de código. Dê exemplos numéricos fictícios e aponte armadilhas."
+    },
+    {
+      "kind": "critic",
+      "label": "Criticar o argumento",
+      "prompt": "Atue como crítico cético. O texto 'The new economics of enterprise AI' é conteúdo patrocinado pela HPE e defende plataformas privadas de IA com base em um teste encomendado pela própria HPE. Liste em português do Brasil que perguntas eu deveria fazer ao fornecedor sobre metodologia, carga de trabalho, utilização assumida e custos ocultos antes de aceitar a conclusão."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "custo-de-ia-0019",
+  "sources": [
+    {
+      "accessed_at": "2026-10-20T19:45:49Z",
+      "language": "en",
+      "published_at": "2026-10-20T15:20:25Z",
+      "publisher": "MIT Technology Review",
+      "source_id": "s1",
+      "title": "The new economics of enterprise AI",
+      "url": "https://www.technologyreview.com/2026/10/20/1146937/the-new-economics-of-enterprise-ai"
+    }
+  ],
+  "summary": "Um artigo patrocinado pela HPE na MIT Technology Review propõe medir o \"custo efetivo por resultado útil\". Separamos o que é argumento sólido do que é marketing e mostramos como aplicar a métrica ao seu trabalho.",
+  "tags": [
+    "theme:roi",
+    "topic:token-efficiency",
+    "topic:inference",
+    "theme:operating-model",
+    "reason:career-utility",
+    "reason:learning-value",
+    "source:mit-technology-review"
+  ],
+  "title": "Custo de IA como infraestrutura: meça o custo por resultado útil, não só tokens"
+}

@@ -1,0 +1,174 @@
+{
+  "article_id": "0fa99193-b74a-4078-8daa-dd582181a146",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A Allen AI publicou o FairStress, um benchmark (conjunto padronizado de testes) para medir justiça demográfica em LLMs que tomam decisões sobre pessoas. A ideia central: não basta checar se o modelo escolhe o mesmo candidato quando trocamos a identidade; é preciso checar se ele cede com a mesma facilidade a um argumento persuasivo, não importa qual grupo seja favorecido. Depois de ler, você poderá montar um teste pequeno desse tipo com um agente de código.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que o FairStress mede",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Benchmarks comuns trocam a identidade de dois candidatos e veem se a escolha muda. O FairStress argumenta que escolher igual nos dois cenários pode esconder diferenças: o modelo pode escolher o candidato mais forte nas duas versões, mas abandoná-lo bem mais facilmente em uma delas quando recebe um argumento do tipo 'um líder sênior recomendou o Candidato B'. Os autores chamam esses argumentos de prefixos adversariais, e cada um tem uma versão espelhada favorecendo o outro candidato.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O benchmark tem 300 cenários de dois candidatos em 29 domínios (contratação, crédito, saúde, educação, moradia, justiça criminal). Alguns têm um candidato claramente melhor; outros são deliberadamente ambíguos. A identidade aparece em quatro graus: ausente, nome com marca demográfica, identidade indireta ou rótulo explícito. Combinando tudo, são mais de 13 milhões de casos; o FairStress-Core é um subconjunto de 50 mil itens para avaliar mais barato. Há download e integração ao Olmo-eval.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Principais achados (relato dos autores)",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Sem informação demográfica, os modelos se comportaram de forma quase simétrica, e em casos ambíguos dividiram as escolhas quase meio a meio.",
+        "Quanto mais explícita a identidade, menos simétrico o comportamento. Os autores chamam o padrão de supercorreção antiestereotípica: o modelo abandona mais facilmente a escolha correta quando isso favorece um candidato de grupo minoritário. A diferença média foi de 6,9 pontos percentuais com identidade implícita e 9,3 com rótulos explícitos, em 15 modelos.",
+        "No Core, Claude Opus 5 e GPT-5.5 escolheram o candidato minoritário em cerca de 60–65% dos casos ambíguos; a troca de decisão em direção a minoritários foi de 8,8 a 42,4 pontos percentuais mais comum, em 12 execuções.",
+        "As explicações também diferem: para escolhas minoritárias, mais palavras como 'resiliência' e 'diversidade'; para majoritárias, termos procedurais como 'evidência' e 'critérios'.",
+        "Em dois modelos (Gemma-3-12B-it e Qwen2.5-7B-Instruct), ativações internas previram o lado escolhido com cerca de 73% de acerto, contra 50% de acaso. Os autores ressalvam que são só dois modelos."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Um achado metodológico útil: no BBQ, benchmark conhecido de viés, os modelos tendiam a respostas consistentes com estereótipos, enquanto o FairStress mostrou favorecimento de minorias. Reproduzindo o BBQ com template de chat, pergunta sim/não e resposta gerada, três de quatro modelos testados passaram a favorecer minorias. Ou seja, a direção do viés medido depende de como se pergunta e se pontua.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O FairStress adota uma definição de justiça centrada em igualdade (simetria). Os próprios autores dizem que uma visão baseada em equidade pode julgar de outra forma. Os números são relato dos autores do benchmark; o texto disponível no pacote termina antes da seção sobre auditoria dos dados de treino do Olmo 3, que não pude verificar.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: um mini-FairStress para o seu projeto",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Se você usa um LLM para classificar, ranquear ou priorizar pessoas (currículos, tickets, leads, pedidos), vale um teste de simetria. Não precisa de 13 milhões de casos; algumas centenas de chamadas já revelam algo. Isso protege contra um risco concreto: decisões que parecem consistentes na média, mas cedem à pressão de contexto de forma desigual.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Crie 20 a 30 cenários de dois candidatos com um claramente melhor, e alguns ambíguos. Peça a um agente de código para gerar e você revisar à mão.",
+        "Gere variações de identidade: sem identidade, nome codificado e rótulo explícito. Troque a posição (A/B) também, para controlar viés de ordem.",
+        "Escreva 5 prefixos persuasivos (autoridade, consenso, 'evidência', histórico) e uma versão espelhada de cada para o outro candidato.",
+        "Rode o modelo com temperatura baixa, várias repetições, pedindo resposta gerada em formato fixo (por exemplo JSON com 'escolha' e 'justificativa').",
+        "Calcule, nos casos com candidato claro, a taxa de abandono da escolha correta por grupo favorecido pelo prefixo. A métrica é a diferença entre os grupos, em pontos percentuais.",
+        "Compare as justificativas: conte palavras de identidade versus palavras de critério."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Esqueleto da métrica de assimetria (a chamada ao modelo fica por sua conta).",
+      "code": "from collections import defaultdict\n\ndef taxa_abandono(resultados):\n    # resultados: lista de dicts com 'grupo_favorecido_pelo_prefixo' e 'abandonou' (bool)\n    n = defaultdict(int); ab = defaultdict(int)\n    for r in resultados:\n        g = r['grupo_favorecido_pelo_prefixo']\n        n[g] += 1\n        ab[g] += int(r['abandonou'])\n    return {g: 100 * ab[g] / n[g] for g in n}\n\ntaxas = taxa_abandono(resultados)\ngap = taxas['minoritario'] - taxas['majoritario']\nprint(taxas, 'gap (p.p.):', gap)",
+      "language": "python",
+      "type": "code"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Gap perto de zero é o objetivo de simetria. Mas meça com resposta gerada, no formato que você realmente usa: o estudo mostra que o método de pontuação pode inverter a direção do viés observado.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Decisões e limites",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Com poucas amostras, o gap tem muito ruído: repita as rodadas e reporte intervalos, em vez de um número único.",
+        "Defina antes qual conceito de justiça seu caso adota (igualdade ou equidade); isso é decisão de governança, não técnica.",
+        "Se o gap for alto, alternativas: remover identidade da entrada, separar a decisão em critérios objetivos pontuados, e não aceitar argumentos de autoridade no prompt. Teste cada mitigação com o mesmo mini-benchmark.",
+        "Em contextos regulados (contratação, crédito), trate o teste como evidência de apoio, não como garantia de conformidade; consulte a área jurídica."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: peça ao seu agente de código para gerar 10 cenários e os prefixos espelhados, rode contra o modelo que você usa e veja o gap. Consulte o post original e a documentação do Olmo-eval para detalhes do método e do download.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_knowledge",
+  "edition_date": "2026-10-22",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-20T19:47:10Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "daebece5-3a42-491c-a092-36ef02d9446d",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique o benchmark FairStress da Allen AI para avaliar justiça demográfica em LLMs que tomam decisões: o conceito de prefixos adversariais espelhados, simetria versus equidade, supercorreção antiestereotípica, a diferença entre pontuação por probabilidade de opções fixas e resposta gerada (como no BBQ) e o uso de item response theory no FairStress-Core. Depois sugira como montar um teste de viés simples com poucas dezenas de cenários, em Python, e como interpretar o gap em pontos percentuais com incerteza estatística."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "fairstress-como-testar-0020",
+  "sources": [
+    {
+      "accessed_at": "2026-10-20T19:46:17Z",
+      "language": "en",
+      "published_at": "2026-10-20T16:09:19Z",
+      "publisher": "Hugging Face",
+      "source_id": "s1",
+      "title": "FairStress: A deeper evaluation of fairness in LLM decision-making",
+      "url": "https://huggingface.co/blog/allenai/fairstress"
+    }
+  ],
+  "summary": "A Allen AI lançou o FairStress, benchmark que mede não só quem o modelo escolhe, mas quão fácil é fazê-lo mudar de ideia conforme o grupo demográfico favorecido. Veja os achados e como replicar a ideia em um teste pequeno.",
+  "tags": [
+    "topic:llm-evaluation",
+    "risk:bias",
+    "topic:benchmarks",
+    "theme:governance",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:hugging-face"
+  ],
+  "title": "FairStress: como testar se um LLM muda de decisão de forma assimétrica"
+}
