@@ -1,8 +1,8 @@
 ---
 // A table on a special page (D-075). Wide columns: a focusable scroll region. Under 34rem each row stacks as a card
 // with the column name over each cell; the explicit ARIA roles keep the table semantics that a display change can
-// drop in some browsers. A list cell holds codes written as "GOV-01 Name (TEC-01, TEC-02)": the code on its own line,
-// the name, then the optional paired codes kept unbroken.
+// drop in some browsers. A list cell holds codes written as "GOV-01 Name (TEC-01, notes)": the code on its own line,
+// the name, then the optional correspondences, each code in them kept unbroken.
 interface Props {
   label: string;
   /** Column headers; the first names the row headers. */
@@ -53,7 +53,18 @@ const parts = (item: string) => {
                       return (
                         <li>
                           <code>{code}</code> {name}
-                          {pair && <span class="pair"> ({pair})</span>}
+                          {pair && (
+                            <span class="pair">
+                              {' ('}
+                              {pair.split(', ').map((piece, k) => (
+                                <>
+                                  {k > 0 && ', '}
+                                  {/^[A-Z]+-\d+$/.test(piece) ? <span class="code">{piece}</span> : piece}
+                                </>
+                              ))}
+                              {')'}
+                            </span>
+                          )}
                         </li>
                       );
                     })}
@@ -123,6 +134,9 @@ const parts = (item: string) => {
 
   .pair {
     color: var(--muted);
+  }
+
+  .pair .code {
     white-space: nowrap;
   }
 

@@ -74,21 +74,21 @@ const FRONTS = [
     'Patrocinador, comitê multidisciplinar, um owner de negócio e um responsável técnico por sistema; quem aprova, suspende e desativa.',
     ['GOV-02 Regimento do comitê', 'GOV-03 Matriz RACI'],
   ],
-  ['Inventário', 'Cada uso de IA registrado com finalidade, dono, dados, terceiros, risco e estado.', ['GOV-04 Inventário corporativo de IA (TEC-02, TEC-03)']],
+  ['Inventário', 'Cada uso de IA registrado com finalidade, dono, dados, terceiros, risco e estado.', ['GOV-04 Inventário corporativo de IA (TEC-02, TEC-03, inventário de componentes)']],
   [
     'Riscos e impactos',
-    'Critérios (gravidade, escala, reversibilidade, dados sensíveis, autonomia) e controles exigidos por classe.',
-    ['GOV-05 Metodologia de risco e impacto (TEC-04)', 'GOV-06 Catálogo de controles (TEC-05)'],
+    'Critérios (probabilidade, gravidade, escala, reversibilidade, dados sensíveis, autonomia) e controles exigidos por classe.',
+    ['GOV-05 Metodologia de risco e impacto (avaliação de riscos, TEC-04)', 'GOV-06 Catálogo de controles (TEC-05)'],
   ],
   [
     'Homologação e terceiros',
     'Evidências por classe, quem aprova a produção, exceções; due diligence de fornecedores.',
-    ['GOV-07 Procedimento de homologação (TEC-07, TEC-08)', 'GOV-08 Política de terceiros (TEC-03)'],
+    ['GOV-07 Procedimento de homologação (TEC-07, TEC-08)', 'GOV-08 Política de terceiros (TEC-03, SBOM e APIs)'],
   ],
   [
     'Supervisão e auditoria',
     'Indicadores, incidentes, auditorias proporcionais ao risco e revisão do programa.',
-    ['GOV-09 Procedimento de incidentes (TEC-09, TEC-10)', 'GOV-10 Indicadores e auditoria (TEC-07, TEC-09)'],
+    ['GOV-09 Procedimento de incidentes (TEC-09, TEC-10)', 'GOV-10 Indicadores e auditoria (TEC-07, TEC-09, histórico de versões e decisões)'],
   ],
 ] as const;
 
@@ -114,7 +114,7 @@ const RISK_CLASSES = [
 
 const DISCIPLINES = [
   ['Arquitetura e ciclo de vida', 'Arquitetura de referência, ambientes segregados, mudanças versionadas, critérios de deploy', ['TEC-01 System Card e arquitetura', 'TEC-08 Pipelines de validação e deploy']],
-  ['Dados', 'Contratos, qualidade, linhagem, permissões e retenção', ['TEC-02 Inventário técnico de dados']],
+  ['Dados', 'Contratos, qualidade, linhagem, classificação, permissões e retenção', ['TEC-02 Inventário técnico de dados']],
   ['Modelos e LLMs', 'Versões, parâmetros, fornecedor, limitações e métricas', ['TEC-03 Registro de modelos (Model Card)']],
   ['Segurança', 'IAM, secrets, prompt injection e testes adversariais', ['TEC-04 Threat model']],
   ['RAG e agentes', 'Autorização na recuperação, contratos de ferramentas, limites de autonomia, confirmação', ['TEC-05 Controles de segurança e autonomia']],
@@ -226,16 +226,18 @@ const CASE_CONTROLS = [
   [
     'RAG',
     [
-      'Documentos com dono, versão, vigência e status de aprovação.',
+      'Documentos com dono, classificação, versão, vigência e status de aprovação.',
       'Autorização checada antes de o conteúdo chegar ao LLM.',
-      'Citação de fontes, abstenção sem base e proteção contra instruções maliciosas nos documentos.',
+      'Testes de recuperação e grounding; citação de fontes e abstenção sem base.',
+      'Proteção contra instruções maliciosas nos documentos.',
     ],
   ],
   [
     'Agente de agendamento',
     [
-      'Ferramentas permitidas por papel; leitura e escrita com permissões distintas, verificadas também no serviço de destino.',
-      'Confirmação explícita antes de criar, alterar ou cancelar, sem duplicidade.',
+      'Ferramentas permitidas por papel e contexto; leitura e escrita com permissões distintas.',
+      'Identidade e permissões verificadas também no serviço de destino.',
+      'Confirmação explícita antes de criar, alterar ou cancelar; limites de execução e sem duplicidade.',
       'Registro auditável de cada chamada de ferramenta.',
     ],
   ],
@@ -244,7 +246,7 @@ const CASE_CONTROLS = [
     [
       'Modelo, configuração e prompts versionados.',
       'Datasets com casos típicos, adversariais e críticos.',
-      'Regressão a cada mudança; avaliação humana nos cenários críticos.',
+      'Regressão a cada mudança; avaliação humana por amostragem e nos cenários críticos.',
     ],
   ],
   [
@@ -502,11 +504,11 @@ const cells = (n: number) => Array.from({ length: n }, (_, i) => i);
     <h3 data-block="heading">4.1 Seis frentes e seus entregáveis</h3>
     <p>
       Cada frente gera entregáveis com código estável (GOV-01 a GOV-10), que os controles e as evidências vão citar. Entre
-      parênteses, o artefato técnico da seção 5 que comprova cada um.
+      parênteses, os artefatos técnicos correspondentes (seção 5), onde a evidência de cada um é produzida.
     </p>
     <SpecialTable
       label="Frentes da governança corporativa e entregáveis"
-      columns={['Frente', 'O que definir', 'Entregáveis (par técnico)']}
+      columns={['Frente', 'O que definir', 'Entregáveis (correspondência técnica)']}
       rows={FRONTS.map(([front, what, deliverables], i) => [`${i + 1}. ${front}`, what, deliverables])}
       wide
     />
@@ -613,7 +615,7 @@ const cells = (n: number) => Array.from({ length: n }, (_, i) => i);
     <aside data-block="callout" data-variant="note">
       <p>
         <strong>Regra de desenho:</strong> uma política pode gerar vários controles, e um teste pode comprovar vários;
-        o mesmo vale para os pares de entregáveis da seção 4.1. Guarde essas relações N:N no catálogo, em vez de exigir
+        o mesmo vale para as correspondências de entregáveis da seção 4.1. Guarde essas relações N:N no catálogo, em vez de exigir
         um documento para cada ligação.
       </p>
     </aside>
