@@ -1,7 +1,8 @@
 ---
 // A table on a special page (D-075). Wide columns: a focusable scroll region. Under 34rem each row stacks as a card
 // with the column name over each cell; the explicit ARIA roles keep the table semantics that a display change can
-// drop in some browsers. A list cell holds codes written as "GOV-01 Name" and shows the code on its own line.
+// drop in some browsers. A list cell holds codes written as "GOV-01 Name (TEC-01, TEC-02)": the code on its own line,
+// the name, then the optional paired codes kept unbroken.
 interface Props {
   label: string;
   /** Column headers; the first names the row headers. */
@@ -14,9 +15,10 @@ interface Props {
   hideRowHeaderTitle?: boolean;
 }
 const { label, columns, rows, wide = false, hideRowHeaderTitle = false } = Astro.props;
-const code = (item: string) => {
+const parts = (item: string) => {
   const space = item.indexOf(' ');
-  return [item.slice(0, space), item.slice(space + 1)];
+  const [, name, pair] = /^(.*?)(?: \(([^)]+)\))?$/.exec(item.slice(space + 1)) ?? [];
+  return { code: item.slice(0, space), name, pair };
 };
 ---
 
@@ -46,11 +48,15 @@ const code = (item: string) => {
                   cell
                 ) : (
                   <ul>
-                    {cell.map((item) => (
-                      <li>
-                        <code>{code(item)[0]}</code> {code(item)[1]}
-                      </li>
-                    ))}
+                    {cell.map((item) => {
+                      const { code, name, pair } = parts(item);
+                      return (
+                        <li>
+                          <code>{code}</code> {name}
+                          {pair && <span class="pair"> ({pair})</span>}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </td>
@@ -113,6 +119,11 @@ const code = (item: string) => {
     display: block;
     color: var(--accent);
     font-weight: 700;
+  }
+
+  .pair {
+    color: var(--muted);
+    white-space: nowrap;
   }
 
   @media (max-width: 34rem) {

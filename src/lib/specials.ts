@@ -19,7 +19,7 @@ export const SPECIALS: readonly Special[] = [
     summary:
       'Guia prático para ligar políticas, riscos e decisões da empresa aos controles, testes e evidências da engenharia.',
     date: '2026-10-23',
-    readMinutes: 16,
+    readMinutes: 15,
   },
 ];
 

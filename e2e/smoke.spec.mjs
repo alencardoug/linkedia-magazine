@@ -92,6 +92,17 @@ test.describe('without JavaScript', () => {
     await page.locator('summary', { hasText: 'Saber mais' }).click(); // <details> needs no JS
     await expect(page.locator('[data-prompt-text]')).toHaveText(PROMPT);
   });
+
+  test('the special guide reads whole, tables and diagrams included (D-075)', async ({ page }) => {
+    await page.goto('/especiais/governanca-de-ia');
+    await expect(page.locator('h1')).toHaveText('Governança de IA: como implementar em ambientes corporativos');
+    const matrix = page.getByRole('region', { name: 'Matriz de homologação do AI-023' });
+    await expect(matrix.getByRole('rowheader', { name: 'Troca de modelo' })).toBeVisible();
+    await expect(page.getByText('Decisão: critérios atendidos e risco residual aceito?')).toBeVisible();
+    await expect(page.getByText('Mudança relevante ou incidente: o sistema volta ao G1.')).toBeVisible();
+    await expect(page.getByText('Observabilidade e governança técnica')).toBeVisible();
+    await expect(page.locator('[data-ai-note]')).toBeVisible();
+  });
 });
 
 test.describe('320 px viewport', () => {
