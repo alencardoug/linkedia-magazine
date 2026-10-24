@@ -21,6 +21,7 @@ A **pre-page (cover)** before the magazine's home page that is pure technologica
 ## Covers so far
 | Week | Cover | Notes |
 |---|---|---|
+| 2026-W43 | **Duas sombras** (`/visual/duas-sombras`, `src/covers/duas-sombras/`) | Codex's concept #1, built by Claude with Codex's plan critique (one rigid object, words readable from the start, a coverage margin). A glass block of ceramic blades, carved for each edition, casts exactly "IA" and "DIA" on two walls; it follows the cursor or the finger, the follow-spots track it, and on entry the shadows swallow the room. Strong rotations smear both words into blocks, so the block only leans a few degrees. |
 | 2026-W42 | **Singularidade** (`/visual/singularidade`, `src/covers/singularidade/`) | Chosen by the owner over three Codex concepts. A real-time general-relativity black hole bends the light of the typographic cover; it follows the cursor or the finger and swallows the screen on entry. The owner prefers ONE hole that follows the cursor (no companion hole, no hole parked on "IA"). |
 
 The owner (2026-10-17) wants a new cover **every week** and every past cover easily reachable (`/visual`, was `/capas`; D-067). The
@@ -29,9 +30,7 @@ routine: `docs/prompts/weekly_cover.md`; the cover contract: `docs/COVERS.md`.
 ## Queue (owner, 2026-10-17: to build and show in the coming weeks)
 Codex's concepts from the 3-01 brainstorm, in the owner's order. The full brainstorm (ten concepts, three wild cards,
 a detailed spec of "Duas sombras") is kept in the engine checkout: `../linkedia-engine/ideas/cover_ideas_2026-10-17.md`.
-1. **Duas sombras / The Day Has Two Shadows** — a suspended sculpture whose two shadows read **IA** on one wall and
-   **DIA** on the other, although the object resembles neither; a new carving every edition, built at build time from
-   two compatible letter masks (projections preserved), lit by two drifting lights; a shutter-like collapse on entry.
+1. ~~**Duas sombras / The Day Has Two Shadows**~~ — built as the 2026-W43 cover (see above).
 2. **Tear do avesso / Inside-Out Loom** — today's articles as monumental coral, cobalt and yellow ribbons weaving
    through impossible crossings, headlines printed on their undersides, "LinkedIA" woven into the selvedge; Canvas 2D,
    strong on weak phones.

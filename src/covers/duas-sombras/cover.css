@@ -1,0 +1,304 @@
+/* "Duas sombras" (docs/COVERS.md): a museum label beside a gallery. Complete without JS: the label is real text and
+   the gallery a flat CSS poster (two walls with their words and a striped glass block). With WebGL2 the canvas draws
+   the gallery live over the poster once its first frame is verified (html[data-art='live']); the label stays real
+   HTML on an opaque card, above the canvas. Scoped to html[data-cover='duas-sombras'].
+   Contrast: --ds-ink on --ds-paper 16.7:1, --ds-muted 7.6:1, --ds-link 7.8:1; fine print --cover-fine on --cover-bg
+   10.8:1, --cover-link 15.0:1. The poster's words are decorative (the room is aria-hidden). */
+html[data-cover='duas-sombras'] {
+  --ds-ink: #201329;
+  --ds-paper: #fbf8ef;
+  --ds-muted: #5a4a66;
+  --ds-link: #3d2fd1;
+  --ds-acid: #e6f49a;
+  --ds-verm: #f45a3c;
+  --ds-chalk: #f4eedc;
+  --ds-ultra: #263bff;
+  --cover-bg: var(--ds-ink);
+  --cover-ink: var(--ds-paper);
+  --cover-fine: #cfc6dc;
+  --cover-link: var(--ds-acid);
+  --cover-focus: var(--ds-acid);
+}
+
+/* Wide screens: the label on the left, the gallery on the right. */
+html[data-cover='duas-sombras'] .ds {
+  position: relative; /* no z-index: the canvas, the link layer and the label stack with the shell's fine print */
+  display: grid;
+  grid-template-columns: minmax(17rem, 30vw) 1fr;
+  grid-template-areas: 'label room';
+  min-height: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html[data-cover='duas-sombras'] .ds-room {
+  grid-area: room;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* The flat poster of the gallery: what devices without the art keep. */
+html[data-cover='duas-sombras'] .ds-poster {
+  position: absolute;
+  inset: 0;
+  background: var(--ds-chalk);
+}
+
+html[data-cover='duas-sombras'] .ds-wall {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 78%;
+  display: grid;
+  place-items: center;
+}
+
+html[data-cover='duas-sombras'] .ds-wall-left {
+  left: 0;
+  background: var(--ds-acid);
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+}
+
+html[data-cover='duas-sombras'] .ds-wall-right {
+  right: 0;
+  background: var(--ds-verm);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 80%);
+}
+
+html[data-cover='duas-sombras'] .ds-word {
+  color: var(--ds-ink);
+  font: 900 clamp(3rem, 16vmin, 10rem) / 0.8 var(--cover-font);
+  letter-spacing: -0.02em;
+  opacity: 0.85;
+}
+
+html[data-cover='duas-sombras'] .ds-wall-left .ds-word {
+  transform: skewY(-9deg) translateY(-8%);
+}
+
+html[data-cover='duas-sombras'] .ds-wall-right .ds-word {
+  transform: skewY(9deg) translateY(-8%);
+}
+
+html[data-cover='duas-sombras'] .ds-block {
+  position: absolute;
+  left: 34%;
+  width: 32%;
+  top: 46%;
+  height: 26%;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background:
+    repeating-linear-gradient(90deg, rgba(38, 59, 255, 0.9) 0 0.3rem, transparent 0.3rem 1.05rem),
+    rgba(225, 235, 255, 0.35);
+  box-shadow: 0 1.4rem 1.6rem -1.2rem rgba(32, 19, 41, 0.55);
+}
+
+html[data-cover='duas-sombras'] .ds-canvas {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+/* The museum label: an opaque card, above the canvas; only the entry link takes clicks. */
+html[data-cover='duas-sombras'] .ds-label {
+  grid-area: label;
+  position: relative;
+  z-index: 3;
+  align-self: center;
+  margin: clamp(1rem, 3vh, 2rem) clamp(1rem, 2.4vw, 2rem);
+  padding: 1.1rem 1.25rem 0.95rem;
+  background: var(--ds-paper);
+  color: var(--ds-ink);
+  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  transition: opacity 0.35s ease 0.15s;
+}
+
+html[data-cover='duas-sombras'] :where(.ds-label p, .ds-label ol) {
+  margin: 0;
+}
+
+html[data-cover='duas-sombras'] .ds-kicker,
+html[data-cover='duas-sombras'] .ds-onview {
+  color: var(--ds-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+html[data-cover='duas-sombras'] .ds-masthead {
+  margin: 0.3rem 0 0.1rem;
+  font-size: clamp(2.2rem, 4.2vw, 3.6rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+html[data-cover='duas-sombras'] .ds-work {
+  font-size: 1rem;
+}
+
+html[data-cover='duas-sombras'] .ds-work cite {
+  font-style: italic;
+  font-weight: 600;
+}
+
+html[data-cover='duas-sombras'] .ds-caption {
+  margin-top: 0.45rem;
+  color: var(--ds-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+html[data-cover='duas-sombras'] .ds-onview {
+  margin-top: 0.85rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(32, 19, 41, 0.18);
+}
+
+html[data-cover='duas-sombras'] .ds-heads {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.35rem;
+  padding-left: 1.1rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+html[data-cover='duas-sombras'] :is(.ds-more, .ds-empty) {
+  margin-top: 0.35rem;
+  color: var(--ds-muted);
+  font-size: 0.8rem;
+}
+
+html[data-cover='duas-sombras'] .ds-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin-top: 0.85rem;
+}
+
+html[data-cover='duas-sombras'] .ds-hint {
+  color: var(--ds-muted);
+  font: 400 0.7rem / 1.4 var(--cover-mono);
+}
+
+html[data-cover='duas-sombras'] .ds-enter {
+  pointer-events: auto;
+  color: var(--ds-link);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none; /* a long touch drags the sculpture; the fine-print links keep their menus */
+}
+
+/* On the light card a dark focus ring (the shell's acid one is for the dark page). */
+html[data-cover='duas-sombras'] .ds-label :focus-visible {
+  outline-color: var(--ds-ink);
+}
+
+/* The whole viewport is this link. */
+html[data-cover='duas-sombras'] .ds-enter::after {
+  content: '';
+  position: fixed;
+  z-index: 2;
+  inset: 0;
+  cursor: pointer;
+}
+
+/* Portrait or very narrow screens: the gallery on top, the label below it (short landscape phones keep the columns). */
+@media (max-width: 36rem), (orientation: portrait) {
+  html[data-cover='duas-sombras'] .ds {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(13rem, 1fr) auto;
+    grid-template-areas: 'room' 'label';
+  }
+
+  html[data-cover='duas-sombras'] .ds-label {
+    align-self: end;
+    margin: 0.6rem 0.75rem 0.4rem;
+    padding: 0.8rem 1rem 0.7rem;
+  }
+
+  html[data-cover='duas-sombras'] .ds-masthead {
+    font-size: 2.1rem;
+  }
+
+  html[data-cover='duas-sombras'] .ds-heads li {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+}
+
+/* Short screens: one line per headline and a shorter caption, so the cover fits and the art can start. */
+@media (max-height: 40rem) {
+  html[data-cover='duas-sombras'] .ds-heads li {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    overflow: hidden;
+  }
+
+  html[data-cover='duas-sombras'] .ds-caption {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+}
+
+/* Live art: the canvas shows the gallery, the page does not scroll or pan, and a drag moves the sculpture instead of
+   the page. Pinch zoom stays where supported. */
+html[data-cover='duas-sombras'][data-art='live'] body {
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  touch-action: none;
+  touch-action: pinch-zoom;
+}
+
+html[data-cover='duas-sombras'][data-art='live'] .ds-canvas {
+  opacity: 1;
+}
+
+/* Entering: the label leaves with the light. */
+html[data-cover='duas-sombras'][data-leaving] .ds-label {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-cover='duas-sombras'][data-art='live'] .ds-hint {
+    animation: ds-pulse 2.8s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-cover='duas-sombras'] :is(.ds-canvas, .ds-label) {
+    transition: none;
+  }
+}
+
+/* The hint never dims below AA: --ds-muted at 0.8 on --ds-paper is 4.8:1. */
+@keyframes ds-pulse {
+  50% {
+    opacity: 0.8;
+  }
+}

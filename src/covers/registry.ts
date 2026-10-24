@@ -22,6 +22,17 @@ export interface CoverMeta {
 
 export const COVERS: readonly CoverMeta[] = [
   {
+    slug: 'duas-sombras',
+    title: 'Duas sombras',
+    weekId: '2026-W43',
+    summary:
+      'Um bloco de vidro com lâminas de cerâmica que, de frente, não formam letra nenhuma; suas sombras dizem IA e ' +
+      'DIA. A escultura segue o cursor ou o dedo, e as sombras vão junto sem deixar de ler.',
+    credit:
+      'escultura calculada para cada edição e iluminada em tempo real (ray marching) no seu aparelho, em código ' +
+      'escrito por IA, sem imagens',
+  },
+  {
     slug: 'singularidade',
     title: 'Singularidade',
     weekId: '2026-W42',
@@ -31,11 +42,12 @@ export const COVERS: readonly CoverMeta[] = [
     credit:
       'luz curvada por um buraco negro simulado em tempo real (relatividade geral) no seu aparelho, em código ' +
       'escrito por IA, sem imagens',
+    edition: '2026-10-23',
   },
 ];
 
 /** The cover shown at `/`. */
-export const CURRENT_COVER = 'singularidade';
+export const CURRENT_COVER = 'duas-sombras';
 
 export function coverBySlug(slug: string): CoverMeta {
   const cover = COVERS.find((c) => c.slug === slug);

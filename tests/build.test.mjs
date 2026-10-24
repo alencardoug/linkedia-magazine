@@ -4,6 +4,7 @@
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { gzipSync } from 'node:zlib';
 import { build } from 'astro';
 import { afterAll, describe, expect, it } from 'vitest';
 import { validateContent } from '../scripts/validate-content.mjs';
@@ -182,14 +183,18 @@ describe('static build', () => {
       ].sort(),
     );
     // The editor is named on /sobre only; the AI note is in the footer of /revista only, each article carries its own
-    // note instead (owner, 2026-10-19). No inline code anywhere. Reading pages: one theme and client JS only with copy buttons; cover
-    // pages: their own shell and only their own cover's script.
+    // note instead (owner, 2026-10-19). No inline code or third-party file anywhere. Reading pages: one theme and client JS
+    // only with copy buttons; cover pages: their own shell and only their own cover's script, within the budgets.
     const AI_NOTE_PAGES = ['revista.html'];
     for (const page of htmlFiles(out)) {
       const html = readFileSync(join(out, page), 'utf8');
       expect(html.includes('rel="author"'), page).toBe(page === 'sobre.html');
       expect(html.includes('Textos gerados com IA'), page).toBe(AI_NOTE_PAGES.includes(page));
       expect(html.includes('data-site-footer'), page).toBe(AI_NOTE_PAGES.includes(page));
+      expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
+      // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
+      expect(html, page).not.toMatch(/<script(?![^>]*\ssrc="\/_astro\/)[^>]*>/);
+      expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
       if (isCover(page)) {
         expect(html, page).toMatch(/^<!DOCTYPE html><html lang="pt-BR" data-cover="[a-z0-9-]+">/);
         expect(html, page).not.toContain('data-theme');
@@ -197,9 +202,21 @@ describe('static build', () => {
         expect(html, page).toMatch(/<a class="[^"]*" href="\/revista" draggable="false" data-enter>/);
         expect(html, page).toContain('href="/visual"');
         expect(html.match(/<h1[\s>]/g), page).toHaveLength(1);
-        expect([...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map((m) => m[1]), page).toEqual([
-          expect.stringMatching(/^\/_astro\/Cover\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/),
-        ]);
+        const scripts = [...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map((m) => m[1]);
+        expect(scripts, page).toEqual([expect.stringMatching(/^\/_astro\/Cover\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/)]);
+        // Budgets (docs/COVERS.md): the cover's JS, with every chunk it imports, ≤ 30 KB gzipped; its CSS ≤ 10 KB.
+        const reach = (file, seen = new Set()) => {
+          if (seen.has(file)) return seen;
+          seen.add(file);
+          const code = readFileSync(join(out, file), 'utf8');
+          for (const m of code.matchAll(/(?:from|import)\s*\(?\s*"\.\/([\w.-]+\.js)"/g)) reach(`_astro/${m[1]}`, seen);
+          return seen;
+        };
+        const gz = (files) => [...files].reduce((n, f) => n + gzipSync(readFileSync(join(out, f))).length, 0);
+        expect(gz(reach(scripts[0].slice(1))), page).toBeLessThanOrEqual(30 * 1024);
+        const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="\/([^"]+)"/g)].map((m) => m[1]);
+        expect(styles.length, page).toBeGreaterThan(0);
+        expect(gz(styles), page).toBeLessThanOrEqual(10 * 1024);
         continue;
       }
       expect(html, page).toContain('<html lang="pt-BR" data-theme="minimal-dark">'); // no slots, no switcher
@@ -208,10 +225,6 @@ describe('static build', () => {
       expect(html, page).toContain('<a href="/revista" data-brand>');
       expect(html, page).toContain('<a href="/visual">Visual</a>');
       expect(html.includes('<script'), page).toBe(html.includes('data-copy='));
-      expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
-      // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
-      expect(html, page).not.toMatch(/<script(?![^>]*\ssrc="\/_astro\/)[^>]*>/);
-      expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
       // Astro drops the line break between text and a link on the next line: "licençaCC BY 4.0".
       expect(html, page).not.toMatch(/[\p{L}.,;:]<a\s/u);
       // A scrollable code block must be reachable by keyboard (axe scrollable-region-focusable).

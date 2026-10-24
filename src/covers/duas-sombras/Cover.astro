@@ -1,0 +1,74 @@
+---
+// "Duas sombras" (2026-W43; docs/COVERS.md, ./README.md). The HTML below is a complete cover on its own — a museum
+// label (masthead, the work, the edition and its lead headlines) next to a flat poster of the gallery — without JS,
+// without WebGL2, with reduced motion. With WebGL2 the script renders the gallery live: a glass block of ceramic
+// blades whose two shadows read "IA" and "DIA", carved for this edition (sculpture.ts). The viewport-wide link into the
+// magazine is a real link, so every click, tap or key press ends in /revista.
+import './cover.css';
+import type { EditionWithArticles } from '../../lib/content';
+import { longDate } from '../../lib/labels';
+import { bladeCount, paramsFor } from './sculpture';
+
+interface Props {
+  latest: EditionWithArticles | undefined;
+}
+const { latest } = Astro.props;
+const LEAD = 3; // headlines on the cover; the rest are counted
+const heads = latest?.articles.slice(0, LEAD) ?? [];
+const more = (latest?.articles.length ?? 0) - heads.length;
+const date = latest?.edition.edition_date ?? '';
+const sculpture = paramsFor(date);
+const blades = bladeCount(sculpture);
+---
+
+<main
+  class="ds"
+  data-ds
+  data-cover-art="duas-sombras"
+  data-theta={sculpture.theta}
+  data-spacing={sculpture.spacing}
+  data-thickness={sculpture.thickness}
+  data-phase={sculpture.phase}
+>
+  <div class="ds-room" data-room aria-hidden="true">
+    <div class="ds-poster">
+      <span class="ds-wall ds-wall-left"><span class="ds-word">IA</span></span>
+      <span class="ds-wall ds-wall-right"><span class="ds-word">DIA</span></span>
+      <span class="ds-block"></span>
+    </div>
+    <canvas class="ds-canvas" data-canvas></canvas>
+  </div>
+  <section class="ds-label">
+    <p class="ds-kicker">Revista diária · Inteligência artificial</p>
+    <h1 class="ds-masthead">LinkedIA</h1>
+    <p class="ds-work"><cite>Duas sombras</cite>, 2026</p>
+    <p class="ds-caption">
+      Vidro e {blades} lâminas de cerâmica a {Math.round(sculpture.theta)}°, calculados no seu aparelho{latest && <> para a edição de <time datetime={date}>{longDate(date)}</time></>}. De frente, nenhuma letra; as sombras dizem IA e DIA.
+    </p>
+    {
+      heads.length > 0 ? (
+        <>
+          <p class="ds-onview">Em exibição</p>
+          <ol class="ds-heads">
+            {heads.map((a) => (
+              <li>{a.title}</li>
+            ))}
+          </ol>
+        </>
+      ) : (
+        <p class="ds-empty">Nenhuma edição publicada ainda.</p>
+      )
+    }
+    {more > 0 && <p class="ds-more">+ {more} {more === 1 ? 'matéria' : 'matérias'} nesta edição</p>}
+    <p class="ds-bar">
+      <span class="ds-hint" data-hint>Clique ou toque em qualquer lugar para entrar.</span>
+      <a class="ds-enter" href="/revista" draggable="false" data-enter>Entrar na revista <span aria-hidden="true">→</span></a>
+    </p>
+  </section>
+</main>
+
+<script>
+  import { boot } from './main';
+
+  boot();
+</script>

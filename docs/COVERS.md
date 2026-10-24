@@ -49,12 +49,17 @@ no client code imports it.
 2. Archive the outgoing cover: set its `edition` to the latest edition date.
 3. Point `CURRENT_COVER` and the import in `src/pages/index.astro` at the new cover (`tests/build.test.mjs` checks
    they agree).
-4. `npm run check && npm test && npm run e2e`, then the acceptance below. The routine and its prompt:
+4. Add the page to the smoke routes (`e2e/smoke.spec.mjs`); `e2e/cover.spec.mjs` runs its contract checks over `/` and
+   every `/visual/<slug>` from the registry, so add only the new cover's own checks there. Copy shared pure modules
+   (entry gestures, adaptive quality) into the package instead of importing another cover's, and add the copy to the
+   parameterised tests in `tests/covers.test.mjs`.
+5. `npm run check && npm test && npm run e2e`, then the acceptance below. The routine and its prompt:
    `docs/prompts/weekly_cover.md`; the idea queue: `docs/prompts/cover_art.md`.
 
 ## Acceptance
-Headless Chromium has no WebGL here, so CI (`e2e/cover.spec.mjs`, `e2e/real-themes.spec.mjs`) covers the HTML cover,
-entry, drag versus tap, keys, Back, a broken WebGL context, the archive, 320 px and axe, and the fidelity of the bitmap
-the art paints from the HTML (`#pintura`). The art itself is accepted on a real GPU: a laptop with an integrated GPU (Intel
-HD 620) and a phone — frame rate, look, steering by mouse and finger, entry, resize, Back, a minute of idling. Record the
-evidence in the cover's README.
+Headless Chromium has no WebGL here, so CI (`e2e/cover.spec.mjs`, `e2e/real-themes.spec.mjs`) covers, on every cover
+page, the HTML cover, entry, a broken or software WebGL context, 320 px, the viewports where the art may start and axe;
+on `/`, drag versus tap, keys and Back; the archive; and each cover's own checks (Singularidade: the fidelity of the
+bitmap its art paints from the HTML, `#pintura`; Duas sombras: the museum label above the art). The art itself is
+accepted on a real GPU: a laptop with an integrated GPU (Intel HD 620) and a phone — frame rate, look, steering by
+mouse and finger, entry, resize, Back, a minute of idling. Record the evidence in the cover's README.
