@@ -1,0 +1,199 @@
+---
+// `/especiais/dez-layouts-governanca-de-ia` (3-23, D-077): the ten tela-1 sketches of the AI governance guide (3-21),
+// one desktop and one phone screenshot each, made by `ideas/especial-tela1-2026-10-24/vitrine.py` in the engine.
+// The pc ↔ celular choice is two radios and `:has()`, so it needs no JS; without `:has()` both views show.
+import Base from '../../layouts/Base.astro';
+import { longDate } from '../../lib/labels';
+import { special } from '../../lib/specials';
+
+const page = special('dez-layouts-governanca-de-ia');
+const guide = special('governanca-de-ia');
+
+const shots = import.meta.glob<{ default: ImageMetadata }>('../../specials/dez-layouts/*.webp', { eager: true });
+const shot = (id: string, device: 'desktop' | 'celular') => shots[`../../specials/dez-layouts/${id}-${device}.webp`].default;
+
+// The owner picked S4 for the guide (2026-10-25, D-077).
+const CHOSEN = 's4';
+const SKETCHES = [
+  ['s1', 'Relatório Executivo', 'Relatório de consultoria aberto como lâmina dobrada: papel e azul-marinho, com o cartão atravessando a dobra.'],
+  ['s2', 'Centro de Comando', 'Superfície de produto escura, construída em torno de um único instrumento: obrigações descem, evidências sobem.'],
+  ['s3', 'Planta Técnica', 'Folha de desenho técnico: um corte com dois pavimentos e a junta de integração ampliada por uma lupa.'],
+  ['s4', 'Fio da Rastreabilidade', 'Doze fios, frios e quentes, emendados por duas amarras; um deles sai da emenda e sublinha “a ponte entre eles”.'],
+  ['s5', 'Mapa de Linhas', 'O sumário vira um mapa de metrô: uma linha contínua 01–14, com baldeação na camada de integração.'],
+  ['s6', 'Camadas de Vidro', 'Três placas de vidro num estúdio escuro, atravessadas por uma junta de latão: a camada de integração.'],
+  ['s7', 'Ponte Estaiada', 'Recorte de uma ponte estaiada ao entardecer: mastro e cabos, tabuleiro e pilares como as três camadas.'],
+  ['s8', 'Prensa de Evidências', 'Editorial industrial: título condensado enorme, um mecanismo de impressão recortado e marcas de registro.'],
+  ['s9', 'Azulejo Institucional', 'Azulejaria cívica feita por código: um único módulo girado e ampliado, com campos vazios para a leitura.'],
+  ['s10', 'Campo de Evidências', 'Campo vivo em WebGL: obrigações caem em âmbar, evidências sobem em ciano e se cruzam numa faixa de troca.'],
+] as const;
+---
+
+<Base title={page.title} description={page.summary}>
+  <article data-article="especial-dez-layouts" data-special data-layouts>
+    <header>
+      <p class="meta">Conteúdo especial · <time datetime={page.date}>{longDate(page.date)}</time></p>
+      <h1>{page.title}</h1>
+      <p data-summary>
+        Dez direções de arte para a primeira tela do guia <a href={`/especiais/${guide.slug}`}>Governança de IA</a>, do
+        cabeçalho ao fim da seção 2. O texto é o mesmo em todas; muda só o desenho. A S4 foi a escolhida para o guia.
+      </p>
+    </header>
+
+    <fieldset class="dl-view">
+      <legend>Ver como</legend>
+      <input type="radio" name="dl-view" id="dl-desktop" value="desktop" checked />
+      <label for="dl-desktop">Computador</label>
+      <input type="radio" name="dl-view" id="dl-celular" value="celular" />
+      <label for="dl-celular">Celular</label>
+    </fieldset>
+
+    <ol class="dl-grid">
+      {
+        SKETCHES.map(([id, name, line], i) => {
+          const pc = shot(id, 'desktop');
+          const cel = shot(id, 'celular');
+          const label = `${id.toUpperCase()} · ${name}`;
+          const loading = i < 2 ? 'eager' : 'lazy'; // the first shots are on screen at load
+          return (
+            <li class="dl-card" data-chosen={id === CHOSEN ? '' : undefined}>
+              <figure>
+                <div class="dl-shots">
+                  <img data-device="desktop" src={pc.src} width={pc.width} height={pc.height} loading={loading} decoding="async" alt={`${label}: primeira tela no computador.`} />
+                  <img data-device="celular" src={cel.src} width={cel.width} height={cel.height} loading={loading} decoding="async" alt={`${label}: primeira tela no celular.`} />
+                </div>
+                <figcaption>
+                  <strong>{label}</strong>
+                  {id === CHOSEN && <span class="dl-badge">Escolhido para o guia</span>}
+                  <span class="dl-line">{line}</span>
+                </figcaption>
+              </figure>
+            </li>
+          );
+        })
+      }
+    </ol>
+
+    <footer>
+      <p class="meta" data-ai-note>
+        Esboços estáticos feitos com apoio de IA e revisão humana; as imagens são capturas de 1440 × 900 (computador) e
+        390 × 844 (celular). <a href="/sobre">Saiba como a Linkedia é feita</a>.
+      </p>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  /* Colours only from the active theme's tokens. In the reading measure the desktop shots take one row each and the
+     phone shots two per row (one under 32rem). */
+  .dl-view {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-4) 0;
+    padding: var(--space-2) 0;
+    border: 0;
+    background: var(--bg);
+  }
+
+  .dl-view legend {
+    float: left;
+    margin-right: var(--space-2);
+    padding: 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+
+  .dl-view input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .dl-view label {
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--fg);
+    font-weight: 600;
+    line-height: 1.6;
+    cursor: pointer;
+  }
+
+  .dl-view input:checked + label {
+    border-color: var(--fg);
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .dl-view input:focus-visible + label {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .dl-grid {
+    display: grid;
+    gap: var(--space-5) var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dl-card figure {
+    margin: 0;
+  }
+
+  .dl-shots img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  [data-chosen] .dl-shots img {
+    border: 2px solid var(--accent);
+  }
+
+  .dl-card figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-2);
+    margin-top: var(--space-2);
+  }
+
+  .dl-badge {
+    padding: 0 var(--space-2);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .dl-line {
+    flex-basis: 100%;
+    color: var(--muted);
+  }
+
+  /* One view at a time where :has() exists. */
+  [data-layouts]:has(#dl-desktop:checked) img[data-device='celular'],
+  [data-layouts]:has(#dl-celular:checked) img[data-device='desktop'] {
+    display: none;
+  }
+
+  [data-layouts]:has(#dl-celular:checked) .dl-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  }
+
+  @supports not selector(:has(*)) {
+    .dl-view {
+      display: none;
+    }
+  }
+</style>

@@ -18,6 +18,7 @@ const ROUTES = [
   '/categorias/lideranca-de-ia',
   '/categorias/conhecimento-de-ia',
   '/especiais/governanca-de-ia',
+  '/especiais/dez-layouts-governanca-de-ia',
   '/sobre',
 ];
 const PROMPT = 'Explique como avaliar criticamente uma notícia sobre inteligência artificial, com fontes e exemplos.';
@@ -102,6 +103,26 @@ test.describe('without JavaScript', () => {
     await expect(page.getByText('Mudança relevante ou incidente: o sistema volta ao G1.')).toBeVisible();
     await expect(page.getByText('Observabilidade e governança técnica')).toBeVisible();
     await expect(page.locator('[data-ai-note]')).toBeVisible();
+  });
+});
+
+test.describe('sketch showcase (3-23)', () => {
+  test('shows one view at a time and switches between computer and phone', async ({ page }) => {
+    await page.goto('/especiais/dez-layouts-governanca-de-ia');
+    const desktop = page.locator('img[data-device="desktop"]');
+    const phone = page.locator('img[data-device="celular"]');
+    await expect(desktop).toHaveCount(10);
+    await expect(phone).toHaveCount(10);
+    await expect(desktop.first()).toBeVisible();
+    await expect(phone.first()).toBeHidden();
+    await page.getByText('Celular', { exact: true }).click();
+    await expect(page.getByRole('radio', { name: 'Celular' })).toBeChecked();
+    await expect(phone.first()).toBeVisible();
+    await expect(desktop.first()).toBeHidden();
+    await page.getByRole('radio', { name: 'Celular' }).focus();
+    await page.keyboard.press('ArrowLeft'); // radios move with the keyboard, no JS
+    await expect(page.getByRole('radio', { name: 'Computador' })).toBeChecked();
+    await expect(desktop.first()).toBeVisible();
   });
 });
 

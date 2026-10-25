@@ -13,6 +13,7 @@ On opening the homepage, lead with one extraordinary presentation of **today's p
 - `/materias/{slug}`: article permalink.
 - `/categorias/{canal}`: published articles of one channel, pt-BR slugs `engenharia-de-ia`, `lideranca-de-ia`, `conhecimento-de-ia` (1B-01).
 - `/especiais/{slug}`: special content (D-075, owner 2026-10-23) — reference guides written for the magazine outside the daily editions, registered in `src/lib/specials.ts` and listed on `/edicoes`. Hand-written pages, not engine exports (nothing in `content/**`, no contract change), on the article hooks (`data-article`, `data-block`) so every theme dresses them; diagrams are HTML/CSS on the theme tokens (no Mermaid: the CSP forbids inline styles) and read in order without CSS; tables stack into cards under 34rem (`SpecialTable.astro`).
+- `/especiais/dez-layouts-governanca-de-ia` (3-23, D-077): the ten tela-1 sketches of the guide, one desktop and one phone WebP each (`src/specials/dez-layouts/`, ≤ 100 KB each, ≤ 1.5 MB total), a computer ↔ phone choice made of two radios and `:has()` (no JS); listed right after the guide. No dark toggle here; that belongs to the guide in S4 (3-22).
 - `/sobre`: how editions are made (AI disclosure, D-028), privacy, editor, licenses (1B-02).
 - Any unknown path: `404.html` with status 404 ("Página não encontrada", links to `/` and `/edicoes`; 1B-03).
 - `/tags/{tag}` may be added when useful; avoid complexity in phase 1B.

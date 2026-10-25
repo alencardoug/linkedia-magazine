@@ -180,6 +180,7 @@ describe('static build', () => {
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
         'especiais/governanca-de-ia.html',
+        'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
         '404.html',
       ].sort(),
@@ -274,6 +275,17 @@ describe('static build', () => {
     const outside = [...special.matchAll(/<a href="https:[^"]*"([^>]*)>/g)].map((m) => m[1]);
     expect(outside.length).toBeGreaterThan(0);
     for (const attrs of outside) expect(attrs).toContain('rel="noopener noreferrer"');
+    // The sketch showcase (3-23, D-077): listed right after the guide; one desktop and one phone shot per sketch, small.
+    expect(editions.indexOf('/especiais/dez-layouts-governanca-de-ia')).toBeGreaterThan(editions.indexOf('/especiais/governanca-de-ia"'));
+    const layouts = read(out, 'especiais/dez-layouts-governanca-de-ia.html');
+    expect(layouts.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(layouts).toContain('href="/especiais/governanca-de-ia"');
+    const imgs = [...layouts.matchAll(/<img[^>]*data-device="(desktop|celular)"[^>]*src="([^"]+\.webp)"/g)];
+    expect(imgs.filter((m) => m[1] === 'desktop')).toHaveLength(10);
+    expect(imgs.filter((m) => m[1] === 'celular')).toHaveLength(10);
+    const bytes = imgs.map((m) => statSync(join(out, m[2])).size);
+    expect(Math.max(...bytes)).toBeLessThanOrEqual(100 * 1024);
+    expect(bytes.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(1.5 * 1024 * 1024);
     const cover = read(out, 'index.html');
     expect(cover).toContain(`<html lang="pt-BR" data-cover="${CURRENT_COVER}">`);
     expect(cover).toContain(`data-cover-art="${CURRENT_COVER}"`); // the page imports the registry's current cover
@@ -362,7 +374,7 @@ describe('static build', () => {
   it('ships three slots with lab themes: pre-paint script, runtime everywhere, switcher on /visual, lazy enhancement', async () => {
     const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
     const pages = htmlFiles(out);
-    expect(pages).toHaveLength(12 + COVERS.length);
+    expect(pages).toHaveLength(13 + COVERS.length);
     for (const page of pages.filter((p) => !isCover(p))) {
       const html = read(out, page);
       expect(html, page).toContain(
@@ -432,6 +444,7 @@ describe('static build', () => {
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
         'especiais/governanca-de-ia.html',
+        'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
         '404.html',
       ].sort(),
