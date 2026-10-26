@@ -1,0 +1,254 @@
+{
+  "article_id": "88a9f86e-5804-48cf-8845-0d2def1be947",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Em 21 e 23 de outubro, o Google Research publicou dois casos em que IA lê imagens médicas simples onde faltam especialistas: raio-X de tórax para triagem de tuberculose (TB) e ultrassom feito por não especialistas para estimar a idade gestacional. Abaixo: o que foi dito, o que é sólido e como você pode testar um protótipo pequeno do mesmo padrão de trabalho.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: o que aconteceu",
+      "type": "heading"
+    },
+    {
+      "level": 3,
+      "text": "Triagem de tuberculose com raio-X",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A TB mata cerca de 1,23 milhão de pessoas por ano, e um gargalo é a falta de radiologistas. O Google descreve uma trajetória de cinco anos: um benchmark em 2019 na Radiology, avaliação independente da Stop TB Partnership em 2021 na Lancet Digital Health, recomendação da OMS de CAD (detecção assistida por computador) para triagem em 2021 e validação prospectiva multicêntrica em 2024 na NEJM AI.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A parceira Nexus AI, de Pretoria, transformou o algoritmo em ferramenta clínica certificada. Segundo o post, ela opera em cerca de 40 unidades de saúde em seis países, com mais de 25.000 radiografias avaliadas por mais de 90 clínicos. O tempo de resposta caiu de semanas para menos de 45 segundos, e a decisão final continua com o profissional. Em uma mina de ouro sul-africana, kits de raio-X portáteis e IA offline foram levados a 4 km de profundidade, e triagem e teste confirmatório passaram a acontecer numa só visita.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Para escalar, o Google abriu componentes: embeddings de raio-X de tórax e o MedSigLIP, um modelo leve que alinha imagem e texto clínico, além do MedGemma (versões 4B e 27B, pesos abertos, rodam localmente sem internet). O Ministério da Saúde da Indonésia faz fine-tuning (ajuste fino) desses modelos em radiografias nacionais para manter os dados no país. O post cita ainda o HeAR, de tosse captada em celular, mas ele está em pesquisa de evidência clínica.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Ultrassom materno com varredura cega",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "A OMS estima mais de 250.000 mortes evitáveis por ano por complicações da gravidez, e dois terços das pessoas no mundo não têm acesso a imagem diagnóstica como ultrassom. A ideia do blind sweep (varredura cega) é que um agente de saúde sem formação em sonografia deslize uma sonda portátil barata pelo abdômen num padrão padronizado, e o modelo estime a idade gestacional.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "O estudo prospectivo, publicado na JAMA Network Open, testou generalização: o modelo foi ajustado com apenas 120 participantes de Chicago (cerca de 6% do treino original) para uma nova sonda, a Clarius C3, e testado em ao menos dois ambientes, com Nairóbi como teste externo sem nenhum dado usado no ajuste. A coorte principal teve 385 participantes entre 16 e 36 semanas. O post diz que a estimativa da IA teve acurácia comparável à da abordagem padrão com sonografistas experientes, mas os números detalhados não aparecem no texto extraído. Também aparecem lições práticas: baterias trocáveis valem mais que bases de carga, e o app deve rejeitar varreduras ruins e mostrar a incerteza do modelo ao clínico.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O que é sólido e o que é relato do fornecedor",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Mais sólido: publicações revisadas por pares, avaliação independente da Stop TB Partnership e recomendação da OMS para CAD em TB. O estudo de ultrassom é prospectivo e tem um teste externo real.",
+        "Relato do próprio Google: os números de implantação (40 unidades, 25.000 radiografias, 45 segundos, 3.000 triagens gratuitas) vêm do post, não de auditoria independente que eu possa ver aqui.",
+        "Lacuna: os resultados numéricos do ultrassom não estão no texto disponível, e o post não mostra quanto a IA erra por subgrupo.",
+        "Reprodução: os modelos abertos (MedSigLIP, MedGemma) você pode testar. Os sistemas certificados da Nexus e o modelo de ultrassom não aparecem como abertos no post."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "type": "list"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: o que você pode fazer com isso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial de cada ferramenta, pois nomes, licenças e requisitos podem mudar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "O padrão comum aos dois casos é reaproveitável fora da saúde: imagem simples e barata, modelo base já treinado, ajuste mínimo com dados locais, teste em local que o modelo nunca viu e uma barreira que rejeita entrada ruim. Você já domina LLMs de texto; a diferença aqui é que o modelo vê imagem e a pergunta central passa a ser se ele generaliza para outra máquina e outra população.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Conceitos em três linhas",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Embedding de imagem: vetor numérico que resume a imagem. Imagens parecidas ficam próximas. É como o embedding do seu RAG, mas para pixels.",
+        "Modelo visão-linguagem (como o MedSigLIP): coloca imagem e texto no mesmo espaço, então você classifica com rótulos em linguagem natural, sem treinar do zero.",
+        "Sensibilidade e especificidade: sensibilidade é a fração de doentes que o teste pega. Em triagem ela pesa mais, pois perder um caso custa caro. Especificidade é a fração de saudáveis corretamente liberados."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Checklist para avaliar qualquer caso de IA em imagem",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Qual decisão o modelo apoia? Triagem (encaminhar para teste confirmatório) é mais segura que diagnóstico final.",
+        "Quem decide no fim? Nos dois casos, o humano.",
+        "A validação foi prospectiva e com teste externo? Dados do mesmo hospital do treino costumam inflar o resultado.",
+        "Funciona com outro aparelho? Troque de equipamento e veja se a métrica cai.",
+        "Há rejeição de entrada ruim e sinal de incerteza?",
+        "Onde os dados ficam? Modelo local evita enviar imagens de pacientes a nuvem de terceiros, o que importa para LGPD.",
+        "Como ela mede erro por subgrupo (idade, sexo, equipamento)? Sem isso, o viés fica invisível."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Em IA de imagem, o número de acurácia importa menos que a pergunta: foi testado em aparelho e população que o modelo nunca viu? Exija teste externo e política de rejeição de entrada ruim antes de confiar.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Primeiros passos: um laboratório de até 3 horas",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Objetivo: sentir na prática o que é classificar imagem com rótulos em texto e medir como isso quebra quando muda a distribuição dos dados. Isso um chat pronto não te dá com controle, pois você mede, compara e roda local. Use um notebook gratuito (como o Colab) e um modelo aberto de visão-linguagem. O MedSigLIP e o MedGemma existem segundo o post, mas podem exigir aceitar termos de uso; se não quiser, use um SigLIP ou CLIP genérico para aprender o mecanismo. Use apenas conjuntos de dados públicos e anonimizados, nunca imagens reais de pacientes.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Escolha um conjunto público pequeno de raio-X de tórax com rótulos (verifique licença e termos na página do conjunto).",
+        "Peça ao seu agente de código um script que gera embeddings das imagens e treina uma regressão logística simples sobre eles (linear probe).",
+        "Compare com classificação zero-shot por texto, por exemplo 'chest x-ray with tuberculosis' contra 'normal chest x-ray'.",
+        "Treine com poucos exemplos (20, 50, 100) e trace a curva da métrica. Isso espelha o argumento dos 120 participantes de Chicago.",
+        "Teste de generalização: treine num subconjunto (fonte A) e avalie em outro (fonte B). Anote a queda.",
+        "Reporte sensibilidade com especificidade fixa, não só acurácia."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Esqueleto de laboratório: poucos exemplos, teste externo e rejeição por incerteza.",
+      "code": "Prompt para o agente de codigo:\n\"Crie um notebook que: (1) carrega imagens de um dataset publico de raio-X de torax em pastas por classe; (2) extrai embeddings com um modelo visao-linguagem aberto; (3) treina regressao logistica com N exemplos (N = 20, 50, 100); (4) avalia em um conjunto de outra fonte; (5) imprime sensibilidade e especificidade com IC por bootstrap; (6) rejeita predicoes com probabilidade entre 0.4 e 0.6 e informa a taxa de rejeicao.\"",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Isto é um exercício de aprendizado, não um dispositivo médico. Os casos do artigo passaram por validação clínica e certificação regulatória; um notebook seu não substitui isso e nunca deve orientar decisão sobre pacientes.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 3,
+      "text": "Decisões de risco e controle",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Viés de distribuição: o problema real aqui é o erro silencioso quando o aparelho muda. Defesa: reservar um site externo para teste e monitorar a métrica por equipamento.",
+        "Privacidade: modelos locais reduzem exposição de dados. O argumento do post sobre a Indonésia vale para qualquer dado sensível seu, inclusive no Brasil sob a LGPD.",
+        "Rejeição de entrada ruim: copie o princípio do app de ultrassom, que descarta varreduras de baixa qualidade, e adicione uma etapa de 'não sei' em seus classificadores."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Esta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha um dos dois posts e responda por escrito às sete perguntas do checklist, marcando onde o texto não traz evidência. Depois, se tiver tempo, rode o laboratório de embeddings com o conjunto público.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-26",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:07:55Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique para um engenheiro de software que conhece LLMs de texto e RAG, mas não treina modelos, como funciona IA em imagem médica de baixo custo: embeddings de imagem, modelos visão-linguagem como MedSigLIP, fine-tuning com poucos exemplos, generalização entre aparelhos, sensibilidade versus especificidade em triagem e validação prospectiva. Use os exemplos de triagem de tuberculose por raio-X e de estimativa de idade gestacional por ultrassom com varredura cega. Termine com um exercício prático de até 3 horas usando apenas dados públicos."
+    }
+  ],
+  "read_minutes": 7,
+  "schema_version": "1.0.0",
+  "slug": "ia-em-imagem-0026",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:06:57Z",
+      "language": "en",
+      "published_at": "2026-10-23T18:51:33Z",
+      "publisher": "Google Research",
+      "source_id": "s1",
+      "title": "Bringing foundational models to the front lines of TB screening",
+      "url": "https://research.google/blog/bringing-foundational-models-to-the-front-lines-of-tb-screening"
+    },
+    {
+      "accessed_at": "2026-10-26T21:06:58Z",
+      "language": "en",
+      "published_at": "2026-10-21T16:23:53Z",
+      "publisher": "Google Research",
+      "source_id": "s2",
+      "title": "Empowering frontline maternal care with AI-assisted ultrasound",
+      "url": "https://research.google/blog/empowering-frontline-maternal-care-with-ai-assisted-ultrasound"
+    }
+  ],
+  "summary": "Dois posts do Google Research mostram IA em raio-X de tórax e ultrassom em locais com poucos especialistas. Veja o que é sólido, o que é relato do fornecedor e como testar uma versão pequena do mesmo padrão.",
+  "tags": [
+    "theme:multimodal",
+    "topic:fine-tuning",
+    "topic:embeddings",
+    "risk:privacy",
+    "theme:science",
+    "topic:inference",
+    "reason:novelty",
+    "source:google-research"
+  ],
+  "title": "IA em imagem médica barata: triagem de TB e ultrassom materno, e o que dá para aprender"
+}

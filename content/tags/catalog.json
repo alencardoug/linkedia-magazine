@@ -47,6 +47,11 @@
       "label": "Viés e discriminação"
     },
     {
+      "key": "risk:concentration-of-power",
+      "kind": "risk",
+      "label": "Concentração de poder"
+    },
+    {
       "key": "risk:misinformation",
       "kind": "risk",
       "label": "Desinformação"
@@ -55,6 +60,11 @@
       "key": "risk:misuse",
       "kind": "risk",
       "label": "Uso indevido"
+    },
+    {
+      "key": "risk:privacy",
+      "kind": "risk",
+      "label": "Privacidade"
     },
     {
       "key": "risk:prompt-injection",
@@ -85,6 +95,11 @@
       "key": "source:google-developers",
       "kind": "source",
       "label": "Google Developers Blog"
+    },
+    {
+      "key": "source:google-research",
+      "kind": "source",
+      "label": "Google Research"
     },
     {
       "key": "source:hamel-husain",
@@ -162,6 +177,11 @@
       "label": "Segurança de IA"
     },
     {
+      "key": "theme:science",
+      "kind": "theme",
+      "label": "Ciência"
+    },
+    {
       "key": "theme:strategy",
       "kind": "theme",
       "label": "Estratégia"
@@ -190,6 +210,16 @@
       "key": "topic:context-engineering",
       "kind": "topic",
       "label": "Engenharia de contexto"
+    },
+    {
+      "key": "topic:embeddings",
+      "kind": "topic",
+      "label": "Embeddings"
+    },
+    {
+      "key": "topic:fine-tuning",
+      "kind": "topic",
+      "label": "Fine-tuning"
     },
     {
       "key": "topic:gcp",

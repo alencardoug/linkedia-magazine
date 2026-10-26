@@ -1,0 +1,189 @@
+{
+  "article_id": "a60c7b8c-7da1-4e95-a621-f1bd7d07f96a",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 23 de outubro de 2026, o Google Research publicou um balanço de cinco anos de trabalho com triagem de tuberculose (TB) por IA: de um algoritmo que lê raio-X de tórax até modelos abertos que ministérios da saúde podem ajustar com dados locais. Depois de ler, você terá um checklist de quatro perguntas (dados, validação, onde roda, quem decide) para avaliar qualquer projeto de IA em saúde, e um exercício pequeno para praticar.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que o Google Research relata",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o post, a TB mata cerca de 1,23 milhão de pessoas por ano, e um gargalo central é a falta de radiologistas e de infraestrutura de imagem em regiões de alta carga. A ideia é usar IA para identificar pessoas com TB presumida e encaminhá-las a um teste confirmatório.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "2019: benchmark publicado na Radiology, com algoritmos de deep learning detectando TB pulmonar ativa em nível comparável ao de radiologistas experientes.",
+        "Agosto de 2021: a Stop TB Partnership avaliou softwares de detecção assistida por computador (CAD) na The Lancet Digital Health e colocou o modelo do Google entre os de melhor desempenho. Naquele ano, a OMS recomendou CAD para triagem de TB.",
+        "Setembro de 2024: validação prospectiva multicêntrica na NEJM AI, indicando alta sensibilidade (poucos casos perdidos) em populações diversas.",
+        "Parceria com a Nexus AI (Pretoria), que transformou o algoritmo em ferramenta diagnóstica certificada (o post cita certificação CE). Ela opera em cerca de 40 unidades de saúde em seis países, com mais de 25.000 radiografias avaliadas por mais de 90 clínicos e tempo de resposta de semanas para menos de 45 segundos. O clínico decide.",
+        "Mina Mponeng (África do Sul): kits de raio-X portáteis e IA offline a quatro km de profundidade, com triagem em segundos e encaminhamento para teste molecular na mesma visita."
+      ],
+      "ordered": true,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A segunda fase é a mais interessante para quem trabalha com IA. Em vez de uma solução fechada por parceiro, o Google abriu componentes pela iniciativa Health AI Developer Foundations (HAI-DEF): embeddings de raio-X de tórax e o MedSigLIP, um modelo leve que alinha imagem médica a texto clínico. Isso permite classificar ou buscar imagens com rótulos em linguagem natural, ou fazer fine-tuning com poucos exemplos locais. Também lançou o MedGemma, família de modelos multimodais de pesos abertos (4B e 27B parâmetros) que combina achados de imagem com histórico clínico, responde em linguagem natural e roda localmente sem internet, com mais de 10 milhões de downloads segundo o post.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Na Indonésia, o Ministério da Saúde faz fine-tuning de MedGemma e MedSigLIP em radiografias nacionais, rodando em infraestrutura local para que os dados fiquem no país. A meta citada é triar 50 milhões de pessoas por ano. Há ainda o HeAR, modelo treinado em mais de 300 milhões de segmentos de áudio, para triagem por tosse gravada em celular, ainda em pesquisa para construir evidência clínica.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "É um relato do próprio laboratório. As evidências citadas (Radiology, Lancet Digital Health, NEJM AI) são publicações externas, mas o pacote não traz métricas numéricas (sensibilidade, especificidade) nem avaliação independente dos números de implantação. Os resultados do Indonésia e do HeAR são projetos em andamento, não resultados comprovados. Leia os artigos originais antes de citar desempenho.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: como avaliar um projeto de IA em saúde",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro, dois conceitos. Triagem não é diagnóstico: o modelo ordena quem deve fazer o teste confirmatório, e por isso o que mais importa é a sensibilidade (não deixar escapar doentes), aceitando alguns falsos positivos. Já o embedding é um vetor numérico que resume a imagem; você pode treinar um classificador simples em cima dele sem treinar um modelo gigante, ideia parecida com a que você já conhece em RAG.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Checklist de quatro perguntas",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Dados: com quais populações, aparelhos e hospitais o modelo foi treinado e testado? Um modelo bom em um tipo de máquina de raio-X pode piorar em outra. Existe teste nos dados do seu contexto?",
+        "Validação: foi retrospectiva (dados antigos) ou prospectiva (pacientes reais acompanhados)? Quem avaliou: os autores ou terceiros? Quais métricas, com qual padrão-ouro (por exemplo, exame molecular) e com qual limiar de decisão?",
+        "Onde roda: na nuvem, no dispositivo ou offline? Isso define privacidade, residência de dados (exigência de que dados fiquem no país, relevante para a LGPD) e custo. Pergunte também o que acontece quando a conexão cai.",
+        "Quem decide: a saída é uma sugestão ao clínico ou uma decisão automática? Há registro das decisões, caminho de revisão e responsável nomeado quando o modelo erra?"
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Aplicando ao caso: o post responde bem a duas (validação com publicações externas e prospectiva; onde roda e quem decide, com offline e clínico no final) e deixa lacunas em outras (métricas por subgrupo e desempenho dos modelos abertos ajustados localmente não aparecem no trecho disponível). Esse é o tipo de separação entre o sólido e o marketing que vale fazer em relatos de fornecedor.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Dá para reproduzir?",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Parcialmente. Os modelos abertos (MedGemma, MedSigLIP) estão disponíveis para download segundo o post, então você pode testá-los. Já a ferramenta certificada da Nexus AI, os dados clínicos e a validação prospectiva não são reproduzíveis por um indivíduo. Verifique na documentação oficial a licença de uso, os requisitos de hardware e os avisos de que o modelo não é dispositivo médico.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de até 3 horas (sem dados de pacientes)",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha um conjunto público de radiografias de tórax com licença clara; confira os termos de uso e nunca use imagens de pacientes reais sem autorização.",
+        "Gere embeddings com um modelo aberto da família HAI-DEF, seguindo a documentação oficial atual, e treine um classificador simples (regressão logística) com poucos exemplos.",
+        "Meça sensibilidade e especificidade em um conjunto separado, varie o limiar e veja o trade-off. Depois teste com imagens de outra fonte para sentir a queda por mudança de distribuição.",
+        "Peça a um agente de código para montar o notebook, mas revise você mesmo a separação treino/teste, para evitar vazamento de dados."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Em IA de saúde, o modelo é a parte mais fácil. O que separa pesquisa de ferramenta útil é validação externa, funcionamento offline, regulação e um humano responsável pela decisão final. Antes de confiar em qualquer relato, responda às quatro perguntas: dados, validação, onde roda, quem decide.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: pegue um projeto de IA que você conhece (em saúde ou não), responda às quatro perguntas por escrito e marque quais respostas são evidência e quais são promessa.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_knowledge",
+  "edition_date": "2026-10-26",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:13:41Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique para um engenheiro de software que conhece LLMs e RAG como funciona a triagem de tuberculose por IA em radiografia de tórax: sensibilidade vs especificidade, limiar de decisão, validação retrospectiva vs prospectiva, embeddings de imagem médica, modelos como MedSigLIP e MedGemma, fine-tuning com poucos dados e implantação offline. Inclua riscos (viés de população, mudança de equipamento, privacidade/LGPD) e um checklist para avaliar projetos de IA em saúde."
+    },
+    {
+      "kind": "critic",
+      "label": "Criticar o relato",
+      "prompt": "Atue como revisor cético. Considere um post de um laboratório de IA que afirma que sua ferramenta de triagem de tuberculose por raio-X reduziu o tempo de resposta de semanas para menos de 45 segundos e foi implantada em 40 unidades de saúde. Liste que evidências independentes, métricas, grupos de comparação e dados de segurança você exigiria antes de aceitar a conclusão, e quais afirmações são só marketing."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "triagem-de-tuberculose-0025",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:06:57Z",
+      "language": "en",
+      "published_at": "2026-10-23T18:51:33Z",
+      "publisher": "Google Research",
+      "source_id": "s1",
+      "title": "Bringing foundational models to the front lines of TB screening",
+      "url": "https://research.google/blog/bringing-foundational-models-to-the-front-lines-of-tb-screening"
+    }
+  ],
+  "summary": "O Google Research relata como levou IA de raio-X de tórax e modelos abertos (MedSigLIP, MedGemma) à triagem de TB. Veja o que é sólido, o que é relato do fornecedor e um checklist para avaliar qualquer projeto de IA em saúde.",
+  "tags": [
+    "theme:science",
+    "theme:multimodal",
+    "topic:fine-tuning",
+    "theme:governance",
+    "risk:privacy",
+    "topic:inference",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:google-research"
+  ],
+  "title": "Triagem de tuberculose com modelos fundacionais: o que o Google Research mostra e o que perguntar"
+}

@@ -1,0 +1,159 @@
+{
+  "article_id": "df731954-bf32-496a-99d2-5b32b73603b7",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A Anthropic protocolou o prospecto do seu IPO (a oferta pública inicial de ações). Segundo a MIT Technology Review, o documento tem 335 páginas, e cerca de 100 delas tratam de riscos. Este artigo separa o que a fonte afirma do que ela não permite afirmar. Depois, mostra como transformar a ideia de uma seção de riscos em um checklist para avaliar fornecedores de IA, como você faz ao escolher um modelo para seus projetos.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: a notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O texto da MIT Technology Review é uma newsletter de opinião (The Algorithm). Não é o prospecto. O pacote de fontes não traz o conteúdo das páginas de risco, então não dá para dizer quais riscos o documento lista.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Fato citado: o prospecto foi protocolado após semanas de especulação, com 335 páginas e cerca de 100 focadas em riscos.",
+        "Fato citado: a newsletter diz que o IPO avalia a empresa em mais de 1,5 trilhão de dólares.",
+        "Fato citado: Jack Clark, cofundador e chefe de política, disse em evento do FMI em Bangkok que a singularidade já começou. Chris Olah falou ao Vaticano sobre estados internos que espelham funcionalmente alegria ou medo.",
+        "Fato citado: um rascunho de projeto de lei circulado em sigilo pela Anthropic para legisladores dos EUA vazou. Nathan Calvin, da Encode AI, perguntou: o que é a Anthropic?",
+        "Interpretação da autora: a empresa pratica uma narrativa que a favorece, apresenta a tecnologia como misteriosa e perigosa, e se coloca como a única confiável para domesticá-la. Ela conclui que a Anthropic é, ao mesmo tempo, empresa lucrativa, organização de segurança e corrida por capacidades superhumanas, o que não a torna mais confiável."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Dario Amodei respondeu que a estratégia é a corrida ao topo: mostrar que dá para construir a tecnologia com responsabilidade eleva o padrão do setor, e isso funciona melhor estando na fronteira. A autora vê tensão entre as prioridades de uma organização de segurança e as de uma empresa movida a lucro.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Não há no pacote nenhum trecho do prospecto. Qualquer afirmação sobre os riscos específicos listados seria especulação. Leia o documento primário antes de citar o conteúdo.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: o que você pode fazer com isso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você depende de fornecedores de IA (Claude, modelos da OpenAI) no seu fluxo diário. Um prospecto de IPO é útil porque, em geral, empresas abertas precisam descrever fatores de risco de forma formal. Mesmo sem ler as 100 páginas, você pode usar a lógica como modelo de perguntas sobre o seu fornecedor.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Checklist de risco de fornecedor de IA",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Dependência: o que quebra se o modelo mudar, ficar mais caro ou for descontinuado? Seu harness e suas skills funcionam com outro modelo?",
+        "Dados: o que é enviado ao fornecedor, por quanto tempo é retido e se pode ser usado para treino? Isso importa para a LGPD (lei brasileira de proteção de dados).",
+        "Disponibilidade: há limites de uso, quedas ou mudanças de política que afetem seu fluxo?",
+        "Segurança: como o fornecedor trata prompt injection (instruções maliciosas escondidas em conteúdo que o agente lê) e vazamento de credenciais?",
+        "Governança: quem decide sobre testes externos de segurança? Há conflito entre lucro e segurança, como a autora aponta?",
+        "Narrativa versus evidência: separe o que é afirmação de marketing do que você mede nos seus próprios testes."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de uma hora",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha um projeto seu que use um agente de código.",
+        "Escreva uma tabela com as seis linhas acima e responda cada uma com um fato verificável (documentação oficial, termos de uso), não com impressão.",
+        "Marque o que você não consegue verificar. Isso é risco aceito ou a investigar.",
+        "Peça ao seu agente de código para trocar o modelo por outro numa pequena tarefa e compare. Isso mede dependência na prática.",
+        "Releia a tabela quando houver mudança de termos. Confira sempre a documentação oficial, pois políticas mudam."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Trate o fornecedor como qualquer dependência crítica: pergunte o que acontece se ele mudar, falhar ou divergir dos seus interesses, e verifique com seus testes, não com a narrativa dele. Esta semana, preencha o checklist para um projeto.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Quando for ler o prospecto em si, procure seções de riscos operacionais, regulatórios, de concentração de clientes e de governança, e compare com a sua tabela. Isso é uma sugestão de método: não sabemos, pelo pacote, como o documento organiza esses temas.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_knowledge",
+  "edition_date": "2026-10-26",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:12:04Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como ler a seção de fatores de risco de um prospecto de IPO de uma empresa de IA, que tipos de risco costumam aparecer (dependência de fornecedores, regulação, concentração de clientes, governança) e como transformar isso em um checklist para avaliar riscos de fornecedores de modelos de linguagem em projetos de engenharia assistida por IA. Inclua exemplos de perguntas sobre dados, LGPD, prompt injection e dependência de modelo."
+    }
+  ],
+  "read_minutes": 4,
+  "schema_version": "1.0.0",
+  "slug": "prospecto-da-anthropic-0024",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:11:25Z",
+      "language": "en",
+      "published_at": "2026-10-26T17:45:43Z",
+      "publisher": "MIT Technology Review",
+      "source_id": "s1",
+      "title": "Will the real Anthropic please stand up",
+      "url": "https://www.technologyreview.com/2026/10/26/1147672/will-the-real-anthropic-please-stand-up"
+    }
+  ],
+  "summary": "A Anthropic protocolou o prospecto de IPO (335 páginas, ~100 sobre riscos). A fonte é uma newsletter de opinião; o texto do prospecto não está no pacote. Use o caso para montar seu checklist de risco de fornecedor.",
+  "tags": [
+    "theme:governance",
+    "theme:strategy",
+    "risk:concentration-of-power",
+    "theme:safety",
+    "reason:novelty",
+    "reason:popularity",
+    "source:mit-technology-review"
+  ],
+  "title": "Prospecto da Anthropic: o que se sabe e como avaliar riscos de um fornecedor de IA"
+}
