@@ -1,0 +1,199 @@
+{
+  "article_id": "ddc3879a-acb8-4c75-a615-274d34d81dfc",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O CSET (Georgetown) publicou uma explicação de como funciona a destilação caixa-preta, técnica em que um modelo mais fraco (aluno) é treinado com as respostas de um modelo mais forte (professor) acessado apenas por prompts. Depois deste texto, você terá um roteiro de perguntas para levar ao jurídico e ao fornecedor sobre uso de saídas, limites de uso e detecção de abuso.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que o CSET explica",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Caixa-preta quer dizer que o professor é fechado e só pode ser consultado online, por interface web ou software. A destilação caixa-branca, que usa pesos e dados internos do professor, ficou fora do escopo. Historicamente a técnica serve para comprimir capacidades em modelos menores. Hoje também serve para gerar dados sintéticos e transferir capacidades, qualquer que seja o tamanho do aluno.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O texto divide o processo em cinco etapas: (1) definir objetivo e escolher aluno e professor; (2) coletar dados-semente, ou seja, as entradas que representam a capacidade, o domínio ou o comportamento a ensinar; (3) direcionar o professor, com instruções e modelos de prompt, para rotular as sementes, expandi-las ou criar dados parecidos; (4) extrair dados sintéticos do professor; (5) treinar o aluno com esses dados.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O contexto é político. A OpenAI acusou a DeepSeek, no início de 2025, de violar os termos de serviço ao destilar o ChatGPT. Depois, outros laboratórios chineses foram acusados de coisa parecida. Um comunicado conjunto de cibersegurança do governo dos EUA, de setembro de 2026, fala em extração sistemática em escala industrial. O CSET lembra ainda que empresas americanas, como a SpaceXAI, também destilaram de modelos fechados americanos, o que mostra que a técnica é comum e juridicamente ambígua.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O que é fato e o que é incerto",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Segundo o CSET, laboratórios chineses destilam de modelos proprietários dos EUA, acessados por terceiros para ocultar a origem.",
+        "Citados nas acusações: a Anthropic disse que a Moonshot AI fez mais de 23 milhões de trocas com o Claude; o Google disse que o Gemini recebeu cerca de cem mil prompts. As empresas não informaram os tokens por prompt, então o volume real é ambíguo.",
+        "DeepSeek e Moonshot AI foram acusadas de redirecionar o tráfego de seus usuários para o Claude, o que usaria prompts reais desses usuários como sementes.",
+        "Não se sabe o quanto esses laboratórios dependem da destilação, porque a última etapa, o treino do aluno, é invisível para quem está de fora.",
+        "O CSET recomenda que Anthropic, OpenAI e Google divulguem quantos tokens foram gerados nas campanhas e publiquem suas pesquisas internas sobre o impacto."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Só tive acesso a um trecho do texto do CSET. As seções sobre as etapas 3 a 5 e sobre defesas estão cortadas. Tudo o que vem a seguir sobre contratos e controles não vem do CSET.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: perguntas para contrato e controle",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Não é aconselhamento jurídico. Confirme sempre os termos vigentes do seu fornecedor, que mudam com o tempo.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Por que isso importa para você: mesmo sem treinar modelos, você pode gerar dados com um modelo via API para ajustar um modelo menor, criar conjuntos de avaliação ou montar exemplos para RAG. Isso já é destilação em pequena escala. A pergunta é se o contrato permite. Pelo que o CSET relata, a discussão pública gira em torno de violação de termos de serviço, e a ilicitude em si ainda é debatida.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Lado 1: usando saídas de terceiros",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Os termos proíbem usar as saídas para treinar ou melhorar outro modelo? Muitos fornecedores têm cláusula sobre isso, e ela costuma diferenciar treinar modelo concorrente de usar saídas em seu produto. Leia a cláusula exata.",
+        "A restrição vale também para ajuste fino de modelo aberto, para dados de avaliação e para dados sintéticos de teste?",
+        "Se você usa um intermediário (gateway, revendedor), os termos dele e os do fornecedor original se somam?",
+        "O que acontece com a conta em caso de violação: suspensão, perda de acesso, responsabilidade?",
+        "Você guarda registro de qual modelo, versão e data gerou cada dado sintético? Sem proveniência, não dá para provar conformidade nem remover dados depois."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Lado 2: protegendo o seu modelo ou produto",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Se você expõe um modelo ou agente por API, o CSET indica o que dificulta ou facilita a detecção: volume e diversidade de prompts que não se parecem com uso normal ajudam a notar abuso, mas sementes customizadas ou tráfego de usuários reais, repassado por terceiros, são mais difíceis de distinguir. Os controles abaixo são práticas gerais, não recomendações do CSET.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Termos de uso que proíbam expressamente treinar modelos com suas saídas e revenda de acesso para ocultar a origem.",
+        "Limites de taxa e cotas por conta, por chave e por organização. Eles encarecem a extração em massa, mas não a impedem se a pessoa distribuir o tráfego entre muitas contas.",
+        "Registro de uso (observabilidade): tokens por conta, repetição de padrões de prompt, cobertura incomum de um único domínio, picos fora do horário.",
+        "Verificação de identidade para contas com alto volume e revisão de contas que revendem acesso.",
+        "Um processo definido para investigar, avisar e suspender, com critérios escritos, para não punir clientes legítimos."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Perguntas a levar ao fornecedor",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Que limites de taxa e cotas existem por chave e por organização, e como são aplicados?",
+        "Vocês monitoram padrões de extração em contas de clientes? O que fazem se a minha conta for sinalizada, e há aviso antes da suspensão?",
+        "Posso usar saídas para ajuste fino ou avaliação de um modelo interno? Há distinção por tipo de modelo?",
+        "Como vocês tratam os meus prompts e saídas em termos de retenção e treino? Isso toca LGPD, então o jurídico deve revisar.",
+        "Há uma forma de provar a origem das saídas que gero, como logs exportáveis?"
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta semana: escolha um fluxo seu que use saídas de um modelo de terceiros para treinar, ajustar ou avaliar outro modelo. Localize a cláusula correspondente nos termos do fornecedor e comece um registro simples com modelo, data e finalidade de cada lote de dados sintéticos. Leve as perguntas acima ao jurídico.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Para acompanhar: as propostas legislativas dos EUA citadas pelo CSET e se os laboratórios passarão a divulgar volumes de tokens, o que tornaria mais fácil avaliar defesas.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-10-27",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:11:24Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique destilação caixa-preta de modelos de linguagem (treinar um modelo aluno com respostas de um modelo professor acessado por API) para um engenheiro que usa agentes de código mas não treina modelos. Cubra as cinco etapas (objetivo, sementes, direcionamento, extração de dados sintéticos, treino), a diferença entre compressão e transferência de capacidades, e a diferença para a destilação caixa-branca. Depois explique que cláusulas de termos de uso de fornecedores de LLM costumam tratar o uso de saídas para treinar outros modelos e que controles (limites de taxa, monitoramento) ajudam a detectar extração. Lembre que não é aconselhamento jurídico."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "destilacao-caixa-preta-o-0028",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:10:35Z",
+      "language": "en",
+      "published_at": "2026-10-26T13:41:00Z",
+      "publisher": "CSET Georgetown",
+      "source_id": "s1",
+      "title": "How Black-Box Distillation Works",
+      "url": "https://cset.georgetown.edu/article/how-black-box-distillation-works"
+    }
+  ],
+  "summary": "O CSET explica as cinco etapas da destilação caixa-preta, em que um modelo aprende com respostas de outro via API. Daí saem perguntas práticas sobre termos de uso, limites de taxa e monitoramento de abuso, para proteger seu modelo e não violar contratos.",
+  "tags": [
+    "theme:governance",
+    "risk:misuse",
+    "topic:fine-tuning",
+    "topic:llm-security",
+    "region:china",
+    "theme:regulation",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:cset"
+  ],
+  "title": "Destilação caixa-preta: o que o contrato com seu fornecedor de modelo precisa dizer"
+}

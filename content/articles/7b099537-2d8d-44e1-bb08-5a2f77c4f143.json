@@ -1,0 +1,174 @@
+{
+  "article_id": "7b099537-2d8d-44e1-bb08-5a2f77c4f143",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 22/10, a OpenAI anunciou a disponibilidade geral da Decisions API. A ideia: apps e agentes tomam muitas decisões pequenas (classificar uma entrada, rotear um pedido, escolher a próxima ação) e, somadas, latência e custo pesam. A API foca o GPT-6 Luna em perguntas com resposta limitada. Depois deste texto, você consegue desenhar um teste que troca uma chamada de modelo grande por uma decisão pontual no seu protótipo.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que foi anunciado",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo a OpenAI, a API roda sobre o GPT-6 Luna e entrega decisões quase em tempo real a partir de texto, imagens e entradas JSON estruturadas, até 10x mais rápido que o Luna via Responses API. Você define uma pergunta e as respostas permitidas, passa o contexto e recebe um de três tipos de resposta.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "predicate: probabilidade (0 a 1) de uma condição ser verdadeira, por exemplo se um produto tem dano visível.",
+        "choice: uma opção entre as que você forneceu, por exemplo continuar, tentar de novo ou pedir esclarecimento; a resposta inclui probabilidades e confiança.",
+        "score: nota contra níveis ordenados de uma rubrica, calculada como média ponderada pela probabilidade dos índices dos níveis."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Novidades desde o beta: integração nativa com o GPT-Live (voz), cache de prompt para contexto reutilizado, residência de inferência nos EUA e na UE, JSON nativo, imagens nas instruções e até 400 perguntas por requisição (o dobro do limite anterior). Preço divulgado: US$ 0,10 por milhão de tokens de entrada, US$ 0,01 para entrada em cache, sem cobrança de tokens de saída. Zero Data Retention existe para clientes elegíveis.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "O que é sólido e o que é marketing",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Sólido (verificável): o formato da API, os três tipos de resposta, o preço por token e os limites, que você confere na documentação.",
+        "Para medir você mesmo: o 10x mais rápido é comparação da própria OpenAI contra o Luna via Responses API, sem metodologia no texto. Não diz nada sobre outros modelos nem sobre qualidade.",
+        "Sem evidência no anúncio: precisão. Não há benchmark de acerto, só exemplos internos (categorizar transações, classificar notícias). Os clientes citados não são nomeados e não há números.",
+        "Reproduzível: sim, o Playground e o guia de desenvolvedor permitem testar com seus dados. O resultado depende da sua tarefa."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O material disponível é só o anúncio do fornecedor. Detalhes de preço, cache de escrita (30 minutos e 12 horas), limites e disponibilidade regional devem ser conferidos na documentação oficial antes de qualquer decisão.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: como testar no seu protótipo",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Intuição: em vez de pedir a um modelo grande que escreva um parágrafo e depois ler a resposta, você faz uma pergunta de múltipla escolha e recebe a opção com probabilidades. É um classificador com cara de LLM: sem texto livre, resultado fácil de usar em um if.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Passo a passo (cerca de 2 horas)",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha uma decisão recorrente do seu protótipo hoje feita por um LLM grande: roteamento de pedido ao agente certo, detectar se a mensagem precisa de ferramenta, categorizar entradas.",
+        "Escreva a pergunta e as respostas permitidas. Poucas opções, mutuamente exclusivas, com definição de cada uma.",
+        "Monte 50 a 100 exemplos reais com rótulo esperado, incluindo casos ambíguos. Peça ao seu agente de código para ajudar a montar e rotular, mas revise você mesmo.",
+        "Rode o mesmo conjunto na chamada atual e na Decisions API (Playground primeiro, depois a API). Registre acerto, latência e custo por decisão.",
+        "Defina um limiar de confiança: abaixo dele, escale para o modelo grande ou para um humano. Esse é o desenho que dá segurança.",
+        "Decida com dados: se o acerto fica próximo e a latência cai, troque; se não, mantenha o modelo grande nesse ponto."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Onde usar e onde evitar",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Bom encaixe: triagem, roteamento, moderação leve, decidir continuar/tentar de novo em um loop de agente, categorização em lote.",
+        "Mau encaixe: raciocínio em vários passos, geração de texto, perguntas cujas respostas não cabem numa lista fechada.",
+        "Risco: uma probabilidade alta não é garantia. Sem avaliação própria, você troca custo por erros silenciosos. Entradas de usuários também podem tentar manipular a classificação (prompt injection), então não deixe uma decisão sozinha disparar ações irreversíveis.",
+        "Privacidade: se os dados são pessoais (LGPD), verifique na documentação as opções de residência e retenção antes de enviar."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Trate a Decisions API como um classificador barato com fallback: meça acerto, latência e custo no seu conjunto de exemplos e só então troque a chamada do modelo grande, mantendo um limiar de confiança para escalar casos duvidosos.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: liste as chamadas de LLM do seu protótipo, escolha a mais simples e repetida e monte 50 exemplos rotulados. Isso já vale mesmo que você decida não usar a API, porque serve de teste para qualquer classificador.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-27",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:09:23Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como usar um LLM pequeno ou uma API de decisões como classificador de baixo custo em apps e agentes: perguntas com respostas limitadas, probabilidades e confiança, limiares para escalar a um modelo maior, como montar um conjunto de avaliação de 100 exemplos e medir acerto, latência e custo. Dê exemplos de roteamento e triagem e riscos como prompt injection e erros silenciosos."
+    }
+  ],
+  "read_minutes": 4,
+  "schema_version": "1.0.0",
+  "slug": "decisions-api-da-0029",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:08:44Z",
+      "language": "en",
+      "published_at": "2026-10-22T19:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s1",
+      "title": "Build more responsive apps with the Decisions API",
+      "url": "https://openai.com/index/decisions-api"
+    }
+  ],
+  "summary": "A OpenAI tornou a Decisions API disponível para todos: ela devolve probabilidade, escolha ou nota para perguntas de resposta limitada, mais rápido e barato que uma chamada comum. Veja o que é sólido e como testar no seu protótipo.",
+  "tags": [
+    "topic:inference",
+    "topic:token-efficiency",
+    "topic:agents",
+    "theme:roi",
+    "reason:career-utility",
+    "reason:novelty",
+    "source:openai"
+  ],
+  "title": "Decisions API da OpenAI: decisões pequenas e rápidas sem chamar um modelo grande"
+}

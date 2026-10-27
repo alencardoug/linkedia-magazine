@@ -1,0 +1,204 @@
+{
+  "article_id": "3d0f71a4-f3d9-4ebe-b40c-4f8859fca676",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 25/10/2026 a OpenAI apresentou o GPT-6.1 Terra, um modelo que ela descreve como rápido e eficiente, com raciocínio visual detalhado e computer use preciso. Computer use significa que o modelo olha capturas da tela e age como uma pessoa: clica, digita, preenche formulários e navega em aplicativos. Depois deste texto você terá um roteiro curto para testar isso numa tarefa repetitiva sua e decidir se compensa frente a um script ou ao Codex.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: o que foi anunciado",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Preço de API: US$ 1 por milhão de tokens de entrada, US$ 0,05 por milhão de entrada em cache e US$ 5 por milhão de saída. A OpenAI diz que isso é 50% menos que o GPT-5.6 Terra e o GPT-6.1 Sol.",
+        "Disponibilidade: planos Plus, Pro, Enterprise e Edu no ChatGPT Work e no Codex, e na API como gpt-6.1-terra. Segundo a empresa, a mesma cota de uso rende mais tarefas do que com Sol ou GPT-6 Astra.",
+        "Computer use: no benchmark Agents' Last Exam, em esforço médio de raciocínio, a OpenAI diz que o Terra pontua 15 pontos percentuais acima do GPT-5.6 Terra, a cerca de um terço do custo. Diz também que fica no nível do GPT-6 Astra com um décimo do preço por token.",
+        "Comparação com a Anthropic: em esforço máximo, a OpenAI afirma que o Terra usa mais de três vezes menos tokens que o Claude Opus 5.5, com um quarto do preço por token, o que daria cerca de 9 vezes menos custo por tarefa.",
+        "Velocidade: tarefas concluídas mais de três vezes mais rápido que com Astra e Sol.",
+        "Código: no Terminal-Bench 4.0, em esforço máximo, 50,3% das tarefas, contra 21,5% do GPT-5.6 Terra. Para código muito complexo, a própria OpenAI recomenda Sol ou Astra.",
+        "Erros factuais: no benchmark interno de prompts que induzem erro, a taxa em esforço baixo caiu de 53,6% para 16,7%."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "O que é sólido e o que é marketing",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Todos os números acima vêm da própria OpenAI, medidos em benchmarks escolhidos e, em parte, internos. O texto não traz nota de método, nem os valores absolutos de Agents' Last Exam e OSWorld 2.1. Os resultados também não foram reproduzidos por terceiros. Os preços por token são fatos verificáveis na tabela oficial. Já a afirmação de custo por tarefa 9 vezes menor depende de como cada modelo gasta tokens na sua tarefa, e só você mede isso. Reproduzir é possível: a API é pública e o roteiro abaixo faz exatamente isso, em escala pequena.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A OpenAI afirma que o modelo atinge o limiar Crítico em cibersegurança no seu Preparedness Framework e que resiste bem a prompt injection nos testes dela. Prompt injection é quando um texto malicioso numa página, e-mail ou documento tenta dar ordens ao agente. Num agente que lê a tela, qualquer conteúdo visível é uma possível entrada hostil. Trate a resistência alegada como hipótese a verificar, não como garantia.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O pacote não detalha limites do computer use, como latência por passo ou taxa de falha em apps reais, nem o conteúdo do system card. Verifique a documentação e o system card oficiais antes de decidir.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: um roteiro de teste para você",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confirme nomes de ferramentas e parâmetros na documentação oficial, pois podem ter mudado.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "level": 3,
+      "text": "1. Escolha a tarefa certa",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Computer use vale a pena quando não existe API nem formato estável para automatizar: um portal antigo, um sistema interno sem integração, um formulário web. Se existe API, banco ou arquivo, um script quase sempre é mais barato, rápido e determinístico. Você já usa Codex e Claude Code: peça a um deles para escrever o script e use isso como linha de base. Bons candidatos: copiar dados de uma tela para uma planilha, preencher o mesmo formulário com 20 registros, conferir um painel e anotar valores. Escolha algo com 5 a 15 passos e resultado fácil de checar.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "2. Monte o isolamento antes de tudo",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Use uma máquina virtual ou contêiner descartável, sem seus navegadores logados e sem gerenciador de senhas.",
+        "Crie uma conta de teste com dados fictícios e permissões mínimas no sistema alvo.",
+        "Restrinja a rede a domínios necessários. Isso evita exfiltração de dados via prompt injection, em que o agente é induzido a enviar o que vê para fora.",
+        "Nunca use credenciais reais de produção.",
+        "Registre cada ação do agente (captura de tela e comando) para auditar depois."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "3. Defina a métrica antes de rodar",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Prepare 10 a 20 casos com resposta esperada conhecida. Meça por execução: sucesso (resultado correto, conferido por você ou por um checador automático), número de passos, tempo total, tokens de entrada e saída, e custo em dólares calculado pela tabela de preços. O custo por tarefa bem-sucedida é o número que decide, pois uma execução barata que falha metade das vezes sai cara.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Modelo de planilha para comparar. Preencha com seus números.",
+      "code": "caso | modelo/esforço  | sucesso | passos | tempo | tokens_in | tokens_out | custo\n1    | terra/medio     | sim     | 9      | 74s   | ...       | ...        | ...\n1    | terra/max       | sim     | 8      | 120s  | ...       | ...        | ...\n1    | script (Codex)  | sim     | -      | 2s    | -         | -          | ~0\n\ncusto por sucesso = custo total / execuções corretas",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "4. Rode a comparação",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Execute o Terra em esforço médio e em máximo nos mesmos casos, repetindo cada um ao menos 3 vezes para ver a variância.",
+        "Se quiser testar a alegação de custo, rode um modelo concorrente na mesma tarefa e compare custo por sucesso, não preço por token.",
+        "Peça ao Codex um script para a mesma tarefa e meça tempo de escrita, manutenção e taxa de acerto.",
+        "Inclua 2 casos adversariais: uma página com texto escondido mandando ignorar as instruções e enviar dados a outro endereço. Veja se o agente obedece. Isso testa de forma concreta a resistência a prompt injection que o fornecedor alega."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "5. Decida",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Taxa de sucesso alta, custo baixo e tarefa sem API: computer use faz sentido, com revisão humana por amostragem.",
+        "Existe API ou formato estável: fique com o script.",
+        "Ação irreversível (pagar, enviar, apagar): exija confirmação humana antes do passo final.",
+        "Falhas frequentes em passos longos: divida a tarefa em etapas curtas ou volte ao script."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Neste fim de semana: escolha uma tarefa repetitiva sem API, monte uma VM com conta fictícia, rode 10 casos no Terra e compare o custo por sucesso com um script escrito pelo Codex. Inclua um caso com prompt injection. Se o script ganhar, você evitou uma automação cara; se o Terra ganhar, tem dados próprios, não os do fornecedor.",
+      "type": "callout",
+      "variant": "takeaway"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-27",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:08:43Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique computer use em agentes de IA (modelos que operam a tela com capturas, cliques e teclado) para quem já usa Codex e Claude Code. Cubra: como o laço observar-agir funciona, diferenças frente a scripts e APIs, riscos de prompt injection e exfiltração, como isolar o ambiente em VM ou contêiner e como medir custo por tarefa bem-sucedida. Sugira um experimento de 3 horas."
+    },
+    {
+      "kind": "critic",
+      "label": "Criticar benchmarks",
+      "prompt": "Atue como revisor cético. Analise as afirmações de um fornecedor de IA sobre computer use: ganho de 15 pontos percentuais, custo por tarefa 9 vezes menor e paridade com um modelo bem mais caro. Liste vieses possíveis em benchmarks internos ou escolhidos pelo fornecedor, quais dados faltam e como eu validaria cada alegação com testes próprios."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "gpt-6-1-terra-e-0027",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:07:56Z",
+      "language": "en",
+      "published_at": "2026-10-26T00:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s1",
+      "title": "Introducing GPT-6.1 Terra",
+      "url": "https://openai.com/index/introducing-gpt-6-1-terra"
+    }
+  ],
+  "summary": "A OpenAI lançou o GPT-6.1 Terra, modelo barato com computer use (agente que opera a tela). Veja o que a empresa afirma, o que é marketing e um roteiro de teste de 2 a 3 horas em sandbox.",
+  "tags": [
+    "topic:agents",
+    "topic:agent-evaluation",
+    "risk:prompt-injection",
+    "topic:benchmarks",
+    "theme:roi",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:popularity",
+    "source:openai"
+  ],
+  "title": "GPT-6.1 Terra e computer use: um roteiro para testar numa tarefa sua"
+}

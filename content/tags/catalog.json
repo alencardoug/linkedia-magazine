@@ -82,6 +82,11 @@
       "label": "AI as Normal Technology"
     },
     {
+      "key": "source:cset",
+      "kind": "source",
+      "label": "CSET Georgetown"
+    },
+    {
       "key": "source:github",
       "kind": "source",
       "label": "GitHub"
