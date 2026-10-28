@@ -1,0 +1,195 @@
+{
+  "article_id": "c1972c08-69b1-4dcf-aaa5-ff539f956468",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 26/10/2026, a OpenAI publicou um texto sobre como seus próprios engenheiros usam o Ultrafast, um modo de alta velocidade do Codex, na resposta a incidentes. Depois de ler, você terá um critério para separar evidência de marketing nesse tipo de relato e um roteiro para montar um fluxo de investigação de falhas com seu agente de código, mesmo sem acesso ao Ultrafast.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: o que a OpenAI relata",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o texto, o Ultrafast virou o padrão dos engenheiros da empresa para responder a incidentes. A ideia é que o agente responda rápido o bastante para que a pessoa não precise esperar minutos enquanto o problema se agrava, e que ele possa investigar várias causas possíveis ao mesmo tempo.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Aaron Friel abre um canal no Slack para o incidente e pede ao Codex que monitore, investigue e responda perguntas. Ele diz que o Ultrafast permite pesquisar vários palheiros ao mesmo tempo.",
+        "AJ Trbojevic, arquiteto de segurança de datacenter, afirma que investigações de segurança levavam uma ou duas horas para juntar dados estruturados e não estruturados, normalizá-los e dar contexto; agora levariam de 10 a 15 minutos, às vezes quase em tempo real.",
+        "Sayan Sisodiya usa o Codex também para varrer o Slack em busca de menções a mudanças suspeitas ou sintomas parecidos, além dos logs.",
+        "Jeff Niu diz que, se a resposta de uma IA passa de 30 segundos, ele prefere perguntar a um colega; com o Ultrafast, a maior parte do trabalho fica abaixo disso. Ele também afirma que refatorações grandes ficaram mais baratas.",
+        "Há usos fora de incidentes: uma conversa contínua que funciona como assistente de agenda e mensagens, e preenchimento de formulários no navegador."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "O que é sólido e o que é marketing",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Fato: o texto é da própria OpenAI, faz parte de uma série de exemplos internos e traz depoimentos de funcionários. Interpretação razoável: velocidade de resposta muda o comportamento, pois a pessoa deixa de duplicar o trabalho à mão e mantém o foco. Isso é plausível e descrito de forma consistente por vários entrevistados.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Os números de 'horas para minutos' são autodeclarados: não há metodologia, amostra, linha de base nem medição de erros. O texto não diz quantas vezes o agente errou a causa, nem quanto tempo se gastou verificando as respostas. Também não informa disponibilidade, custo ou como obter o Ultrafast em contas externas.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em resumo: o relato sustenta que a latência baixa melhora a experiência de uso. Não sustenta, de fora, o ganho exato de tempo nem a qualidade dos diagnósticos.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Fonte única e do fornecedor. O texto não detalha quais ferramentas, permissões ou fontes de dados o Codex acessa durante os incidentes, então a reprodução exata não é possível.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: como montar seu próprio fluxo de investigação",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial das suas ferramentas, pois recursos mudam.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "O que dá para replicar não é o modo rápido, e sim o método: dar ao agente acesso somente leitura a várias fontes, pedir hipóteses concorrentes em paralelo e exigir evidência para cada uma. Velocidade é um bônus; a disciplina é o que evita diagnósticos bonitos e errados.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Passo a passo",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Defina o incidente em poucas linhas: sintoma, horário de início, o que mudou (deploys, flags, migrações). Salve em um arquivo, por exemplo incidente.md, que o agente lê.",
+        "Reúna as fontes em formato legível: trechos de logs do intervalo, saída de git log do período, alertas exportados. Quanto menos ruído, melhor; recorte por janela de tempo em vez de entregar tudo.",
+        "Peça de 3 a 5 hipóteses distintas, cada uma com: o que explicaria o sintoma, qual evidência a confirmaria, qual a refutaria e qual comando somente leitura a checa.",
+        "Execute a verificação de cada hipótese em sessões ou subagentes separados, se sua ferramenta suportar. Isso imita o 'pesquisar vários palheiros' do relato, mas com você no controle.",
+        "Exija citações: arquivo, linha ou trecho de log para cada afirmação. Afirmação sem evidência é marcada como suposição.",
+        "Só depois proponha correção. Gere o patch em outra etapa, com teste que reproduz a falha antes e passa depois.",
+        "Ao final, peça um resumo do incidente para o post-mortem, e revise você mesmo."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Modelo de prompt para a fase de hipóteses; adapte aos seus nomes de arquivos.",
+      "code": "Contexto: leia incidente.md e os logs em ./evidencias (somente leitura).\nTarefa: liste 4 hipóteses para a causa do sintoma.\nPara cada uma informe:\n- o que a confirmaria e o que a refutaria\n- um comando de leitura que testa isso\n- evidência encontrada (arquivo:linha) ou 'sem evidência'\nNão altere arquivos. Marque como SUPOSIÇÃO tudo que não tiver evidência.\nTermine com a hipótese mais provável e o que ainda falta checar.",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Controles de risco",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Permissão mínima: comece com leitura apenas. Um agente que pode executar comandos em produção durante um incidente aumenta o risco de piorar a situação.",
+        "Injeção de prompt: logs, mensagens de Slack e tickets são texto não confiável. Alguém pode inserir instruções neles que o agente passe a seguir. Trate esse conteúdo como dado, não como ordem, e não dê ao agente ferramentas de escrita ao ler fontes externas.",
+        "Dados sensíveis: logs podem conter tokens e dados pessoais. Mascare antes de enviar a um serviço externo e confira a política da sua organização e a LGPD.",
+        "Viés de confirmação: agentes tendem a defender a primeira hipótese plausível. Por isso a exigência de evidência refutadora."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Como medir se funciona no seu caso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Para testar a alegação de 'horas para minutos' no seu contexto, pegue de dois a três incidentes passados com causa conhecida. Esconda a causa, rode o fluxo e compare: o agente achou a causa real? Em quanto tempo? Quantas hipóteses falsas apresentou? Registre numa tabela simples. Isso vale mais do que qualquer depoimento de fornecedor.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: escolha um bug antigo com causa conhecida, rode o prompt de hipóteses sem revelar a causa e anote acerto, tempo e hipóteses erradas. Se o Ultrafast não estiver disponível na sua conta, o método vale igual com o modo normal; só muda a espera.",
+      "type": "callout",
+      "variant": "takeaway"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-28",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:10:09Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como usar agentes de código (como Codex ou Claude Code) para investigar incidentes de software: hipóteses concorrentes, evidência com citação de logs, permissões somente leitura, riscos de injeção de prompt em logs e Slack, e como medir se o agente realmente acelera a investigação. Dê exemplos práticos e um exercício com um bug antigo."
+    },
+    {
+      "kind": "critic",
+      "label": "Avaliar relato de fornecedor",
+      "prompt": "Atue como revisor cético. Vou colar um texto de um fornecedor de IA afirmando que sua ferramenta reduziu uma tarefa de horas para minutos. Liste que evidências faltam (linha de base, amostra, taxa de erro, custo), quais afirmações são fatos e quais são opinião, e proponha um experimento simples de 2 horas para verificar o ganho no meu contexto."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "ultrafast-no-codex-0031",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:09:23Z",
+      "language": "en",
+      "published_at": "2026-10-26T07:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s1",
+      "title": "How Ultrafast cut incident investigation from hours to minutes at OpenAI",
+      "url": "https://openai.com/index/openai-cut-incident-investigation"
+    }
+  ],
+  "summary": "A OpenAI diz que o modo Ultrafast do Codex reduziu investigações de incidentes de horas para minutos. Separamos o que o relato sustenta do que é marketing e mostramos um fluxo próprio de investigação com agente de código.",
+  "tags": [
+    "topic:coding-agents",
+    "topic:agents",
+    "topic:observability",
+    "risk:security",
+    "topic:inference",
+    "reason:career-utility",
+    "source:openai"
+  ],
+  "title": "Ultrafast no Codex em incidentes da OpenAI: o que é sólido e como replicar"
+}

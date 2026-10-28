@@ -1,0 +1,181 @@
+{
+  "article_id": "c83d8ffb-f8be-426c-90eb-1f3f6f210e3b",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Aviso direto: o editor pediu um caso simples de IA para tratamento de áudio com grande impacto, mas o material desta semana não traz um caso de limpeza de ruído, transcrição ou separação de áudio. O único item relacionado é sobre música gerada por IA. Abaixo está o que ele sustenta e, depois, um roteiro prático de até 3 horas para você testar áudio por conta própria.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: a notícia e o que ela sustenta",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O artigo do Understanding AI relata o caso de um autor que gravou trechos de músicas cantarolados no Voice Memos do iPhone. Em meados de 2025, ele testou a versão 4.5 do Suno, um gerador de música por IA, que cria uma música a partir de texto e também transforma uma música existente em outro estilo ou gênero. Ele enviou cerca de 50 gravações antigas, pediu vários gêneros e obteve centenas de gravações geradas. Uma delas virou um funk psicodélico dos anos 1970.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A tese do texto é a de 'mídia pessoal': quando a banda custa quase nada, não é preciso ter público. O autor cita que o CEO do Suno disse, em fevereiro, que o serviço tinha 2 milhões de assinantes pagantes e mais de 100 milhões de pessoas já o tinham usado. Também afirma que, para ele, o resultado é divertido, mas provavelmente ninguém mais vai querer ouvir.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Isso é um relato pessoal, não um estudo de impacto. Não é limpeza nem transcrição de áudio, e não há medição de ganho. Os números de assinantes são afirmações citadas no texto, sem verificação independente no pacote.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: o que você pode fazer com áudio, no seu nível",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Ferramentas e comandos mudam: confira a documentação oficial antes de usar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Três tarefas de áudio com IA são maduras e rodam no seu computador, de graça: transcrição (áudio vira texto), separação de fontes (dividir uma música em voz, bateria, baixo e outros, chamados stems) e normalização de volume. O diferencial frente a soluções prontas na nuvem é rodar local: o áudio não sai da sua máquina, o que importa para reuniões, entrevistas e dados pessoais sob a LGPD.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Exercício 1: transcrição local com Whisper (cerca de 45 min)",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Whisper é um modelo de reconhecimento de fala aberto da OpenAI. Em termos simples, é um modelo que recebe áudio e devolve texto, com suporte a vários idiomas, incluindo português. Ele roda em CPU, só que mais devagar. Modelos menores são mais rápidos e erram mais.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Transcrição local. Pode ser necessário instalar o ffmpeg antes. Veja as opções na documentação do projeto.",
+      "code": "pip install openai-whisper\nwhisper reuniao.mp3 --model small --language pt --output_format txt",
+      "language": "bash",
+      "type": "code"
+    },
+    {
+      "source_ids": [],
+      "text": "Teste com 5 minutos de uma conversa sua. Depois peça ao seu agente de código um script que percorra uma pasta de áudios, transcreva cada um e envie o texto a um LLM para gerar ata e lista de tarefas. Essa junção é o ganho real: você já domina a parte de texto.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Exercício 2: separar voz e instrumentos com Demucs (cerca de 45 min)",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Demucs é um modelo aberto de separação de fontes musicais, publicado pela Meta. Ele recebe uma música mixada e devolve faixas separadas. Serve para extrair uma voz limpa, fazer karaokê ou estudar um arranjo. Isso conecta com o relato acima: o autor partiu de um memo de voz cru.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Gera stems em uma pasta de saída. Confira as opções no repositório oficial.",
+      "code": "pip install demucs\ndemucs musica.mp3",
+      "language": "bash",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Exercício 3: pipeline de limpeza (cerca de 1 hora)",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Separe a voz com Demucs, quando houver música de fundo.",
+        "Normalize o volume com o filtro loudnorm do ffmpeg: ffmpeg -i entrada.wav -af loudnorm saida.wav.",
+        "Transcreva com Whisper e compare a taxa de erro com e sem o passo anterior, contando manualmente os erros em um trecho de 2 minutos."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "O terceiro passo é o que torna isso um experimento e não uma demonstração: meça. Um pré-processamento não garante transcrição melhor, e às vezes piora, porque a separação pode introduzir artefatos na voz.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Riscos e decisões",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Privacidade: áudio de reunião contém voz e dados pessoais. Rodar local evita enviar tudo a terceiros; mesmo assim, guarde e apague os arquivos com critério.",
+        "Uso indevido: separar ou transformar a voz de outra pessoa sem consentimento levanta questões de direitos autorais e de imitação de voz.",
+        "Alucinação: o Whisper pode inventar trechos em silêncios ou áudio ruim. Revise antes de usar a transcrição como registro."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta semana: transcreva 5 minutos de áudio seu com Whisper local e meça os erros com e sem normalização. Em uma hora você tem uma base de comparação própria, em vez de depender de promessas de fornecedor.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Falta uma fonte que comprove impacto de IA em limpeza, transcrição ou separação de áudio. Antes de publicar como caso de impacto, o ideal é buscar uma fonte específica.",
+      "type": "callout",
+      "variant": "uncertainty"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-10-28",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:10:34Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique para um engenheiro de software que usa LLMs de texto, mas é iniciante em áudio, como funcionam transcrição automática de fala (como o Whisper), separação de fontes musicais (como o Demucs) e normalização de volume. Cubra conceitos-chave (espectrograma, taxa de amostragem, stems, taxa de erro de palavras), limitações, riscos de privacidade e LGPD, e proponha um experimento de 3 horas rodando localmente e de graça."
+    }
+  ],
+  "read_minutes": 4,
+  "schema_version": "1.0.0",
+  "slug": "audio-com-ia-0033",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:10:10Z",
+      "language": "en",
+      "published_at": "2026-10-19T13:33:47Z",
+      "publisher": "Understanding AI",
+      "source_id": "s1",
+      "title": "AI is ushering in an age of personal media",
+      "url": "https://www.understandingai.org/p/ai-is-ushering-in-an-age-personal"
+    }
+  ],
+  "summary": "O pacote não traz um caso de limpeza, transcrição ou separação de áudio. Só mostra música gerada por IA a partir de memos de voz. Veja o que isso sustenta e um roteiro local e gratuito para testar áudio.",
+  "tags": [
+    "theme:multimodal",
+    "risk:privacy",
+    "theme:society",
+    "reason:novelty",
+    "source:understanding-ai"
+  ],
+  "title": "Áudio com IA: o que as fontes mostram (pouco) e um roteiro de 3 horas para testar"
+}

@@ -142,9 +142,19 @@
       "label": "OpenAI"
     },
     {
+      "key": "source:scmp",
+      "kind": "source",
+      "label": "South China Morning Post"
+    },
+    {
       "key": "source:simon-willison",
       "kind": "source",
       "label": "Simon Willison"
+    },
+    {
+      "key": "source:understanding-ai",
+      "kind": "source",
+      "label": "Understanding AI"
     },
     {
       "key": "theme:governance",
@@ -185,6 +195,11 @@
       "key": "theme:science",
       "kind": "theme",
       "label": "Ciência"
+    },
+    {
+      "key": "theme:society",
+      "kind": "theme",
+      "label": "Sociedade"
     },
     {
       "key": "theme:strategy",

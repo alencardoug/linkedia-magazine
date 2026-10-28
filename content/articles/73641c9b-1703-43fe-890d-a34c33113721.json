@@ -1,0 +1,161 @@
+{
+  "article_id": "73641c9b-1703-43fe-890d-a34c33113721",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Resumo rápido: a China criou uma empresa estatal nacional de dados, e o ponto central é que a disputa de IA não depende só de chips, mas também de quem consegue transformar dados em insumo utilizável. Depois da notícia, você terá um roteiro simples para aplicar a mesma lógica aos dados dos seus próprios projetos com agentes de código.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o South China Morning Post, a empresa foi estabelecida em 20 de outubro como uma estatal gerida pelo governo central, com sede na Nova Área de Xiongan, na província de Hebei. A leitura do jornal é que Pequim quer converter seu enorme acervo digital em vantagem competitiva, alimentando a IA e o crescimento econômico.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O subtítulo da matéria diz que Pequim apoia a entidade com grandes estatais, incluindo as principais operadoras de telecomunicações e empresas da rede elétrica. O trecho disponível também traz o alerta central: especialistas dizem que o sucesso dependerá de derrubar barreiras arraigadas ao compartilhamento de dados.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O que sabemos é pouco: só o início da reportagem estava disponível. Não há detalhes sobre quais dados serão incluídos, como serão acessados, quem pagará, nem sobre privacidade. Se a aposta vai funcionar é especulação, como o próprio texto indica ao citar avisos de especialistas.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Por que isso importa e o que fica como interpretação",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Fato: a estatal existe e o obstáculo apontado é o compartilhamento. Interpretação (nossa): ter muitos dados não basta se eles estão presos em silos, ou seja, bases isoladas que cada órgão ou empresa controla e que não conversam entre si. Uma centralizadora estatal tenta resolver isso por cima, o que também levanta, em tese, questões de concentração de poder e privacidade que a fonte disponível não detalha.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: sua versão do problema de silos",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você usa RAG (recuperação de documentos para o modelo consultar na hora da resposta) e agentes de código. Em escala pequena, o gargalo é o mesmo: dados espalhados, sem dono, sem saber se podem ser usados. Quem resolve isso antes ganha qualidade e evita problema depois.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de uma tarde: inventário de dados",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Liste cada fonte de dados que seus projetos usam (pastas, planilhas, bancos, exports de conversas, APIs).",
+        "Para cada uma, registre: dono, origem, finalidade para a qual foi coletada, se contém dados pessoais, e quem pode ver.",
+        "Marque a restrição de uso: pode ir para um modelo externo, só para modelo local, ou não pode sair?",
+        "Peça ao seu agente de código para gerar um script que leia esse arquivo e falhe se alguma fonte usada no pipeline estiver sem dono ou sem restrição definida."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Exemplo de catálogo mínimo de dados; os campos são sugestão, adapte ao seu caso.",
+      "code": "fontes:\n  - nome: tickets_suporte\n    dono: time-suporte\n    origem: export do helpdesk\n    tem_dado_pessoal: true\n    finalidade: atendimento\n    pode_ir_para_modelo_externo: false\n  - nome: docs_publicos\n    dono: eu\n    origem: documentação aberta\n    tem_dado_pessoal: false\n    finalidade: base de conhecimento\n    pode_ir_para_modelo_externo: true",
+      "language": "yaml",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Controle e LGPD, em termos de decisão",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Se um dado pessoal entra em um índice de RAG ou em um prompt, a LGPD pede, entre outras coisas, finalidade clara e base legal para o tratamento. O risco prático é reaproveitar dados coletados para um fim e usá-los em outro, ou enviá-los a um provedor externo sem avaliar. O catálogo acima torna essa pergunta verificável antes de o dado chegar ao modelo. Para casos reais, confirme com o jurídico e com o texto oficial da lei.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "A lição da notícia para o seu nível: dado só vira insumo de IA quando se sabe de quem é, para que serve e se pode circular. Comece com um inventário de uma página por projeto e uma checagem automática que o agente mantém.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 2,
+      "text": "Primeiro passo desta semana, e o que observar",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Esta semana, faça o inventário do seu projeto de RAG mais usado. Quanto à China, acompanhe se surgirão detalhes sobre quais dados a estatal reunirá, como o acesso será regulado e se as barreiras de compartilhamento citadas pelos especialistas realmente caem. Hoje, nada disso está confirmado pela fonte disponível.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_knowledge",
+  "edition_date": "2026-10-28",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-26T21:13:10Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "29db27ab-e955-423b-bdb4-16f0b952068f",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português do Brasil, para alguém que usa LLMs, RAG e agentes de código, por que dados (e não só chips) são estratégicos na corrida de IA entre EUA e China. Cubra: silos de dados, governança de dados, compartilhamento entre órgãos e empresas, riscos de privacidade e concentração de poder, e como a LGPD trata finalidade e base legal. Dê exemplos práticos de como organizar um inventário de dados para projetos pessoais de RAG."
+    }
+  ],
+  "read_minutes": 4,
+  "schema_version": "1.0.0",
+  "slug": "china-cria-estatal-0032",
+  "sources": [
+    {
+      "accessed_at": "2026-10-26T21:12:42Z",
+      "language": "en",
+      "published_at": "2026-10-26T09:00:08Z",
+      "publisher": "South China Morning Post",
+      "source_id": "s1",
+      "title": "China’s AI race needs data fuel. Can a new state-owned giant deliver?",
+      "url": "https://www.scmp.com/tech/policy/article/3372159/chinas-ai-race-needs-data-fuel-can-new-state-owned-giant-deliver"
+    }
+  ],
+  "summary": "Em 20 de outubro, Pequim criou uma estatal central de dados em Xiongan. O artigo explica o que a fonte afirma, o que ela não detalha e como transformar a lição (dados compartilháveis valem mais) em um inventário de dados para seus projetos.",
+  "tags": [
+    "region:china",
+    "theme:strategy",
+    "theme:governance",
+    "risk:concentration-of-power",
+    "risk:privacy",
+    "reason:novelty",
+    "source:scmp"
+  ],
+  "title": "China cria estatal de dados para alimentar a IA: a aposta e o obstáculo"
+}
