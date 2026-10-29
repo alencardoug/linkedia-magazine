@@ -122,6 +122,11 @@
       "label": "Interconnects"
     },
     {
+      "key": "source:latent-space",
+      "kind": "source",
+      "label": "Latent Space"
+    },
+    {
       "key": "source:mit-technology-review",
       "kind": "source",
       "label": "MIT Technology Review"
@@ -140,6 +145,11 @@
       "key": "source:openai",
       "kind": "source",
       "label": "OpenAI"
+    },
+    {
+      "key": "source:platformer",
+      "kind": "source",
+      "label": "Platformer"
     },
     {
       "key": "source:scmp",

@@ -1,0 +1,220 @@
+{
+  "article_id": "73edd629-dfe3-47f5-964e-de43689db0d8",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Em um episódio do podcast Latent Space, Katelyn Lesse (engenharia) e Angela Jiang (produto) explicaram como a Anthropic construiu os Managed Agents, parte da Claude Platform. A ideia central é separar o 'cérebro' do agente (modelo, log da sessão e harness) das 'mãos' (o sandbox que executa código). Depois deste texto, você terá um roteiro de perguntas para aplicar essa divisão nos seus próprios agentes de código.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: o que foi dito",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o resumo do episódio, nos Managed Agents a Anthropic separa o log da sessão e o harness do sandbox onde o código roda. Harness é o programa em volta do modelo: ele monta o contexto, chama ferramentas e decide o próximo passo. Sandbox é um ambiente isolado onde código gerado é executado. Com a separação, o harness pode persistir enquanto o ambiente de execução é criado só quando necessário, e um sandbox que falha não derruba a sessão inteira.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Os convidados dizem que a abordagem anterior colocava o agente de código inteiro dentro de um sandbox atrás de uma API. Subir ambiente e agente atrasava a primeira resposta, e, se o sandbox sumisse, o agente em execução sumia junto. Separar as peças permitiu buscar menor latência e mais confiabilidade, mantendo a execução isolada.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Há também um ganho de segurança. Se o código gerado roda num sandbox que nunca recebe uma credencial de serviço, não há credencial ali para ele ler. O episódio descreve credenciais guardadas separadamente e anexadas por um proxy, além de controles sobre para onde o tráfego do sandbox pode ir.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "É um relato do próprio fornecedor, a partir de uma entrevista. O que está disponível são o texto de apresentação e a lista de tópicos; a transcrição é rascunho automático. Não há números de latência ou confiabilidade que permitam medir o ganho, então ele é uma afirmação, não um resultado verificado.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O episódio também trata de outros temas: o lançamento do Opus 5.5, a exigência de preservar blocos de raciocínio (thinking) entre turnos, que pode quebrar harnesses de clientes, e o recurso 'dreaming', que é um agente inspecionando o trabalho de outro e gravando memórias. Ideias de roadmap citadas devem ser tratadas como planos, não como entregas.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: como usar essa divisão no seu trabalho",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial das ferramentas antes de aplicar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "level": 3,
+      "text": "A intuição",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Pense num agente como um gerente (cérebro) que dá ordens a um operário (mãos) numa oficina. O gerente guarda o caderno de tudo o que foi feito. Se a oficina pega fogo, você monta outra e o gerente continua a partir do caderno. Além disso, você não deixa as chaves do cofre na oficina: o gerente as usa por um guichê controlado.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "As três perguntas de projeto",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O próprio texto sugere perguntar: o que precisa sobreviver, o que executa trabalho não confiável e quais segredos precisam estar onde o código roda. Veja como responder no seu nível.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "O que precisa sobreviver? Registre a sessão fora do ambiente de execução (um arquivo de log com os passos, comandos e resultados). Se o container morrer, o agente retoma de lá.",
+        "O que executa trabalho não confiável? Qualquer código gerado pelo modelo ou vindo de dependências. Rode em container ou VM descartável, sem acesso ao seu home e sem montar a pasta inteira de projetos.",
+        "Que segredos precisam estar lá? Quase sempre nenhum. Passe chaves por um intermediário (proxy ou função sua) que faz a chamada autenticada e devolve só o resultado."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Que ataque isso evita",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Evita o roubo de credenciais por código malicioso ou induzido por prompt injection, isto é, texto escondido em página, issue ou arquivo que convence o agente a executar comandos. Se o sandbox não tem a chave, o pior caso muda de 'vazou a chave' para 'o código tentou usar o guichê', que você pode limitar e registrar. Restringir o tráfego de saída reduz também o envio de dados para fora.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de fim de semana",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Pegue um projeto pessoal em que um agente de código roda comandos.",
+        "Liste os segredos presentes no ambiente (variáveis de ambiente, arquivos de configuração, tokens do git).",
+        "Mova a execução para um container descartável sem esses segredos e sem rede, liberando apenas o que for necessário.",
+        "Se uma tarefa precisar de uma API externa, escreva um pequeno script no lado de fora que recebe um pedido simples, valida e faz a chamada.",
+        "Grave um log de sessão em arquivo, apague o container no meio da tarefa e veja se o agente retoma a partir do log."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Antes de cada agente novo, responda por escrito: o que persiste, onde roda código não confiável e quais segredos estão lá. Se a resposta para a última for 'todos', comece por aí.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "O que é sólido e o que é marketing",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Sólido por ser prática de engenharia geral: isolar execução, não colocar credenciais em ambiente não confiável, separar estado de processo descartável.",
+        "Não verificável aqui: ganhos de latência e confiabilidade da Anthropic, e o desempenho do Opus 5.5 como 'melhor modelo'.",
+        "Reprodução: dá para reproduzir o padrão (log fora, sandbox descartável, proxy de credenciais) com ferramentas comuns de container; não dá para reproduzir os Managed Agents em si sem a plataforma."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Uma observação sobre avaliações: o episódio lembra que melhorar um harness se parece com pesquisa, ou seja, definir objetivo, medir, olhar falhas e iterar, e que ter bons evals vale muito. Para o seu caso, guarde cinco tarefas reais do seu repositório e rode-as a cada mudança de harness.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: faça a lista de segredos visíveis ao seu agente de código hoje e remova pelo menos um.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-10-29",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-29T22:32:02Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "9c50a771-9c7f-4d00-abd7-1d21f984fac5",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português, em nível intermediário, o padrão de separar o 'cérebro' (modelo, harness e log de sessão) das 'mãos' (sandbox de execução) em agentes de código. Cubra: o que é harness e sandbox, por que persistir o estado fora do ambiente de execução, como manter credenciais fora do sandbox usando um proxy, como restringir tráfego de rede, e riscos como prompt injection. Dê exemplos práticos que eu possa reproduzir com containers num projeto pessoal."
+    },
+    {
+      "kind": "architecture",
+      "label": "Desenhar meu agente",
+      "prompt": "Vou projetar um agente de código com log de sessão persistente, sandbox descartável e acesso a APIs externas sem expor credenciais. Peça os detalhes do meu caso e proponha uma arquitetura em texto, com os componentes, o fluxo de uma tarefa, o que acontece quando o sandbox falha e uma lista de ameaças com mitigações."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "cerebro-e-maos-0034",
+  "sources": [
+    {
+      "accessed_at": "2026-10-29T22:31:15Z",
+      "language": "en",
+      "published_at": "2026-10-27T18:53:10Z",
+      "publisher": "Latent Space",
+      "source_id": "s1",
+      "title": "How Anthropic ships Claude with Claude: Separating the Brain from the Hands",
+      "url": "https://latent.space/p/opus55"
+    },
+    {
+      "accessed_at": "2026-10-29T22:31:16Z",
+      "language": "en",
+      "published_at": "2026-10-27T18:40:19Z",
+      "publisher": "Latent Space",
+      "source_id": "s2",
+      "title": "How Anthropic ships the #1 LLM in the World safely: Separating the Brain from the Hands",
+      "url": "https://latent.space/p/how_anthropic_ships_the_1_llm_in_the_world_safely_separating_the_brain_from_the_hands"
+    }
+  ],
+  "summary": "Em entrevista ao Latent Space, a Anthropic descreve os Managed Agents: sessão e harness separados do sandbox que executa código. Veja o que é sólido, o que é relato do fornecedor e como aplicar a divisão nos seus agentes.",
+  "tags": [
+    "topic:agents",
+    "topic:coding-agents",
+    "risk:security",
+    "topic:llm-security",
+    "topic:guardrails",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:latent-space"
+  ],
+  "title": "Cérebro e mãos: como separar o modelo da execução ao projetar agentes de código"
+}
