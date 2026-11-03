@@ -1,0 +1,240 @@
+{
+  "article_id": "dfecc6a8-d51a-420b-85b2-ece7af157ffe",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Um Principal Engineer da Thomson Reuters, que vive no sopé do Himalaia e enfrenta quedas de rede e de energia, testou até onde um agente de código funciona com a internet desligada. Depois de ler este texto, você saberá montar a mesma pilha (OpenCode + Ollama + Qwen), saberá o que sua máquina precisa ter e terá uma estimativa de custo de energia em São Paulo para decidir quando isso complementa o Claude Code ou o Codex.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1 — A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O relato, publicado no Latent Space, usa três peças. OpenCode é um agente de código de código aberto: lê arquivos, propõe edições e roda comandos, como a suíte de testes, pedindo permissão antes. Ollama é o serviço que executa o modelo na sua máquina. Qwen é uma família de modelos de pesos abertos (os parâmetros aprendidos podem ser baixados e rodados localmente). O autor usou o Qwen3.5 9B.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O experimento: um projeto pequeno em Python com uma função que somava despesas, mas substituía o total a cada iteração em vez de acumular. Três testes falhavam (aritmética decimal, reembolsos e o exemplo), e o total correto seria 25,50. Com o Wi-Fi desligado, o agente propôs uma correção de uma linha (de total = para total +=), pediu permissão, rodou os testes, e o autor os reexecutou. O arquivo de teste ficou intacto.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O que é sólido e o que não é",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Sólido: a cadeia local funcionou offline numa tarefa pequena, com testes existentes como verificação independente.",
+        "Limitado: é um bug de uma linha. O próprio autor diz que isso não mostra como o modelo lidaria com um repositório grande ou um framework desconhecido.",
+        "Não medido: as pontuações da tabela (LiveCodeBench v6 de 65,6 e BFCL-V4 de 66,1 para o 9B) vêm do model card da Qwen, não do laptop dele. O 4B tem 55,8 e 50,3; o gpt-oss-20b tem 74,6 em código e não reporta BFCL. BFCL-V4 mede chamada de função, isto é, escolher a ferramenta certa com os argumentos certos.",
+        "Incompleto: os exercícios do relatório CSV e do analisador de logs ainda não tinham sido rodados offline; o texto da fonte também está truncado no final.",
+        "Falha observada: o agente propôs pytest num projeto que usa unittest. Por isso o autor recomenda informar o comando de teste exato."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O packet é um excerto. Não traz detalhes do laptop usado além de ser um Mac, nem tempos de resposta, nem o conteúdo completo do opencode.json. Confirme tudo no README do projeto do autor.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2 — O que você pode fazer com isso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Os números de hardware e de custo abaixo são estimativas de ordem de grandeza: confira a documentação oficial e a tarifa da sua conta de luz.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "level": 3,
+      "text": "Passo a passo para reproduzir",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Com internet, instale o Ollama, o OpenCode e o modelo (ollama pull qwen3.5:9b, conforme o relato). Siga o README do autor para a versão exata que ele testou.",
+        "Num terminal, suba o serviço só em localhost: OLLAMA_HOST=127.0.0.1:11434 OLLAMA_NO_CLOUD=1 OLLAMA_CONTEXT_LENGTH=65536 ollama serve. O relato indica que isso mantém o serviço local e desativa os recursos de nuvem.",
+        "No projeto, configure o opencode.json apontando o provedor para http://127.0.0.1:11434/v1, com permissão para perguntar antes de editar ou rodar shell e com as ferramentas web bloqueadas.",
+        "Rode uma vez tudo ainda online, para que nada precise ser baixado depois.",
+        "Desligue Wi-Fi, Ethernet e tethering. Prove o isolamento: a chamada à API local deve responder e uma chamada a um site externo deve falhar.",
+        "Dê tarefas pequenas, com o comando de teste explícito no prompt, e proíba alterar os testes. Leia o diff e rode os testes você mesmo."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Modelo de prompt inspirado no relato, adaptado para qualquer projeto.",
+      "code": "Corrija o bug em X para os testes existentes passarem.\nNão altere os testes e não instale nada.\nComando de teste: python3 -m unittest -v\nRode os testes e explique a correção.",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Que infraestrutura é necessária",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Do relato: o download do Qwen3.5 9B tem cerca de 6,6 a 7,6 GB, o 4B de 3,3 a 4 GB e o 27B de 17 a 20 GB. Tamanho de download não é requisito de RAM: o autor cita 12 a 16 GB de memória para uma versão de 6,6 GB do 9B, e seu contexto de 64 mil tokens pode exigir mais.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "A partir daí, uma regra geral: o modelo precisa caber na memória rápida, que é a RAM unificada num Mac com Apple Silicon ou a VRAM de uma GPU dedicada. Quando não cabe, parte dele vai para a RAM comum ou para o disco e a velocidade despenca. O contexto longo, que agentes de código consomem muito (arquivos, saídas de teste), ocupa memória extra além dos pesos.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Mínimo viável (modelo 4B): 16 GB de RAM, SSD com espaço livre, qualidade limitada para tarefas agênticas. Serve para experimentar.",
+        "Ponto de partida realista (9B): 16 GB de memória unificada é apertado; 24 a 32 GB dá folga para contexto de 64k e para IDE, navegador e testes abertos. Em PC, uma GPU com 12 a 16 GB de VRAM é um alvo razoável.",
+        "Modelos maiores (27B ou mais): pense em 32 a 64 GB de memória unificada ou GPU com 24 GB ou mais, e espere um laptop mais quente e barulhento.",
+        "Disco: reserve dezenas de GB se for testar vários modelos.",
+        "Software: Python e dependências do projeto já instalados e a documentação salva em disco, porque o agente não consulta a web."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Custo de energia em São Paulo",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Faça a conta com a fórmula: kWh = potência em watts × horas ÷ 1000, e custo = kWh × tarifa. Não incluí a tarifa porque ela muda por distribuidora, bandeira tarifária e impostos: pegue o valor por kWh na sua conta e substitua abaixo.",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Laptop sob carga de inferência: ordem de 30 a 100 W. Em 4 h por dia, são cerca de 0,12 a 0,4 kWh por dia.",
+        "Desktop com GPU dedicada sob carga: ordem de 200 a 450 W. Em 4 h por dia, cerca de 0,8 a 1,8 kWh por dia. Em repouso, bem menos, mas deixar ligado 24 h pesa.",
+        "Exemplo: 0,4 kWh por dia × 30 dias = 12 kWh por mês. Multiplique pela sua tarifa; para um laptop o valor tende a ser pequeno diante de uma assinatura de agente, enquanto um desktop com GPU forte pode pesar mais."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Custos menos óbvios: o hardware em si, que costuma ser o maior item (uma GPU ou um Mac com muita memória custa mais que anos de energia de um laptop); depreciação e desgaste de bateria se você roda sempre sob carga; ventoinhas e ruído; e, no caso de desktop, o calor extra no ambiente.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Refrigeração em São Paulo: o clima é ameno e a maioria das casas não usa ar-condicionado o ano todo. Um laptop ou um desktop de 300 W raramente muda isso, mas num escritório pequeno e fechado, no verão, o calor adicional pode levar a ligar o ar. Um split de 9.000 a 12.000 BTU consome tipicamente algumas centenas de watts, o que pode superar o consumo do próprio computador. Se for o seu caso, inclua o ar na conta. Também considere um nobreak, pois queda de energia derruba a sessão e o modelo carregado.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Quando substitui Claude Code ou Codex, e quando não",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Faz sentido: voo, viagem ou área sem rede; código que não pode sair da máquina (privacidade e LGPD); tarefas pequenas e verificáveis por teste; experimentar agentes sem custo por token.",
+        "Não substitui: refatorações grandes, repositórios desconhecidos e frameworks novos. Modelos locais de 9B costumam ficar atrás dos modelos de ponta, e o relato não testa isso.",
+        "Uso híbrido: modelo local para tarefas pequenas e confidenciais, modelo de ponta para o que é difícil e para revisão."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Cuidados de segurança",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Manter as permissões em modo de perguntar e bloquear ferramentas web reduz dois riscos reais: um agente executar comandos destrutivos sem você ver e dados saírem da máquina por chamadas de rede. Mesmo offline, leia cada comando antes de aprovar. Isso não impede um prompt malicioso embutido em arquivos do repositório de induzir o agente a propor comandos ruins, por isso a revisão humana do diff e dos comandos continua sendo o controle.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Receita central: testes existentes + comando de teste explícito no prompt + proibição de editar os testes + revisão do diff. Isso vale para qualquer modelo, local ou de nuvem.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Em uma tarde, monte o exemplo do expense_total.py do autor, rode online uma vez, desligue a rede e repita. Depois adapte a um bug real de um projeto seu pequeno, e anote tempo de resposta, uso de memória e quantas vezes você precisou corrigir o agente. Esses três números dizem se vale comprar hardware.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-11-03",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-29T22:31:14Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "9c50a771-9c7f-4d00-abd7-1d21f984fac5",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como montar um agente de código totalmente offline com OpenCode, Ollama e um modelo Qwen de pesos abertos. Cubra: o que cada peça faz, como a memória (RAM, VRAM, memória unificada) limita o tamanho do modelo e do contexto, o que é quantização, como estimar o custo de energia de rodar inferência local, e como comparar um modelo local de 9B com modelos de ponta em tarefas de programação. Sugira um experimento prático de 2 horas com testes unitários para avaliar a qualidade."
+    }
+  ],
+  "read_minutes": 7,
+  "schema_version": "1.0.0",
+  "slug": "agente-de-codigo-0038",
+  "sources": [
+    {
+      "accessed_at": "2026-10-29T22:30:18Z",
+      "language": "en",
+      "published_at": "2026-10-27T14:41:25Z",
+      "publisher": "Latent Space",
+      "source_id": "s1",
+      "title": "Coding From the Himalayas With an Offline AI Agent",
+      "url": "https://latent.space/p/offline-coding"
+    }
+  ],
+  "summary": "Um engenheiro mostrou um agente de código rodando sem internet no laptop, com OpenCode, Ollama e Qwen3.5 9B. Veja o que o relato prova, o que exige de hardware e quanto custa de energia em São Paulo.",
+  "tags": [
+    "topic:coding-agents",
+    "topic:inference",
+    "theme:open-models",
+    "theme:hardware",
+    "risk:privacy",
+    "theme:roi",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:latent-space"
+  ],
+  "title": "Agente de código offline com OpenCode, Ollama e Qwen: passo a passo, hardware e custo"
+}

@@ -1,0 +1,214 @@
+{
+  "article_id": "64980811-6ac4-4ef8-9985-391148a09d82",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Em 28/10, a NVIDIA publicou no Hugging Face o Nemotron 3.5 Transcribe, um modelo de pesos abertos que transforma fala gravada em texto e aceita instruções em linguagem natural. Depois deste artigo você vai saber o que o modelo promete, onde estão os números sólidos e os de marketing, e como montar um teste de uma tarde com áudios seus. Há uma ressalva importante: o pacote de fontes é só o post do próprio fornecedor, e não consegui confirmar nele se o português está entre os idiomas.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o post, um único checkpoint (arquivo de pesos do modelo) faz quatro coisas: transcrição, atribuição de falantes (diarização, ou seja, marcar quem falou quando), tradução e perguntas e respostas sobre o áudio. Os números anunciados: transcreve 40 idiomas, traduz 31 deles de ou para o inglês, atribui falantes em 13, aceita gravações de até uma hora e até oito falantes. O mesmo áudio pode gerar saídas diferentes conforme a instrução, como 'transcreva e rotule cada falante', 'traduza para inglês' ou 'que decisões foram tomadas?'.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O modelo combina um codificador de fala com um modelo de linguagem híbrido Mamba–Transformer com mistura de especialistas. São cerca de 30 bilhões de parâmetros, dos quais só uns 4 bilhões ficam ativos por token. Isso importa para custo e velocidade de inferência. O modelo é feito para áudio gravado, não para streaming ao vivo. O post diz que há versões quantizadas (pesos em menor precisão, mais leves) e que dá para servir o checkpoint com vLLM ou rodar localmente com NeMo-Speech.cpp.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Sólido versus marketing",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Mais verificável: os rankings são em leaderboards públicos e de terceiros. O post cita 5,33% de WER médio (taxa de erro de palavras; menor é melhor) em inglês no Open ASR Leaderboard do Hugging Face, entre modelos abertos. Cita também 2,8% de AA-WER na Artificial Analysis, empatado em primeiro entre abertos.",
+        "Diarização: menor taxa de erro (18,26%) no ranking da David AI em 21 idiomas, por pouca margem sobre o modelo dedicado da própria NVIDIA (18,38%). A margem é pequena.",
+        "Cuidado: a redação é da NVIDIA. Frases como 'à frente de várias APIs proprietárias' dependem do gráfico escolhido. O destaque em inglês não prova qualidade em português.",
+        "Velocidade: 100 horas de áudio em menos de três minutos numa GPU RTX PRO 6000 Blackwell, mas com a versão NVFP4 ainda por lançar e clipes de 30 segundos com alta concorrência. Não é o que você verá num notebook.",
+        "Adaptação: num estudo de caso médico (fala de médicos indianos, em inglês), um prompt melhor reduziu o WER de 30,8% para 23,8%, e o fine-tuning chegou a 11,8%. É um caso só, mas mostra a progressão."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O post também lança o Granary v2, um conjunto de dados e um pipeline de curadoria: 463.062 horas em 48 idiomas, com transcrições em três formas (verbatim, com formatação e disfluências, e formatação limpa). O áudio-fonte deve ser baixado à parte, sob a licença original de cada corpus. Esses números descrevem o dataset, não tudo o que treinou o modelo.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Não verifiquei no pacote: se o português está entre os 40 idiomas, em quais tarefas ele vale (o post diz que o suporte varia por tarefa e que perguntas sobre áudio são treinadas em inglês), a licença exata e os requisitos de GPU. Tudo isso fica na model card.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Roteiro prático: um teste de uma tarde",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Detalhes de ferramentas e comandos podem mudar: confira a documentação oficial.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Por que vale o esforço? Uma API pronta de transcrição entrega texto. Aqui você tem pesos abertos: o áudio pode ficar na sua máquina ou na sua nuvem (relevante para LGPD, se houver dado de saúde ou de clientes), o formato sai por instrução e dá para fazer fine-tuning com seu vocabulário. Se você só precisa transcrever uma reunião de vez em quando, uma API resolve melhor. O diferencial aparece com jargão, privacidade ou volume.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Hora 1: leia a model card e prepare o conjunto de teste",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Abra a página do modelo no Hugging Face (busque pelo nome no site da NVIDIA) e confirme três coisas: português na matriz de tarefas por idioma, licença compatível com seu uso e requisitos de memória de GPU.",
+        "Se não tiver GPU, veja se há uma demo hospedada ou um serviço de GPU alugada por hora. Não precisa comprar nada para a primeira avaliação.",
+        "Separe de 5 a 10 áudios seus, de 1 a 5 minutos cada, com perfis variados: uma pessoa falando limpo, uma reunião com 2 ou 3 vozes, áudio com ruído de celular, e um com jargão do seu trabalho. Use apenas gravações que você pode processar (sem dado sensível de terceiros)."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Hora 2: crie a referência e rode o modelo",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Para medir erro de verdade, você precisa de uma transcrição de referência. Corrija à mão um trecho de uns 2 minutos de cada áudio, o que dá o 'gabarito'. Depois rode o modelo seguindo o exemplo de inferência da model card (o post cita vLLM como caminho de servir). Peça a mesma coisa em prompts diferentes e compare:",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Variações de prompt para testar. O formato foi inspirado nos exemplos do post (idioma, alfabeto, lista de termos 'só se o áudio sustentar'); a redação em português é nossa.",
+      "code": "Prompt A (básico):\nTranscreva esta gravação em português.\n\nPrompt B (formato):\nTranscreva em português do Brasil, alfabeto latino, com números e moedas na forma escrita convencional, sem hesitações como 'é...' e 'né'.\n\nPrompt C (vocabulário):\nTranscreva esta gravação em português. Termos possíveis: Kubernetes, LGPD, Pix. Use esses termos somente quando o áudio os sustentar.\n\nPrompt D (falantes):\nTranscreva e rotule cada falante.",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A frase 'use esses termos somente quando o áudio os sustentar' vem do exemplo do próprio post, e tem um motivo: listas de termos podem fazer o modelo inserir a palavra que você sugeriu mesmo quando ela não foi dita. Teste isso de propósito, com um áudio que não contém nenhum dos termos.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Hora 3: meça, compare e decida",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Calcule o WER dos trechos de referência. Peça a um agente de código (Claude Code ou Codex) um script pequeno que normalize minúsculas e pontuação e use uma biblioteca de WER; revise a normalização, pois ela muda o resultado.",
+        "Compare com a API que você já usa, no mesmo trecho e com a mesma normalização.",
+        "Para a diarização, não conte só o texto: confira manualmente as trocas de falante e os trechos de fala sobreposta. O post mesmo recomenda conferir nomes, trocas de falante e respostas contra a gravação.",
+        "Anote por categoria (limpo, ruidoso, jargão, reunião) onde o modelo ganha ou perde, e o custo de rodar (tempo e GPU)."
+      ],
+      "ordered": true,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Riscos reais: (1) alucinação, em que o modelo escreve algo que não foi dito, especialmente em silêncio ou ruído; o pipeline do Granary v2 tem checagem de alucinação, sinal de que o problema existe. (2) Dados pessoais: se rodar em serviço de terceiros, o áudio sai do seu controle. Prefira processamento local ou numa região que você escolhe, e anonimize antes. (3) Resumos e respostas feitas pelo modelo sobre a reunião precisam de conferência humana antes de virar ata.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "level": 3,
+      "text": "E o fine-tuning?",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Fine-tuning é continuar o treinamento do modelo com seus próprios pares de áudio e texto. Você não precisa disso na primeira tarde. A ordem sugerida pelo post é: primeiro prompt, depois adaptação. Só se o prompt não resolver os erros de domínio vale tentar o fluxo do NeMo Speech, que exige áudio com transcrição fiel ao formato desejado. É um projeto de dias, não de uma tarde.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Faça um teste A/B de uma tarde: 5 áudios seus, 4 variações de prompt, WER medido contra um gabarito corrigido à mão e comparação com a API que você usa hoje. Se o português não aparecer na model card, pare no passo 1: o ranking em inglês não vale para o seu caso.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: abra a model card, anote idiomas, licença e requisitos de GPU, e separe os cinco áudios. Só depois decida se vale alugar uma GPU.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_knowledge",
+  "edition_date": "2026-11-03",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-29T22:37:00Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "9c50a771-9c7f-4d00-abd7-1d21f984fac5",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique para um engenheiro de software que conhece LLMs de texto, mas é iniciante em áudio: o que é reconhecimento automático de fala (ASR), WER, diarização de falantes, quantização e fine-tuning de modelos de fala. Depois descreva como montar um teste de uma tarde para comparar um modelo aberto de transcrição com uma API comercial usando áudios em português do Brasil, incluindo como criar um gabarito, normalizar o texto antes de calcular o WER e quais armadilhas (alucinação, ruído, fala sobreposta, LGPD) avaliar."
+    }
+  ],
+  "read_minutes": 7,
+  "schema_version": "1.0.0",
+  "slug": "nemotron-3-5-transcribe-0037",
+  "sources": [
+    {
+      "accessed_at": "2026-10-29T22:29:20Z",
+      "language": "en",
+      "published_at": "2026-10-28T14:58:17Z",
+      "publisher": "Hugging Face",
+      "source_id": "s1",
+      "title": "NVIDIA Nemotron 3.5 Transcribe and Granary v2: Intelligent Multilingual Transcription You Can Prompt and Adapt",
+      "url": "https://huggingface.co/blog/nvidia/nemotron-transcribe-granary"
+    }
+  ],
+  "summary": "A NVIDIA abriu um modelo de transcrição que também separa falantes, traduz e responde perguntas sobre o áudio. Veja o que o post afirma, o que é marketing e um roteiro de uma tarde para testar com áudios seus em português.",
+  "tags": [
+    "theme:multimodal",
+    "theme:open-models",
+    "topic:fine-tuning",
+    "topic:inference",
+    "topic:benchmarks",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:hugging-face"
+  ],
+  "title": "Nemotron 3.5 Transcribe: transcrição que você pode promptar e adaptar"
+}

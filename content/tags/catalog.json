@@ -172,6 +172,11 @@
       "label": "Governança"
     },
     {
+      "key": "theme:hardware",
+      "kind": "theme",
+      "label": "Hardware e chips"
+    },
+    {
       "key": "theme:multimodal",
       "kind": "theme",
       "label": "Multimodalidade"

@@ -1,0 +1,231 @@
+{
+  "article_id": "b69b2159-eeb7-49c8-9cf7-e1021ee7231d",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2",
+        "s3",
+        "s4"
+      ],
+      "text": "Em outubro de 2026, dois textos patrocinados da MIT Technology Review defenderam a mesma tese: em IA corporativa, a vantagem está menos no modelo escolhido e mais no que se constrói ao redor dele. No mesmo período, a OpenAI anunciou ampliações de parceria com ServiceNow e Oracle, levando dados e fluxos dessas empresas para dentro do ChatGPT e do Codex. Depois deste artigo você terá um jeito de separar o que é sólido do que é marketing e uma lista de perguntas para avaliar o contexto da sua empresa antes de trocar de fornecedor.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1 — A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O primeiro texto, patrocinado pela Atlan, cita uma pesquisa da MIT Technology Review Insights. Todas as organizações consultadas usam IA, mas só 16% extraem valor transformador. Outros 40% veem ganhos moderados em tarefas ou times específicos, 21% veem ganhos significativos e 23% têm retorno mínimo ou nulo. Só 12% têm agentes de IA em produção. A cofundadora da Atlan, Prukalpa Sankar, atribui parte do problema à falta de uma camada de contexto: uma infraestrutura entre os sistemas de negócio e as plataformas de IA, que traduz o conhecimento da empresa em contexto governado e utilizável por agentes.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s4"
+      ],
+      "text": "O segundo texto, patrocinado pela EXL, fala em serving harness: o sistema de engenharia em volta do modelo, com arquitetura, gestão de memória, escalonamento e otimização de inferência. O argumento é que, em produção, importa entregar a inteligência de forma confiável, econômica e em escala. Por isso a troca de modelo deveria virar uma decisão de avaliação e configuração, não uma reconstrução da plataforma.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s2",
+        "s3"
+      ],
+      "text": "Os anúncios da OpenAI mostram o mesmo movimento do lado dos fornecedores. Com a ServiceNow, um plugin MCP (protocolo que conecta ferramentas externas a um assistente) já está no marketplace da OpenAI. Os clientes ligam o ChatGPT à sua própria instância e escolhem quais capacidades expor, e o Action Fabric aplica as regras de negócio e permissões já existentes. Com a Oracle, o plano é o Oracle AI Workspace, com acesso governado pelas permissões e aprovações de cada organização. Vários itens têm data futura: recursos de voz e segurança só devem chegar em 2027.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2",
+        "s3",
+        "s4"
+      ],
+      "text": "Fontes fracas para a tese central. Os textos da Atlan e da EXL são conteúdo patrocinado, escrito por empresas que vendem justamente a camada de contexto ou de engenharia. Os anúncios da OpenAI são comunicação do fornecedor. O único número de resultado (pesquisa de recrutamento da Oracle que caiu de dois a quatro dias para 15–20 minutos) é autodeclarado, sem método. Nada disso é evidência independente de que o entorno vale mais que o modelo.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "O que é sólido: a pesquisa mostra que poucas empresas têm agentes em produção, e as integrações listadas expressam um desenho concreto, no qual permissões existentes governam o que o agente pode fazer. O que é interpretação: que isso seja a principal fonte de vantagem. O que não sabemos: a metodologia da pesquisa e qualquer comparação controlada entre trocar de modelo e melhorar o contexto.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2 — O que você pode fazer com isso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Você já usa harness e skills no Claude Code e conhece RAG. Então a tese tem uma versão que você já sente no dia a dia: o mesmo modelo rende bem ou mal conforme o repositório, as instruções, os testes e as permissões que você deu a ele. Em empresa, o equivalente é: quais dados o agente enxerga, com que significado, sob quais permissões, e como você mede se acertou. Note que os dois textos usam palavras parecidas para coisas diferentes. Camada de contexto é sobre significado e governança dos dados. Serving harness é sobre infraestrutura de execução, como memória de GPU e latência. Só o segundo importa se você hospeda os modelos; se usa API, ele é quase todo problema do fornecedor.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Como argumentar com seu diretor sem exagerar",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Reconheça o limite: as fontes são patrocinadas e não provam a tese.",
+        "Proponha uma hipótese testável: com o mesmo conjunto de tarefas reais, mudar o contexto melhora mais o resultado do que mudar o modelo?",
+        "Peça um experimento pequeno em vez de uma decisão de arquitetura: duas ou três tarefas do seu negócio, rodadas com dois modelos e dois níveis de contexto.",
+        "Defina antes o que é sucesso: taxa de acerto, tempo, custo por tarefa e incidentes de permissão."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Experimento de 2x2 que você mesmo pode montar",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha 20 a 30 perguntas ou tarefas reais, por exemplo consultas de SQL sobre o seu banco, com a resposta correta conhecida. Rode quatro combinações: modelo A e modelo B, cada um com contexto mínimo (só o esquema cru) e com contexto enriquecido (descrições de colunas, definições de métricas como o que conta como cliente ativo, exemplos de consultas boas, regras de acesso). Um agente de código pode montar o script e a planilha de resultados. Compare. Se o contexto move o resultado mais que o modelo, a tese vale para você; se não, ela é marketing para o seu caso.",
+      "type": "paragraph"
+    },
+    {
+      "alt": "Tabela 2 por 2 comparando dois modelos e dois níveis de contexto",
+      "caption": "Desenho do experimento 2x2.",
+      "diagram_format": "text",
+      "diagram_spec": "Contexto mínimo | Contexto enriquecido\nModelo A:  acerto ?   | acerto ?\nModelo B:  acerto ?   | acerto ?\n\nLeitura: diferença na coluna (contexto) maior que na linha (modelo) = a camada ao redor pesa mais.",
+      "long_description": "Uma tabela com duas linhas, modelo A e modelo B, e duas colunas, contexto mínimo e contexto enriquecido. Cada célula recebe a taxa de acerto medida. Compara-se a diferença entre colunas com a diferença entre linhas.",
+      "source_ids": [],
+      "type": "diagram"
+    },
+    {
+      "level": 3,
+      "text": "Perguntas para avaliar se seu contexto está pronto",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Definições: as métricas e termos do negócio estão escritos em um lugar que o agente consegue ler, ou só na cabeça das pessoas?",
+        "Qualidade e origem: dá para saber de onde veio cada dado e se está atualizado?",
+        "Permissões: o agente herda as permissões do usuário que o chamou, ou usa uma conta de serviço ampla? Esse é o ponto que os anúncios de ServiceNow e Oracle destacam.",
+        "Ações: o que o agente pode escrever ou alterar, e o que exige aprovação humana?",
+        "Avaliação: existe um conjunto de testes seu, independente do fornecedor, que roda a cada mudança?",
+        "Rastreabilidade: dá para auditar quem pediu o quê, que contexto foi usado e que ação foi feita?",
+        "Portabilidade: se você trocar de modelo, o contexto, os testes e as integrações continuam funcionando, ou estão presos ao produto de um fornecedor?",
+        "Custo: você mede custo e latência por tarefa, não só qualidade?"
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Risco de segurança: dar a um agente acesso amplo a sistemas de negócio expõe a ataques de injeção de prompt, em que texto malicioso num ticket, e-mail ou documento instrui o agente a fazer algo indevido. A proteção básica é privilégio mínimo: o agente só executa ações que o usuário já poderia fazer, ações de escrita pedem confirmação, e as chamadas ficam registradas. Verifique na documentação oficial de cada produto como as permissões são aplicadas.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [
+        "s4"
+      ],
+      "text": "Antes de trocar de fornecedor, rode o teste 2x2 com suas próprias tarefas e responda às oito perguntas. Se o contexto, as permissões e os testes não estiverem prontos, trocar o modelo provavelmente não resolve. Se estiverem, aí sim a troca vira só uma decisão de avaliação e configuração.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "Primeiro passo desta semana: escreva 20 tarefas reais com a resposta esperada e rode-as no modelo que você já usa, primeiro sem contexto extra e depois com um arquivo de glossário e regras. Esse conjunto é o ativo que sobrevive a qualquer troca de fornecedor. Para acompanhar, observe se o plugin MCP da ServiceNow ganha as capacidades prometidas até o fim de 2026 e se alguém publica resultados medidos de forma independente.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-11-03",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-29T22:35:15Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "9c50a771-9c7f-4d00-abd7-1d21f984fac5",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em português a ideia de camada de contexto corporativo para agentes de IA (definições de métricas, catálogo de dados, permissões, governança) e a diferença para serving harness (infraestrutura de inferência, KV cache, escalonamento). Dê exemplos práticos, riscos como injeção de prompt e privilégio excessivo, e como montar um experimento 2x2 comparando modelos e níveis de contexto com tarefas reais de SQL."
+    },
+    {
+      "kind": "critic",
+      "label": "Criticar a tese",
+      "prompt": "Atue como cético. A tese é: em IA corporativa, a vantagem está mais na camada de contexto e na engenharia ao redor do modelo do que na escolha do modelo. Liste os melhores contra-argumentos, os vieses de fornecedores que patrocinam esse tipo de texto e que evidências independentes mudariam sua opinião."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "o-modelo-importa-0039",
+  "sources": [
+    {
+      "accessed_at": "2026-10-29T22:34:13Z",
+      "language": "en",
+      "published_at": "2026-10-28T20:32:02Z",
+      "publisher": "MIT Technology Review",
+      "source_id": "s1",
+      "title": "Creating AI value with enterprise context",
+      "url": "https://www.technologyreview.com/2026/10/28/1147709/creating-ai-value-with-enterprise-context"
+    },
+    {
+      "accessed_at": "2026-10-29T22:34:15Z",
+      "language": "en",
+      "published_at": "2026-10-28T13:15:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s2",
+      "title": "OpenAI and ServiceNow expand partnership across enterprise workflows",
+      "url": "https://openai.com/index/openai-servicenow-partnership-expansion"
+    },
+    {
+      "accessed_at": "2026-10-29T22:34:16Z",
+      "language": "en",
+      "published_at": "2026-10-27T07:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s3",
+      "title": "OpenAI expands partnership with Oracle to bring its apps to ChatGPT",
+      "url": "https://openai.com/index/oracle-apps-in-chatgpt"
+    },
+    {
+      "accessed_at": "2026-10-29T22:34:17Z",
+      "language": "en",
+      "published_at": "2026-10-22T21:17:29Z",
+      "publisher": "MIT Technology Review",
+      "source_id": "s4",
+      "title": "Designing an AI serving harness built to last",
+      "url": "https://www.technologyreview.com/2026/10/22/1146109/designing-an-ai-serving-harness-built-to-last"
+    }
+  ],
+  "summary": "Textos patrocinados da MIT TR e anúncios de OpenAI com ServiceNow e Oracle dizem que a vantagem está na camada ao redor do modelo. Veja o que é sólido, o que é marketing e uma lista de perguntas para avaliar seu contexto.",
+  "tags": [
+    "topic:context-engineering",
+    "theme:strategy",
+    "theme:governance",
+    "theme:roi",
+    "topic:mcp",
+    "topic:agents",
+    "reason:career-utility",
+    "source:mit-technology-review",
+    "source:openai"
+  ],
+  "title": "O modelo importa menos que o entorno? Como testar essa tese antes de trocar de fornecedor"
+}
