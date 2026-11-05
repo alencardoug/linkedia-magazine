@@ -264,7 +264,7 @@ describe('static build', () => {
     expect(editions).toMatch(/<h2 id="especiais"[^>]*>Conteúdos especiais<\/h2>[\s\S]*<h2 id="por-data"[^>]*>Edições diárias<\/h2>/);
     const special = read(out, 'especiais/governanca-de-ia.html');
     expect(special).toContain('data-article="especial-governanca-de-ia"');
-    expect(special).toContain('<title>Governança de IA: como implementar em ambientes corporativos');
+    expect(special).toContain('<title>Guia Governança de IA: como implementar em ambientes corporativos');
     expect(special).toContain('data-ai-note');
     expect(special.match(/<h1[\s>]/g)).toHaveLength(1);
     // Every in-page link lands on an id of the page; every outside link opens without referrer or opener.

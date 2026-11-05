@@ -17,7 +17,7 @@ export interface Special {
 export const SPECIALS: readonly Special[] = [
   {
     slug: 'governanca-de-ia',
-    title: 'Governança de IA: como implementar em ambientes corporativos — da estratégia ao software de IA',
+    title: 'Guia Governança de IA: como implementar em ambientes corporativos — da estratégia ao software de IA',
     summary:
       'Guia prático para ligar políticas, riscos e decisões da empresa aos controles, testes e evidências da engenharia.',
     date: '2026-10-23',
@@ -25,7 +25,7 @@ export const SPECIALS: readonly Special[] = [
   },
   {
     slug: 'dez-layouts-governanca-de-ia',
-    title: 'Dez layouts para o guia de Governança de IA',
+    title: 'Dez layouts para as Guias da revista',
     summary:
       'As dez direções de arte desenhadas para a primeira tela do guia, cada uma no computador e no celular.',
     date: '2026-10-25',
