@@ -1,0 +1,201 @@
+{
+  "article_id": "bf641665-5c40-4c52-8ee8-8864a4a2bc37",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Em 27 e 28 de outubro de 2026, a OpenAI publicou dois estudos de caso: Retell, plataforma de agentes de voz para call centers, e Legora, plataforma de IA para trabalho jurídico. Ambos usam números de eficiência para sustentar a ideia de que equipes pequenas, com agentes, rendem mais. Depois de ler, você terá um vocabulário e um roteiro de 30 minutos para desenhar uma equipe com agentes: que tarefas vão para quem e quem responde pelo resultado.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1: o que foi publicado",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "Retell diz atender mais de 4.000 empresas, com volume mensal de chamadas que saiu de 30 milhões no início de 2026 para mais de 100 milhões em setembro. Afirma resolução acima de 80% e receita anual recorrente (run rate) de US$ 1,6 milhão por funcionário. Segundo o texto, a equipe de engenharia continua contratando, mas não precisou crescer no ritmo do negócio. Os engenheiros usam o Codex para pesquisar código desconhecido, implementar e depurar, e o GPT-6 Astra para testar interfaces: ele abre a tela de um pull request, clica, tenta quebrar fluxos e reporta problemas.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Legora relata que sua própria equipe jurídica gastava cerca de 20% da capacidade revisando NDAs (acordos de confidencialidade) e hoje gasta menos de 1%, com um playbook que faz a primeira passada e destaca termos fora do aceitável. Para um cliente Fortune 100, cita 90% de redução no tempo de contratos, mais de US$ 20 milhões economizados em litígio e diligência externos e 9,5 horas devolvidas por advogado por semana. Em due diligence de M&A, agentes revisam contratos e advogados revisam e interpretam o resultado.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O que é sólido e o que é marketing",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Descrição de arquitetura: o desenho de Retell é concreto. Um harness (a camada de código que cerca o modelo) controla áudio, turnos e interrupções; o modelo gera respostas e pede chamadas de ferramentas; quando precisa de julgamento humano, o agente passa um resumo ao atendente e confirma que ele está pronto antes de transferir. É informação útil e plausível.",
+        "Métricas de clientes citadas: a Anker reporta 80,4% de resolução e NPS 63; a Pine Park Health, tempo equivalente a 2,1 funções em tempo integral. São relatos de clientes, mas publicados pelo fornecedor e pela OpenAI.",
+        "Benchmark próprio: o vCX é de Retell, que também vende o produto. Ele coloca o GPT-6 Astra em primeiro em seguimento de instruções (89,7%), mas não é avaliação independente.",
+        "US$ 1,6 mi por funcionário: é receita anualizada, não lucro. O texto não diz como o headcount é contado (terceirizados, contratados, tempo parcial). Não há validação independente."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s2"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Todas as fontes do pacote são da OpenAI. A tese de desenho organizacional que o título atribui à OpenAI (e o texto citado como S7) não está no material que recebi, então não a descrevo aqui. Os termos abaixo, em especial abaixo, ao lado e entre, são um enquadramento nosso para organizar a discussão, não uma citação da OpenAI.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2: o que você pode fazer com isso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "level": 3,
+      "text": "Um vocabulário de três posições",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Abaixo: o agente executa e a pessoa supervisiona. Exemplo: o playbook de NDA faz a primeira passada, e o advogado revisa as exceções. Você faz isso com Claude Code ou Codex quando revisa o diff.",
+        "Ao lado: agente e pessoa trabalham em paralelo na mesma tarefa, em ciclos curtos. Exemplo: engenheiro e Codex explorando um código desconhecido.",
+        "Entre: o agente fica na fronteira entre sistemas ou entre pessoas e faz a passagem de bastão. Exemplo: o agente de voz que prepara o atendente antes da transferência. Aqui o risco está na qualidade do resumo e na regra de quando escalar."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de 30 minutos: mapa de tarefas",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Escolha um fluxo seu (por exemplo, triagem de issues dos seus projetos ou revisão de PRs) e liste de 8 a 12 tarefas. Para cada uma, responda quatro perguntas: quem executa, quem verifica, quem responde se der errado e como você saberia que deu errado. Se a resposta da terceira for o agente, algo está errado: um agente não responde, uma pessoa responde. Peça ao seu agente de código para gerar o rascunho em arquivo e depois corrija à mão.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Modelo de mapa de tarefas; os exemplos são ilustrativos, inspirados nos casos.",
+      "code": "- tarefa: primeira passada em NDAs\n  posicao: abaixo\n  executa: agente\n  verifica: advogado (amostra + todas as exceções)\n  responde: advogado responsavel\n  sinal_de_erro: reversoes na revisao, clausulas perdidas\n- tarefa: transferir chamada para humano\n  posicao: entre\n  executa: agente (resumo de contexto)\n  verifica: atendente confirma antes de aceitar\n  responde: lider da operacao\n  sinal_de_erro: cliente repete informacao ao atendente",
+      "language": "yaml",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Como ler uma métrica como receita por funcionário",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Pergunte o numerador: receita recorrente anualizada não é receita realizada nem margem.",
+        "Pergunte o denominador: quem entra na contagem de funcionários?",
+        "Procure a causa: crescimento por produto, preço, mercado ou por agentes? O texto atribui parte ao Codex, mas não isola o efeito.",
+        "Procure o viés de seleção: casos publicados por fornecedores mostram quem deu certo.",
+        "Peça métrica de qualidade junto: resolução, retrabalho, reclamações. Velocidade sem isso pode esconder custo."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Dá para reproduzir?",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Os números de Retell e Legora, não: dependem de dados, volume e clientes deles. O método, sim, em escala pequena. Meça seu tempo atual numa tarefa repetitiva, escreva um playbook com critérios explícitos, deixe o agente fazer a primeira passada, revise 100% no início e meça o que você corrigiu. Isso replica a lógica do caso de NDA e gera seu próprio número. Legora também recomenda embutir avaliação, testes e transparência desde o começo.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Antes de falar em quantas pessoas a IA substitui, defina para cada tarefa a posição do agente (abaixo, ao lado ou entre), quem verifica e quem responde. Depois exija do fornecedor a métrica de qualidade junto da de produtividade.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Faça o mapa de tarefas de um fluxo real e marque, em cada linha, o sinal de erro. As linhas sem sinal de erro são seu risco: ali o agente pode estar errando sem ninguém perceber.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-11-05",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-29T22:34:13Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "9c50a771-9c7f-4d00-abd7-1d21f984fac5",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique como desenhar equipes que combinam pessoas e agentes de IA: quais tarefas delegar a agentes, quais manter com pessoas, como definir quem verifica e quem responde pelo resultado. Cubra os conceitos de supervisão, trabalho em paralelo e transferência (handoff) entre agente e humano, e como avaliar criticamente métricas como receita por funcionário em casos publicados por fornecedores. Dê exemplos de call center e de revisão de contratos, e um exercício prático para eu aplicar a um fluxo de engenharia de software."
+    },
+    {
+      "kind": "critic",
+      "label": "Criticar o caso do fornecedor",
+      "prompt": "Atue como cético. Dado um estudo de caso de fornecedor de IA que afirma US$ 1,6 milhão de receita anual recorrente por funcionário e 80% de resolução em atendimento, liste vieses, o que falta para validar de forma independente, perguntas a fazer ao fornecedor e experimentos pequenos que um time poderia rodar para checar se o resultado se reproduz."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "onde-a-ia-0042",
+  "sources": [
+    {
+      "accessed_at": "2026-10-29T22:33:21Z",
+      "language": "en",
+      "published_at": "2026-10-28T09:30:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s1",
+      "title": "Legora is building the agentic operating system for legal work",
+      "url": "https://openai.com/index/legora"
+    },
+    {
+      "accessed_at": "2026-10-29T22:33:23Z",
+      "language": "en",
+      "published_at": "2026-10-27T15:00:00Z",
+      "publisher": "OpenAI",
+      "source_id": "s2",
+      "title": "Retell uses OpenAI models to help power 100M monthly calls",
+      "url": "https://openai.com/index/retell-ai"
+    }
+  ],
+  "summary": "Dois casos publicados pela OpenAI (Retell e Legora) mostram agentes redesenhando equipes. Separamos o que é dado do fornecedor do que é argumento, e damos um mapa de tarefas para discutir quem faz o quê e quem responde pelo resultado.",
+  "tags": [
+    "theme:operating-model",
+    "topic:agents",
+    "theme:roi",
+    "theme:talent",
+    "topic:coding-agents",
+    "reason:career-utility",
+    "source:openai"
+  ],
+  "title": "Onde a IA entra no organograma: abaixo, ao lado e entre as pessoas"
+}

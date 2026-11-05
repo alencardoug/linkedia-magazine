@@ -1,0 +1,209 @@
+{
+  "article_id": "f5e399c5-45e6-48f6-a40e-9a3e4513b8e4",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Resumo: o Google publicou um post sobre como acelerar interfaces geradas por agentes (generative UI). Em vez de o modelo escrever JSON verboso, ele escreve uma sintaxe compacta, o A2UI Express, e um compilador converte isso em JSON. Depois de ler, você terá um método para testar a mesma ideia nas saídas estruturadas dos seus agentes.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que mudou no A2UI",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "A2UI é um protocolo para UI generativa. O cliente anuncia um catálogo de componentes confiáveis, que funciona como contrato. O agente envia mensagens descrevendo uma tela montada com esse catálogo, e o renderizador do cliente a desenha.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Até agora o agente gerava diretamente as mensagens JSON de transporte. Segundo o Google, gerar árvores JSON restritas por um esquema complexo é lento e propenso a erros para LLMs. A novidade são os formatos de inferência intercambiáveis (inference_format): o formato que o modelo escreve. O SDK gera as instruções de prompt para esse formato e compila a resposta do modelo em mensagens A2UI validadas.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O Express vira o formato padrão. Cada linha atribui um componente a uma variável (o nome vira o ID), os argumentos são posicionais, na ordem declarada pelo esquema do catálogo, e o símbolo _ pula um argumento. Há SDKs em Python, TypeScript e Dart.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Trecho adaptado do exemplo do post: um componente por linha, argumentos posicionais.",
+      "code": "surface(\"gallery-notification-permission\")\n$/title=\"Enable notification\"\nroot=Card(main_column)\nmain_column=Column([icon, title, actions], _, \"center\")\ntitle=Text($/title)\nyes_btn_text=Text(\"Yes\")\nyes_btn=Button(yes_btn_text, _, Event(\"accept\", {}))",
+      "language": "text",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Números e o que vale confiar",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Alegações do Google: até 3x menos tokens que JSON direto; latência até 3x menor com Express; até 80x com um modelo de decisão chamado Jev.",
+        "Avaliação: 51 tarefas no gemini-3.5-flash, com raciocínio (thinking) ligado e desligado. O Google diz que o Express funciona igualmente bem com thinking desligado.",
+        "Modelo de decisão: Jev, da TypeSafe, responde perguntas tipadas com probabilidades calibradas em cerca de 100 a 300 ms. No projeto de exemplo Apparite, a árvore de componentes apareceu em 92 a 298 ms e a tela completa levou 0,8 a 1,7 s, em 11 prompts. O próprio projeto chama isso de primeira olhada, por ser amostra pequena."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Todos os números vêm do próprio fornecedor, sem verificação independente. Os detalhes dos quatro formatos comparados e da métrica de acerto não estão no trecho disponível, e o Jev não tem detalhes suficientes para reproduzir. O Express e o SDK, ao contrário, são instaláveis e testáveis.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Limites declarados: o Python e o TypeScript fazem streaming de JSON direto pedaço a pedaço, mas compilam o Express só com a resposta completa. Os SDKs ainda não incluem um formato para modelo de decisão. Controlled generation só produz layouts que a gramática descreve; a do Apparite cobre nove arquétipos de tela e doze blocos.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: aplicando a ideia nas suas saídas estruturadas",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "A ideia central é separar o que o modelo escreve do que o sistema consome. O modelo emite um formato barato e fácil de acertar. Um compilador determinístico (código comum, sem LLM) converte e valida. Você já faz algo parecido ao pedir ao modelo um YAML ou uma lista simples em vez de JSON aninhado.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Por que um formato compacto tende a ajudar",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Menos tokens de pontuação: chaves, aspas e nomes de campo repetidos consomem tokens e tempo de geração, que cresce com o tamanho da saída.",
+        "Menos pontos de falha: uma chave esquecida quebra um JSON inteiro; em linhas independentes, o erro fica localizado.",
+        "Validação fora do modelo: o compilador rejeita o que não existe no esquema, e você pode devolver o erro ao modelo para corrigir.",
+        "Custo: o modelo precisa aprender o formato por instruções e exemplos, o que aumenta o prompt. Compensa mais quando a saída é grande ou repetida."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Experimento de uma tarde com seu agente de código",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha uma saída estruturada sua, por exemplo uma lista de itens com campos fixos (plano de tarefas, resultado de revisão).",
+        "Defina um formato de uma linha por item, como tipo|campo1|campo2, e escreva um parser curto que gere o JSON final e rejeite linhas inválidas. Peça isso ao Claude Code ou ao Codex.",
+        "Crie 20 a 50 entradas de teste e rode as duas versões (JSON direto e formato compacto) no mesmo modelo.",
+        "Meça tokens de saída, tempo total, taxa de saída válida e acerto de conteúdo. Repita com raciocínio ligado e desligado, se o modelo permitir.",
+        "Decida pelos seus números. Se a diferença for pequena ou a taxa de acerto cair, fique com o JSON, possivelmente com saída estruturada nativa do provedor."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Não adote formato compacto por fé no 3x do fornecedor. Meça em suas tarefas: tokens, latência e taxa de saída válida, comparando com JSON direto. O ganho só importa se a precisão não cair.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Riscos e controle",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Um catálogo fechado de componentes é um controle útil: o modelo só pode pedir o que você permitiu, o que reduz o risco de ele gerar UI arbitrária. O post também descreve macros, em que o modelo escreve só um ID (como OrderStatus(\"ord_42\")) e o seu código busca os dados reais, para que os valores na tela venham dos seus sistemas e não do modelo. O padrão se generaliza: deixe o modelo escolher referências e deixe o código preencher dados sensíveis. Ainda assim, trate a saída do modelo como entrada não confiável e valide no compilador.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Se quiser testar o A2UI em si, o post indica instalar o SDK Python com pip install a2ui-agent-sdk ou o de TypeScript com npm install @a2ui/agent, usar ExpressFormatFactory() ao criar o gerador e rodar o modelo com thinking desligado. Confira a documentação oficial, pois o SDK Dart está em versão inicial.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Pegue uma saída JSON que seu agente gera com frequência, meça quantos tokens são só estrutura e implemente o experimento acima em uma tarde. Se o ganho aparecer nos seus números, você terá um padrão reaproveitável.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-11-05",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-29T22:32:53Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "9c50a771-9c7f-4d00-abd7-1d21f984fac5",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique o A2UI (protocolo de UI generativa do Google) e o conceito de formato de inferência intercambiável, como o A2UI Express (sintaxe compacta estilo Python compilada em JSON). Cubra: por que JSON direto é lento e propenso a erro para LLMs, o papel do compilador determinístico, catálogos de componentes, macros e a diferença para modelos de decisão. Sugira como medir tokens, latência e taxa de saída válida ao comparar formatos nas minhas próprias saídas estruturadas. Nível: uso LLMs, RAG e agentes de código, mas não opero agentes em produção."
+    },
+    {
+      "kind": "lab",
+      "label": "Laboratório: JSON vs formato compacto",
+      "prompt": "Me guie em um experimento prático de uma tarde: escolher uma saída estruturada de um agente, criar um formato compacto de uma linha por item com um parser que gera JSON e rejeita linhas inválidas, montar 30 casos de teste e comparar com JSON direto em tokens de saída, latência e taxa de validade. Inclua uma planilha de resultados e critérios de decisão."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "a2ui-express-menos-0040",
+  "sources": [
+    {
+      "accessed_at": "2026-10-29T22:32:04Z",
+      "language": "en",
+      "publisher": "Google Developers Blog",
+      "source_id": "s1",
+      "title": "Fast, reliable A2UI, with swappable inference formats",
+      "url": "https://developers.googleblog.com/fast-reliable-a2ui"
+    }
+  ],
+  "summary": "O Google lançou formatos de inferência intercambiáveis no A2UI. O Express usa sintaxe compacta, parecida com Python, e é compilado por código determinístico. A ideia vale para qualquer saída estruturada do seu agente.",
+  "tags": [
+    "topic:token-efficiency",
+    "topic:agents",
+    "topic:inference",
+    "topic:context-engineering",
+    "topic:gcp",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:google-developers"
+  ],
+  "title": "A2UI Express: menos tokens e latência ao gerar interfaces com agentes"
+}

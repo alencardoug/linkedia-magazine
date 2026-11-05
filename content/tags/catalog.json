@@ -82,6 +82,11 @@
       "label": "AI as Normal Technology"
     },
     {
+      "key": "source:chinai",
+      "kind": "source",
+      "label": "ChinAI Newsletter"
+    },
+    {
       "key": "source:cset",
       "kind": "source",
       "label": "CSET Georgetown"
@@ -220,6 +225,11 @@
       "key": "theme:strategy",
       "kind": "theme",
       "label": "Estratégia"
+    },
+    {
+      "key": "theme:talent",
+      "kind": "theme",
+      "label": "Talentos e equipes"
     },
     {
       "key": "topic:agent-evaluation",

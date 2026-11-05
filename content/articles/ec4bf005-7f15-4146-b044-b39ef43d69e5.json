@@ -1,0 +1,189 @@
+{
+  "article_id": "ec4bf005-7f15-4146-b044-b39ef43d69e5",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Microdramas são séries verticais de episódios curtos, feitos para o celular. Na China, viraram campo de batalha entre Tencent e ByteDance, e a IA está no centro. Este texto separa o que as fontes sustentam do que é ruído e termina com um experimento pequeno que você pode fazer para entender o formato.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que aconteceu",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Segundo o South China Morning Post, o novo mini-app de vídeos curtos da Tencent está ganhando usuários rapidamente com microdramas gratuitos, o que preocupa executivos da ByteDance. O jornal cita uma espectadora, banqueira em Guangdong, que diz assistir por dias inteiros e que o apelo está na aparência dos personagens, que a IA teria deixado 'deslumbrantes'. É um relato anedótico, não um dado de mercado.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O trecho disponível do SCMP é curto: não traz números de mercado, receita ou usuários da Tencent. Não dá para afirmar o tamanho real da disputa apenas com ele.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "O número viral de 55% e sua contestação",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "A newsletter ChinAI #379 conta que circulou na web chinesa a ideia de que mais da metade do poder computacional do país serve para 'TV lixo'. A origem foi uma fala da empresa COL Group a investidores, em junho, citando pesquisa setorial: vídeos curtos dramatizados e geração de vídeo por IA seriam 55% de todo o consumo de tokens na China. Token é a unidade em que um modelo mede o texto, a imagem ou o vídeo que processa.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "A resposta veio de dois lados. A ByteDance, pelo responsável de relações públicas do app Doubao, questionou o número e disse que só cerca de 10% da capacidade computacional total da empresa vai para treino e inferência de modelos de vídeo. Já um comentário da revista Banyuetan, ligada à agência Xinhua, lembrou que consumo de tokens não equivale a consumo de computação: o custo real por token varia muito entre modelos, e as comparações China x EUA diferem em escopo, tipos de modelo e amostra.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "Um dado de contexto, vindo da mesma fonte: o app Hongguo, de microdramas da ByteDance, é a principal plataforma do formato na China, e seus usuários ativos diários superam a soma das quatro grandes plataformas de vídeo longo (Tencent Video, iQIYI, Youku e Mango TV). Isso é afirmação reproduzida pela newsletter, sem número no trecho.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "Fatos: a disputa existe e o número de 55% foi contestado. Interpretação do autor da newsletter: o meme reflete ansiedade nacional sobre usar IA 'do jeito certo'. Incerto: a participação real de vídeo de IA na computação chinesa; nem o 55% nem o 10% foram verificados de forma independente nas fontes.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Valor prático: como pensar e testar isso no seu trabalho",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Lição 1, sobre leitura de números: quando alguém diz 'X% dos tokens', pergunte o que foi medido. Tokens de saída de vídeo, de texto e de imagem não têm o mesmo custo de computação. Uma métrica de uso (tokens) não é métrica de custo (GPU-hora) nem de valor (receita). Você já avalia LLMs; use esse mesmo cuidado com estatísticas de fornecedor ou de relatório de investidor.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Lição 2, sobre o formato: microdrama é um pipeline de produção repetível. Roteiro curto, personagens consistentes, cenas geradas, legenda, corte vertical e um gancho no fim de cada episódio. A parte onde IA ajuda mais é a consistência visual e o volume; a parte difícil continua sendo roteiro e retenção.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Exercício de até 3 horas: protótipo de roteiro em série",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha um produto fictício ou um projeto pessoal e defina um personagem e um conflito em duas frases.",
+        "Peça a um LLM que gere 5 episódios de 30 a 45 segundos, cada um terminando em gancho, em formato de tabela: cena, fala, descrição visual, duração.",
+        "Escreva uma ficha fixa do personagem (aparência, roupa, cenário) e cole em todo prompt de imagem ou vídeo, para testar consistência.",
+        "Se quiser ir além do texto, teste um gerador de imagem ou vídeo com plano gratuito, se existir hoje na ferramenta que escolher; confira limites e termos na documentação oficial.",
+        "Meça: em quantos episódios a aparência do personagem deriva? Quanto tempo humano de revisão cada episódio exigiu?"
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "O diferencial do exercício não é o resultado final, e sim medir o custo de consistência e revisão. Com ele você consegue responder, com dados seus, se o formato serve para marketing de um produto real.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Riscos e controles",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Direito de imagem e deepfake: não use rosto de pessoa real sem autorização; isso evita uso indevido de identidade e problemas legais.",
+        "LGPD: não coloque dados pessoais de clientes em prompts de ferramentas de terceiros sem base legal e contrato adequado.",
+        "Transparência: rotule conteúdo gerado por IA em publicidade; verifique regras de plataformas e a regulação vigente.",
+        "Qualidade: conteúdo em massa de baixa qualidade ('slop') pode desgastar marca; defina uma revisão humana antes de publicar."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Desconfie de percentuais de 'tokens' sem definição de escopo, e teste o formato microdrama em pequeno: 5 episódios, uma ficha de personagem fixa e a medição de quanto tempo de revisão humana cada um exige.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: faça o roteiro dos 5 episódios e anote onde o personagem muda de um episódio para o outro. Para acompanhar, observe se o SCMP ou outras fontes trazem números de usuários e receita da disputa Tencent x ByteDance, que ainda faltam no material disponível.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_knowledge",
+  "edition_date": "2026-11-05",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-10-29T22:37:24Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "9c50a771-9c7f-4d00-abd7-1d21f984fac5",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique o fenômeno dos microdramas (séries verticais curtas) na China e a disputa entre Tencent e ByteDance, incluindo o app Hongguo. Explique o que é token, por que consumo de tokens não equivale a consumo de computação e como avaliar criticamente estatísticas como '55% dos tokens da China vão para vídeo de IA'. Depois sugira como profissionais de marketing no Brasil poderiam testar o formato com IA, considerando LGPD e direito de imagem."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "microdramas-com-ia-0041",
+  "sources": [
+    {
+      "accessed_at": "2026-10-29T22:37:00Z",
+      "language": "en",
+      "published_at": "2026-10-29T02:00:06Z",
+      "publisher": "South China Morning Post",
+      "source_id": "s1",
+      "title": "China’s microdrama war heats up as Tencent, ByteDance fight for eyeballs",
+      "url": "https://www.scmp.com/tech/big-tech/article/3372463/chinas-microdrama-war-heats-tencent-bytedance-fight-eyeballs"
+    },
+    {
+      "accessed_at": "2026-10-29T22:37:01Z",
+      "language": "en",
+      "published_at": "2026-10-26T11:06:35Z",
+      "publisher": "ChinAI Newsletter",
+      "source_id": "s2",
+      "title": "ChinAI #379: “Chinese AI only makes trash TV?”",
+      "url": "https://chinai.substack.com/p/chinai-379-chinese-ai-can-only-make"
+    }
+  ],
+  "summary": "Tencent e ByteDance brigam por atenção com microdramas, e um número viral diz que 55% dos tokens da China vão para vídeo de IA. Veja o que é sólido, o que foi contestado e como testar a ideia em marketing.",
+  "tags": [
+    "region:china",
+    "theme:multimodal",
+    "theme:strategy",
+    "theme:society",
+    "reason:novelty",
+    "source:scmp",
+    "source:chinai"
+  ],
+  "title": "Microdramas com IA na China: a disputa Tencent x ByteDance e o que o \"55%\" não prova"
+}
