@@ -1,0 +1,199 @@
+{
+  "article_id": "6a3a56ce-86cb-48f8-a7c3-70dfa0b0f2a5",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O Allen AI publicou o StateBench, um benchmark para medir o rastreamento de estado em contexto longo: quão bem um modelo de linguagem acompanha o que acontece com entidades (variáveis, personagens, objetos) quando elas mudam ao longo de um documento. Depois deste texto, você terá um roteiro para montar um mini-teste parecido com seus próprios logs, contratos ou diffs, e assim auditar agentes que leem muito contexto.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Parte 1 — A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O StateBench tem quatro níveis de dificuldade, que o blog explica como tipos de atribuição de variável. R-trivial: valor imutável, só se recupera o primeiro (let x = 4). Aperiódico: reatribuição por valor, vale o último (x = 4, depois x = 2). Solúvel: atualização autorreferente, como x = x + 5, em que é preciso carregar a mudança adiante. Geral finito: atribuição por referência, como x = y ou trocar duas variáveis, o que cria dependências entre atualizações. O exemplo clássico é o copo com a bolinha, com trocas repetidas entre cinco copos.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Para comparar os níveis com justiça, os autores partem de uma sequência geral e derivam três versões mais fáceis. Todas têm o mesmo número de variáveis e valores distintos, com atribuições nos mesmos pontos; muda só o tipo de atribuição.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "O que eles encontraram",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Quatro modelos de ponta (Gemini 3.8 Flash, Claude Opus 5.5, GPT-6 Sol e Luna) foram bem em r-trivial e aperiódico, mas, em solúvel e geral finito, a acurácia caiu forte com o aumento da entrada, chegando a 13% ou menos nos problemas gerais mais longos.",
+        "Entre modelos abertos pré-treinados (Olmo 3, um transformer, e Olmo Hybrid, com camadas Gated DeltaNet, além de menores), quase todos foram bem no r-trivial, perderam acurácia no aperiódico com a entrada maior e ficaram no acaso no geral finito.",
+        "O formato importa: modelos pequenos quase no teto em problemas r-trivial no estilo RULER ficaram perto do acaso nos mesmos problemas apresentados como edições de planilha.",
+        "Treinados diretamente no benchmark (modelos de 275 milhões de parâmetros, treino até 256 atribuições, teste até 64 mil), Gated DeltaNet e híbridos generalizaram quase perfeitamente nos três primeiros níveis. Transformers degradaram e nunca aprenderam o nível geral."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Os autores sugerem, como fator provável, a sensibilidade: nos níveis difíceis, muito mais passos afetam a resposta final, então perder uma atualização já estraga o resultado. Eles mesmos listam limites: o benchmark assume número fixo de variáveis, enquanto tarefas reais introduzem entidades novas, e a posição exata de certas variantes de Gated DeltaNet na hierarquia segue em aberto.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Só li o texto do blog. Não vi o relatório técnico, os dados nem o código, então detalhes de método (prompts, número de amostras, intervalos de confiança) e os números por comprimento não foram verificados. Os nomes dos modelos e os resultados são os que o blog informa.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Parte 2 — O que você pode fazer com isso",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "A ideia central é transferível: o que importa não é o tamanho do contexto, e sim o tipo de operação que o modelo precisa fazer sobre ele. Procurar o último valor é diferente de acumular e de seguir referências. Muitas tarefas de agentes se encaixam nesses tipos: saldo de uma conta em extratos (acumulação), status atual de um ticket (último valor), quem é o responsável depois de várias reatribuições entre pessoas (referência).",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Mini-teste em quatro passos",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Gere dados sintéticos com um script (peça ao seu agente de código). Crie N variáveis e uma sequência de operações, e calcule a resposta correta com um interpretador simples. Gabarito automático evita depender de juiz LLM.",
+        "Faça quatro versões com as mesmas variáveis e posições, mudando só o tipo de operação: valor fixo, reatribuição (x = 2), acumulação (x = x + 5) e cópia/troca (x = y). É o controle que o StateBench usa; assim você isola o que quebra.",
+        "Varie o comprimento (por exemplo 50, 200, 1000 operações) e o formato: linhas de código, log de aplicação, cláusulas de aditivo contratual, edições de planilha. Como o blog mostra, o formato sozinho pode mudar muito o resultado.",
+        "Peça o valor final de todas as variáveis, em JSON, e pontue por variável e por exemplo. Rode várias vezes e registre acurácia, tokens e custo por nível e comprimento."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Esqueleto de gerador: mesmas variáveis, tipo de operação diferente. Ilustrativo, não testado.",
+      "code": "import random\n\ndef gerar(n_ops, vars_, modo, seed=0):\n    rnd = random.Random(seed)\n    estado = {v: i for i, v in enumerate(vars_)}\n    linhas = [f\"{v} = {estado[v]}\" for v in vars_]\n    for _ in range(n_ops):\n        a, b = rnd.sample(vars_, 2)\n        if modo == 'reatribuir':\n            k = rnd.randint(0, 9)\n            linhas.append(f\"{a} = {k}\")\n            estado[a] = k\n        elif modo == 'acumular':\n            k = rnd.randint(1, 5)\n            linhas.append(f\"{a} = {a} + {k}\")\n            estado[a] += k\n        elif modo == 'referencia':\n            linhas.append(f\"{a} = {b}\")\n            estado[a] = estado[b]\n    return \"\\n\".join(linhas), estado",
+      "language": "python",
+      "type": "code"
+    },
+    {
+      "source_ids": [],
+      "text": "Na versão com referência, o estado de uma variável depende do valor que a outra tinha naquele instante, que é justamente o que o blog descreve como o nível mais difícil. Troque o formato (por exemplo, narrar em frases: 'o contrato foi transferido da empresa A para a B') para checar se a queda vem do conceito ou da apresentação.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Como ler os resultados e decidir",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Se o modelo cai só no nível de referência, evite entregar a ele cadeias longas de dependências em uma passada. Alternativas: pedir que ele escreva o estado intermediário passo a passo ou, melhor, delegar o cálculo a código ou SQL que o agente executa.",
+        "Se a queda começa já na acumulação, trate qualquer saldo ou contagem derivada de um texto longo como suspeita e recalcule fora do modelo.",
+        "Se tudo passa até seu comprimento real de uso, ótimo: você tem um número para defender essa escolha e um teste de regressão ao trocar de modelo.",
+        "Compare modelos com a mesma bateria e registre o custo por acerto."
+      ],
+      "ordered": false,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O risco prático é a falha silenciosa: o modelo responde com confiança um estado desatualizado ou errado. Em contratos, financeiro ou logs de incidente, valide os valores finais contra uma fonte estruturada sempre que possível. Não extrapole os resultados do blog para o seu caso: os problemas são sintéticos, com número fixo de variáveis.",
+      "type": "callout",
+      "variant": "warning"
+    },
+    {
+      "source_ids": [],
+      "text": "Teste seu agente por tipo de operação, não só por tamanho de contexto: último valor, acumulação e referência falham de formas diferentes. Gere dados sintéticos com gabarito automático, varie comprimento e formato, e mova para código as contas que o modelo não sustenta.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "level": 3,
+      "text": "Primeiro passo desta semana",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Peça ao seu agente de código um gerador como o acima e rode os quatro modos em dois comprimentos com o modelo que você mais usa. Em cerca de uma hora você terá uma tabela de acurácia por nível. Depois, leia o relatório técnico do StateBench (o blog aponta os links) para comparar com o método original antes de tirar conclusões fortes.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-11-09",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-11-09T17:24:36Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "d025ae60-52eb-4a37-87eb-1df85e829a8c",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique o benchmark StateBench do Allen AI sobre rastreamento de estado em contexto longo: os quatro níveis (r-trivial, aperiódico, solúvel, geral finito), a relação com a teoria de Krohn-Rhodes em nível introdutório, por que transformers têm limites teóricos e o que são Gated DeltaNet e modelos híbridos. Depois sugira como construir um mini-benchmark próprio com dados sintéticos e gabarito automático para avaliar agentes que leem logs e contratos longos."
+    },
+    {
+      "kind": "lab",
+      "label": "Montar o mini-teste",
+      "prompt": "Atue como engenheiro de avaliação. Escreva um script em Python que gere problemas de rastreamento de estado com N variáveis em quatro modos (valor fixo, reatribuição, acumulação, atribuição por referência), calcule o gabarito, chame um modelo via API pedindo JSON com o valor final de cada variável e produza uma tabela de acurácia por modo e por comprimento, incluindo tokens usados."
+    }
+  ],
+  "read_minutes": 6,
+  "schema_version": "1.0.0",
+  "slug": "statebench-como-testar-0045",
+  "sources": [
+    {
+      "accessed_at": "2026-11-09T17:23:44Z",
+      "language": "en",
+      "published_at": "2026-11-03T17:15:21Z",
+      "publisher": "Hugging Face",
+      "source_id": "s1",
+      "title": "StateBench: Testing how language models track state changes over long documents",
+      "url": "https://huggingface.co/blog/allenai/statebench"
+    }
+  ],
+  "summary": "O Allen AI lançou o StateBench, que mede quanto LLMs rastreiam variáveis que mudam em textos longos. Modelos de ponta vão bem no fácil e despencam no difícil. Aprenda a montar um mini-teste com seus logs e contratos.",
+  "tags": [
+    "topic:benchmarks",
+    "topic:llm-evaluation",
+    "topic:agent-evaluation",
+    "topic:context-engineering",
+    "theme:research",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:hugging-face"
+  ],
+  "title": "StateBench: como testar se um LLM acompanha mudanças de estado em documentos longos"
+}

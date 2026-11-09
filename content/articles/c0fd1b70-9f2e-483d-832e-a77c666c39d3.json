@@ -1,0 +1,197 @@
+{
+  "article_id": "c0fd1b70-9f2e-483d-832e-a77c666c39d3",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "Em 3 e 4 de novembro de 2026, Simon Willison lançou o datasette-agent 0.5a0 e o datasette-apps 0.3a0. Juntos, permitem pedir a um LLM um app com banco de dados e depois ajustá-lo num chat que fica ao lado do próprio app. Depois deste texto, você terá um roteiro para montar um protótipo parecido sobre seus dados em SQL e uma lista de cuidados de permissão para adotar desde o início.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s2"
+      ],
+      "text": "O datasette-agent 0.5a0 é descrito como um lançamento significativo. A novidade principal é o panel: o chat do agente abre e fica ao lado de páginas do Datasette, como uma tabela ou uma consulta. Combinado com o datasette-apps, dá para pedir por prompt um app apoiado no banco e modificá-lo pelo chat lateral. Há uma instância para testar em agent.datasette.io, com login via GitHub.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O datasette-apps hospeda e edita aplicações HTML customizadas dentro do Datasette. Podem ser feitas à mão, mas o caminho mais fácil é gerá-las com LLMs via Datasette Agent. A versão 0.3a0 melhora essa integração:",
+      "type": "paragraph"
+    },
+    {
+      "items": [
+        "Digitar # numa mensagem do chat marca um app, com autocompletar entre os apps que o usuário tem permissão para ver.",
+        "Duas ferramentas novas, app_add_stored_queries() e app_remove_stored_queries(), deixam o agente gerenciar quais consultas armazenadas (stored queries) o app pode chamar. Conceder uma consulta de escrita exige aprovação do usuário.",
+        "app_create() agora verifica se cada consulta pedida existe e se o usuário pode vê-la, e pede aprovação para consultas de escrita antes de criar o app.",
+        "Os botões View app e os links de referências # abrem o app em tela cheia no panel do Datasette Agent."
+      ],
+      "ordered": false,
+      "source_ids": [
+        "s1"
+      ],
+      "type": "list"
+    },
+    {
+      "source_ids": [
+        "s1",
+        "s2"
+      ],
+      "text": "São versões alfa e as fontes são notas de release, não tutorial. Elas não detalham o modelo completo de permissões nem a segurança do HTML gerado (por exemplo, isolamento do código do app). Trate como protótipo, não como algo para dados sensíveis.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Por que isso importa",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O padrão é interessante além do Datasette: o app não fala livremente com o banco. Ele só chama consultas armazenadas e nomeadas, e o agente precisa de aprovação humana para conceder escrita. É um controle de privilégio mínimo aplicado a apps gerados por LLM. Esta é uma interpretação nossa a partir das mudanças descritas.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "Na prática: replique o fluxo no seu nível",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial do Datasette e dos plugins, pois são versões alfa e detalhes podem mudar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Conceitos rápidos. Datasette é uma ferramenta open source que publica um banco SQLite com interface web e API JSON. Uma consulta armazenada (canned query) é um SQL nomeado, exposto como endpoint. Um app gerado é uma página HTML com JavaScript que chama esses endpoints para mostrar ou alterar dados.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Roteiro de 1 a 2 horas",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Escolha um SQLite pequeno e sem dados sensíveis, por exemplo exportação de gastos pessoais ou de issues do seu repositório.",
+        "Rode o Datasette localmente e instale os plugins seguindo o README de cada um. Se preferir só testar, use a instância pública citada, sem enviar dados reais.",
+        "Escreva 2 ou 3 consultas somente leitura, como total por mês e top 10 por categoria, e deixe-as como consultas armazenadas.",
+        "Peça ao agente um app que use apenas essas consultas: um painel com filtro e gráfico.",
+        "Itere pelo chat lateral com pedidos pequenos: trocar o gráfico, adicionar filtro de data, ajustar o layout.",
+        "Só então, se precisar, peça uma consulta de escrita (por exemplo marcar item como revisado) e observe o pedido de aprovação."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Replicando com Claude Code ou Codex",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Sem o plugin, o mesmo padrão funciona com seu agente de código: mantenha o SQLite e um servidor local, dê ao agente um arquivo com a lista de endpoints permitidos e peça um único HTML estático que só chame esses endpoints. Itere editando o HTML em um terminal ao lado do navegador. O ganho do panel é tirar o atrito de alternar entre as duas telas.",
+      "type": "paragraph"
+    },
+    {
+      "caption": "Exemplo de consulta de leitura que o app poderia chamar. Os nomes de tabela e colunas são hipotéticos.",
+      "code": "-- consulta somente leitura, candidata a stored query\nselect strftime('%Y-%m', data) as mes,\n       categoria,\n       sum(valor) as total\nfrom gastos\ngroup by mes, categoria\norder by mes desc, total desc;",
+      "language": "sql",
+      "type": "code"
+    },
+    {
+      "level": 3,
+      "text": "Decisões de risco e controle",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Leitura por padrão: escrita só com aprovação explícita, como o próprio release faz. Isso reduz o dano de um app gerado que apague ou altere dados por erro ou por prompt injection (instruções maliciosas escondidas em dados que o LLM lê).",
+        "Use uma cópia do banco enquanto prototipa.",
+        "Evite colunas com dados pessoais; se houver, considere a LGPD antes de expor o app a terceiros.",
+        "Leia o HTML gerado antes de compartilhar: procure chamadas a domínios externos e envio de dados para fora."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "source_ids": [],
+      "text": "Padrão a copiar: o app só enxerga consultas nomeadas e revisadas, e qualquer escrita passa por aprovação humana. Isso vale mesmo se você não usar Datasette.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: monte o painel de leitura com 2 consultas sobre um banco seu, itere três vezes por prompt e anote o que o agente errou. Essa lista é a base para decidir se o fluxo serve ao seu trabalho.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_engineering",
+  "edition_date": "2026-11-09",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-11-09T17:23:44Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "d025ae60-52eb-4a37-87eb-1df85e829a8c",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique o Datasette (SQLite publicado com interface web e API JSON), consultas armazenadas (canned queries) e plugins. Depois explique como apps HTML gerados por LLM podem usar essas consultas com privilégio mínimo, e quais riscos existem (prompt injection, escrita não autorizada, vazamento de dados). Sugira um projeto de 2 horas para construir um painel sobre um SQLite meu, passo a passo, para quem já usa agentes de código e SQL."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "datasette-agent-apps-0044",
+  "sources": [
+    {
+      "accessed_at": "2026-11-09T17:22:58Z",
+      "language": "en",
+      "published_at": "2026-11-04T00:29:36Z",
+      "publisher": "Simon Willison",
+      "source_id": "s1",
+      "title": "datasette-apps 0.3a0",
+      "url": "https://simonwillison.net/2026/Nov/4/datasette-apps"
+    },
+    {
+      "accessed_at": "2026-11-09T17:23:00Z",
+      "language": "en",
+      "published_at": "2026-11-03T23:13:45Z",
+      "publisher": "Simon Willison",
+      "source_id": "s2",
+      "title": "datasette-agent 0.5a0",
+      "url": "https://simonwillison.net/2026/Nov/3/datasette-agent"
+    }
+  ],
+  "summary": "Duas versões alfa de Simon Willison juntam um chat lateral (panel) a apps HTML gerados por LLM dentro do Datasette. Veja o que mudou e como replicar o fluxo com seu agente de código.",
+  "tags": [
+    "topic:agents",
+    "topic:coding-agents",
+    "risk:security",
+    "topic:guardrails",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:simon-willison"
+  ],
+  "title": "Datasette Agent + Apps: peça um app sobre seu banco e ajuste-o num chat ao lado"
+}

@@ -202,6 +202,11 @@
       "label": "Regulação"
     },
     {
+      "key": "theme:research",
+      "kind": "theme",
+      "label": "Pesquisa"
+    },
+    {
       "key": "theme:roi",
       "kind": "theme",
       "label": "Retorno sobre investimento"

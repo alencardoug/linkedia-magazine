@@ -1,0 +1,173 @@
+{
+  "article_id": "6835e918-8a3d-43b2-bcf0-4cf64448a7d0",
+  "blocks": [
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "Imagine um vendedor pedindo preços de um cliente a um agente de IA. O agente junta dados de um sistema de preços restrito, de comunicações internas e de cotações antigas. O resultado parece correto, então um segundo agente o usa para redigir a proposta. Ninguém confere nenhuma das duas passagens. Depois, descobre-se que a proposta tem informação confidencial e não aprovada, e ninguém sabe por onde esse dado entrou nem por onde se espalhou. Depois deste artigo, você terá um roteiro de perguntas de auditoria para cada handoff (passagem de dados de um agente a outro) e uma forma de testá-lo num fluxo seu.",
+      "type": "paragraph"
+    },
+    {
+      "level": 2,
+      "text": "A notícia: o que a fonte diz",
+      "type": "heading"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O texto é da MIT Technology Review, de 4 de novembro de 2026, mas é conteúdo patrocinado pela Cyberhaven e produzido pelo braço de conteúdo customizado, não pela redação. Sua tese: com agentes no dia a dia, a empresa precisa gerir dados em movimento, que são ingeridos, copiados, resumidos, transformados e redistribuídos. Por isso, diz o texto, segurança de IA seria um problema de visibilidade de dados, não de ferramenta. Abordagens centradas em aplicações, redes ou endpoints não bastariam, e seria preciso estabelecer linhagem de dados (data lineage: o registro de onde cada dado veio e por onde passou).",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [
+        "s1"
+      ],
+      "text": "O trecho disponível descreve um cenário hipotético, não um incidente real datado. Não traz dados, medições nem descrição de produto, e o patrocinador vende nessa área. Trate a tese como um argumento plausível, não como evidência. Não dá para saber, pela fonte, como a Cyberhaven implementa linhagem.",
+      "type": "callout",
+      "variant": "uncertainty"
+    },
+    {
+      "level": 2,
+      "text": "Aplicação prática: auditar cada handoff",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Esta parte é orientação prática dos editores, baseada em conhecimento geral, e não nas fontes citadas. Confira a documentação oficial das ferramentas que usar.",
+      "type": "callout",
+      "variant": "note"
+    },
+    {
+      "source_ids": [],
+      "text": "Ataque ou falha que isso evita: vazamento por agente com acesso excessivo, em que um dado restrito entra num contexto e sai em um artefato destinado a quem não tem permissão. Também ajuda contra injeção de prompt (texto malicioso em um documento que manda o agente agir), porque você passa a saber quais fontes contaminaram uma saída.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Ideia central: trate cada pedaço de dado como tendo uma etiqueta de origem e de classificação (por exemplo público, interno, restrito) que viaja junto com ele. Quando agentes combinam dados, a saída herda a classificação mais restritiva das entradas. É o mesmo raciocínio de propagação de permissões que você já conhece de RAG com filtro por metadados, só que aplicado à saída e à passagem entre agentes.",
+      "type": "paragraph"
+    },
+    {
+      "level": 3,
+      "text": "Perguntas de auditoria por handoff",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Origem: de quais fontes (sistema, documento, e-mail, versão) veio cada trecho que entrou no contexto?",
+        "Permissão: quem pediu tem direito de ler cada fonte? O agente agiu com a permissão do usuário ou com uma credencial ampla própria?",
+        "Classificação: qual o nível mais restritivo entre as entradas? A saída foi rotulada com ele?",
+        "Transformação: o dado foi resumido, copiado ou reescrito? O rótulo sobreviveu a isso?",
+        "Destino: quem vai ler a saída (cliente externo, outro agente, outro sistema) e esse destino pode receber esse nível?",
+        "Verificação: houve checagem automática ou humana antes de cruzar uma fronteira de confiança?",
+        "Rastro: dá para reconstruir, depois, quem passou o quê a quem e quando?"
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "level": 3,
+      "text": "Teste num fluxo seu, em cerca de uma tarde",
+      "type": "heading"
+    },
+    {
+      "items": [
+        "Monte um fluxo mínimo com dois agentes: o primeiro lê três arquivos locais (um deles marcado como restrito); o segundo redige um texto a partir da saída do primeiro.",
+        "Plante um canário: uma frase única e inventada no arquivo restrito, como um preço fictício com um código estranho.",
+        "Registre em log, em cada handoff, a lista de arquivos usados e os rótulos de classificação, em JSON simples.",
+        "Rode o fluxo como um usuário sem permissão sobre o arquivo restrito e verifique se o canário aparece no texto final.",
+        "Adicione uma regra determinística entre os agentes: se algum rótulo for restrito e o destino não for, bloqueie e peça revisão.",
+        "Repita com resumos e paráfrases. Veja se o canário vaza reescrito e anote onde o rótulo se perdeu."
+      ],
+      "ordered": true,
+      "source_ids": [],
+      "type": "list"
+    },
+    {
+      "caption": "Exemplo de registro de handoff com origem, permissão e decisão. O formato é ilustrativo, não um padrão.",
+      "code": "{\n  \"handoff\": \"agente_precos -> agente_proposta\",\n  \"usuario\": \"vendedor_01\",\n  \"fontes\": [\n    {\"id\": \"tabela_precos_v7\", \"classe\": \"restrito\", \"permitido_ao_usuario\": false},\n    {\"id\": \"email_cliente_123\", \"classe\": \"interno\", \"permitido_ao_usuario\": true}\n  ],\n  \"classe_saida\": \"restrito\",\n  \"destino\": \"cliente_externo\",\n  \"decisao\": \"bloquear\"\n}",
+      "language": "json",
+      "type": "code"
+    },
+    {
+      "alt": "Fluxo de dois agentes com checagem de linhagem entre eles",
+      "caption": "A checagem fica no handoff, onde o texto diz que ninguém confere.",
+      "diagram_format": "mermaid",
+      "diagram_spec": "flowchart LR\nA[Fontes com rótulo] --> B[Agente 1]\nB --> C{Checagem de linhagem}\nC -->|permitido| D[Agente 2]\nC -->|bloqueado| E[Revisão humana]\nD --> F[Saída com rótulo herdado]",
+      "long_description": "Fontes rotuladas alimentam o agente 1. A saída passa por uma checagem de linhagem: se permitido, segue ao agente 2, que produz uma saída com o rótulo herdado; se bloqueado, vai para revisão humana.",
+      "source_ids": [],
+      "type": "diagram"
+    },
+    {
+      "level": 3,
+      "text": "Limites e decisões",
+      "type": "heading"
+    },
+    {
+      "source_ids": [],
+      "text": "Rótulos se perdem quando o modelo reescreve texto: o LLM não carrega metadados na paráfrase. Por isso o controle deve ficar no código orquestrador, que acompanha as fontes usadas, e não pedir ao modelo que lembre. Isso é conservador: pode bloquear saídas legítimas, então meça falsos bloqueios. Antes de comprar uma plataforma de linhagem, veja se o seu log próprio já responde às sete perguntas.",
+      "type": "paragraph"
+    },
+    {
+      "source_ids": [],
+      "text": "Faça cada handoff responder: de onde veio, quem pode ler, qual o nível mais restrito e para quem vai. Comprove com um canário plantado em um arquivo restrito.",
+      "type": "callout",
+      "variant": "takeaway"
+    },
+    {
+      "source_ids": [],
+      "text": "Primeiro passo desta semana: escolha um fluxo seu com dois agentes ou duas etapas de LLM, adicione o log de fontes por handoff e rode o teste do canário uma vez.",
+      "type": "paragraph"
+    }
+  ],
+  "channel": "ai_leadership",
+  "edition_date": "2026-11-09",
+  "editorial_metadata": {
+    "ai_generated": true,
+    "content_version": 1,
+    "generated_at": "2026-11-09T17:25:37Z",
+    "model": "claude-sonnet-5-5",
+    "reviewed_sources": true,
+    "run_ref": "d025ae60-52eb-4a37-87eb-1df85e829a8c",
+    "supersedes_article_id": null
+  },
+  "locale": "pt-BR",
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique data lineage aplicada a sistemas multiagente de IA: como rastrear origem, classificação e permissão de dados em cada handoff entre agentes, propagação do rótulo mais restritivo, riscos de acesso excessivo e injeção de prompt, e como testar com canários. Dê exemplos práticos em Python para um desenvolvedor que usa agentes de código e conhece RAG e SQL, mas não opera agentes em produção."
+    }
+  ],
+  "read_minutes": 5,
+  "schema_version": "1.0.0",
+  "slug": "handoff-entre-agentes-0043",
+  "sources": [
+    {
+      "accessed_at": "2026-11-09T17:25:10Z",
+      "language": "en",
+      "published_at": "2026-11-04T13:00:00Z",
+      "publisher": "MIT Technology Review",
+      "source_id": "s1",
+      "title": "Securing the agentic enterprise with data lineage",
+      "url": "https://www.technologyreview.com/2026/11/04/1147596/securing-the-agentic-enterprise-with-data-lineage"
+    }
+  ],
+  "summary": "Um texto patrocinado descreve um agente que mistura dados restritos e um segundo que redige a proposta sem revisão. Veja o que a fonte sustenta e como montar perguntas de auditoria de origem e permissão em cada handoff do seu fluxo.",
+  "tags": [
+    "topic:agents",
+    "risk:security",
+    "theme:governance",
+    "risk:privacy",
+    "topic:guardrails",
+    "topic:observability",
+    "reason:career-utility",
+    "reason:novelty",
+    "reason:learning-value",
+    "source:mit-technology-review"
+  ],
+  "title": "Handoff entre agentes: use linhagem de dados como controle de acesso"
+}
