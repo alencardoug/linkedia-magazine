@@ -7,6 +7,7 @@ import { readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { readManifest, slots } from '../scripts/themes.mjs';
+import { SPECIALS } from '../src/lib/specials.ts';
 import { axeBlocking, layoutShift, preset, watchErrors, withoutWebgl } from './helpers.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -17,7 +18,10 @@ const pages = (dir) =>
     .map((f) => `/${dir}/${f.slice(0, -'.html'.length)}`);
 const NOT_FOUND = '/pagina-que-nao-existe';
 const ARTICLES = pages('materias').slice(0, 3);
-const ROUTES = ['/revista', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, ...pages('especiais'), '/sobre', '/visual', NOT_FOUND];
+// A standalone special has its own shell and no magazine theme (its spec: e2e/governanca-de-projetos.spec.mjs).
+const STANDALONE = new Set(SPECIALS.filter((s) => s.standalone).map((s) => `/especiais/${s.slug}`));
+const SPECIAL_ROUTES = pages('especiais').filter((r) => !STANDALONE.has(r));
+const ROUTES = ['/revista', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, ...SPECIAL_ROUTES, '/sobre', '/visual', NOT_FOUND];
 const WIDTHS = [1100, 320];
 const SLOTS = Object.entries(slots(readManifest())).filter(([, theme]) => theme !== null);
 const ENHANCE = '/enhance.';

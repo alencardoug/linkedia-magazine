@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="Um mapa interativo de governança de projetos de TI: decisões, artefatos, software, dados, IA, segurança e operação. Avalie a prontidão com evidências.">
+  <meta property="og:title" content="Governança de Projetos · Linkedia">
+  <meta property="og:description" content="Do propósito ao valor. Explore 38 estações de governança e verifique o que seu projeto precisa para avançar.">
+  <link rel="canonical" href="https://linkedia.web.app/especiais/governanca-de-projetos">
+  <meta property="og:url" content="https://linkedia.web.app/especiais/governanca-de-projetos">
+  <meta property="og:type" content="website">
+  <title>Governança de Projetos · Linkedia</title>
+  <script src="/especiais/governanca-de-projetos/assets/00211cee06d28832/theme.js"></script>
+  <link rel="stylesheet" href="/especiais/governanca-de-projetos/assets/00211cee06d28832/theme.css">
+  <link rel="stylesheet" href="/especiais/governanca-de-projetos/assets/00211cee06d28832/styles.css">
+  <script type="module" src="/especiais/governanca-de-projetos/assets/00211cee06d28832/app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <header class="site-header">
+    <a class="brand" href="https://linkedia.web.app" aria-label="Linkedia, página inicial"><span class="brand-icon" aria-hidden="true">l.</span>linkedia<span class="brand-divider">/</span><span class="brand-section">especiais</span></a>
+    <span class="edition">CADERNO DE PRÁTICA <b>01</b></span>
+    <div class="header-tools">
+      <a class="back-link" href="https://linkedia.web.app/especiais/governanca-de-ia">Governança de IA <span aria-hidden="true">↗</span></a>
+      <label class="theme-picker" hidden>Tema<select id="theme-preference"><option value="system">Sistema</option><option value="light">Claro</option><option value="dark">Escuro</option></select></label>
+    </div>
+  </header>
+  <main id="conteudo" tabindex="-1">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow"><span class="live-dot"></span> GUIA INTERATIVO · FASE 1</p>
+        <h1 id="page-title">Governança<br>de <span>Projetos.</span></h1>
+        <p class="hero-copy">Da intenção ao valor entregue.<br>Um mapa para saber o que precisa estar pronto<br class="desktop-break"> antes de o seu projeto avançar.</p>
+        <div class="hero-actions"><a href="#mapa" class="button primary">Explorar o mapa <span aria-hidden="true">↘</span></a><button class="text-button" data-guide="metodo">Como usar o guia <span class="info-icon" aria-hidden="true">i</span></button></div>
+      </div>
+      <aside class="hero-note"><span class="note-index">DIREÇÃO → ENTREGA → EVOLUÇÃO</span><div class="mini-metro" aria-hidden="true"><svg viewBox="0 0 290 120"><path d="M5 22H88Q108 22 128 42L170 84Q185 100 206 100H285" class="line-projeto"/><path d="M5 65H65Q86 65 103 48L112 39Q130 22 153 22H285" class="line-dados"/><path d="M5 105H74Q96 105 113 88L163 38Q180 22 202 22" class="line-ia"/><g class="line-projeto mini-stations" stroke-width="3"><circle cx="48" cy="22" r="6"/><circle cx="117" cy="32" r="9"/><circle cx="200" cy="100" r="6"/><circle cx="245" cy="22" r="6"/></g></svg></div><h2>Várias frentes.<br>Uma direção comum.</h2><p>Software, dados, IA, confiança e operação. As vias correm em paralelo e se encontram nas decisões.</p><span class="note-footer">38 ESTAÇÕES <span>·</span> 7 MARCOS DE DECISÃO</span></aside>
+    </section>
+    <section class="module-fallback" id="module-fallback" aria-labelledby="fallback-title">
+      <h2>Guia completo de leitura</h2>
+      <p>Acesse todas as estações, critérios, artigos e modelos mesmo se o mapa interativo não carregar.</p>
+      <a href="/especiais/governanca-de-projetos/guia-completo">Abrir versão de leitura e impressão</a>
+    </section>
+    <nav class="view-nav" aria-label="Seções do guia"><a href="#mapa" data-view="mapa">01 <span>Mapa do projeto</span></a><a href="#checklist" data-view="checklist">02 <span>Verificar prontidão</span></a><a href="#biblioteca" data-view="biblioteca">03 <span>Biblioteca prática</span></a><a href="#metodo" data-view="metodo">04 <span>Método & fontes</span></a></nav>
+    <section class="project-config" aria-label="Configure a rota de avaliação">
+      <div><span class="section-kicker">SUA ROTA</span><h2>Todo projeto tem<br>seu próprio percurso.</h2></div>
+      <fieldset class="routes"><legend>Quais frentes fazem parte?</legend><span class="base-route">P + C + O <span class="info-wrap"><button class="info-button" aria-label="Sobre as frentes de base" aria-describedby="base-info" aria-expanded="false">i</button><span class="tooltip" id="base-info" role="tooltip">Projeto, confiança e operação são a base. IA inclui software e dados. Desativar uma frente preserva suas respostas e altera a rota avaliada.</span></span></span><label><input type="checkbox" id="route-software"> Software</label><label><input type="checkbox" id="route-dados"> Dados & BI</label><label><input type="checkbox" id="route-ia"> IA</label></fieldset>
+      <label class="select-label">Rigor da revisão<select id="rigor"><option value="1">Essencial</option><option value="2">Padrão</option><option value="3">Alto impacto</option></select></label>
+      <label class="select-label">Avaliar até<select id="stage"></select></label>
+    </section>
+    <div id="view-content"></div>
+  </main>
+  <footer class="site-footer"><div><a class="footer-brand" href="https://linkedia.web.app">linkedia<span> / especiais</span></a><p>Conhecimento que ajuda a decidir.</p></div><p>Guia editorial · v1.1.0 · revisão em <time datetime="2026-11-10">10 de nov. de 2026</time><br>Fase 1: conteúdo e autoavaliação local.</p><a href="#metodo">Método, limites e fontes <span aria-hidden="true">↗</span></a></footer>
+  <dialog id="detail-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><span id="dialog-kicker"></span><button id="close-dialog" class="icon-button" aria-label="Fechar painel">✕</button></div><div id="dialog-content"></div><div id="answer-announcement" class="sr-only" role="status"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+
+</body>
+</html>
