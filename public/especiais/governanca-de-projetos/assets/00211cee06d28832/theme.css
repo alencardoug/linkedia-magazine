@@ -1,0 +1,63 @@
+:root {
+  color-scheme:light dark;
+  --paper:light-dark(#f6f5ef,#141b18);
+  --ink:light-dark(#243847,#e7eee6);
+  --muted:light-dark(#58666a,#b5c4b9);
+  --border:light-dark(#d9ded3,#42564b);
+  --surface:light-dark(#fffefa,#1c2822);
+  --accent:light-dark(#dceab9,#3b5130);
+  --focus:light-dark(#427cbb,#a5cbff);
+
+  --dark-hover:#2a3b31;
+  --dark-tint:#263829;
+  --dark-strong-border:#607367;
+  --dark-muted-green:#bdceb1;
+}
+
+:root[data-theme="light"] {
+  color-scheme:light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme:dark;
+}
+
+.theme-picker {
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  color:var(--muted);
+  white-space:nowrap;
+  font-size:.75rem;
+}
+
+.theme-picker[hidden] {
+  display:none;
+}
+
+.theme-picker select {
+  min-height:2.25rem;
+  max-width:100%;
+  padding:.25rem .4rem;
+  border:1px solid var(--border);
+  border-radius:.35rem;
+  background:var(--surface);
+  color:var(--ink);
+  font:inherit;
+}
+
+.theme-picker select:focus-visible {
+  outline:3px solid var(--focus);
+  outline-offset:3px;
+}
+
+@media print {
+  :root, :root[data-theme] {
+    color-scheme:light;
+    background:white;
+  }
+
+  .theme-picker {
+    display:none;
+  }
+}

@@ -70,6 +70,9 @@ const read = (out, page) => readFileSync(join(out, page), 'utf8');
 // Cover pages (3-01): the current cover at `/` and every cover in the archive.
 const COVER_PAGES = ['index.html', ...COVERS.map((c) => `visual/${c.slug}.html`)];
 const isCover = (page) => COVER_PAGES.includes(page);
+// Standalone special (owner, 2026-11-10): a snapshot in `public/` with its own shell, CSS and modules.
+const STANDALONE_PAGES = ['especiais/governanca-de-projetos.html', 'especiais/governanca-de-projetos/guia-completo.html'];
+const STANDALONE_ASSETS = /^\/especiais\/governanca-de-projetos\/assets\/[0-9a-f]{16}\/[\w/.-]+\.(?:m?js|css)$/;
 
 function htmlFiles(dir, prefix = '') {
   return readdirSync(join(dir, prefix), { withFileTypes: true }).flatMap((e) =>
@@ -180,6 +183,7 @@ describe('static build', () => {
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
         'especiais/governanca-de-ia.html',
+        ...STANDALONE_PAGES,
         'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
         '404.html',
@@ -194,6 +198,26 @@ describe('static build', () => {
       expect(html.includes('rel="author"'), page).toBe(page === 'sobre.html');
       expect(html.includes('Textos gerados com IA'), page).toBe(AI_NOTE_PAGES.includes(page));
       expect(html.includes('data-site-footer'), page).toBe(AI_NOTE_PAGES.includes(page));
+      if (STANDALONE_PAGES.includes(page)) {
+        // Its own shell: no magazine theme or code, no inline code (CSP), only its own hashed files, and every
+        // same-origin reference resolves in the build (clean URLs: `x` is served from `x.html`).
+        expect(html, page).toMatch(/^<!doctype html>\s*<html lang="pt-BR">/i);
+        expect(html, page).not.toContain('data-theme="minimal-dark"');
+        expect(html, page).not.toContain('/_astro/');
+        expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
+        const scripts = [...html.matchAll(/<script([^>]*)>/g)].map((m) => m[1].match(/\ssrc="([^"]+)"/)?.[1]);
+        expect(scripts.length, page).toBeGreaterThan(0);
+        for (const src of scripts) expect(src, page).toMatch(STANDALONE_ASSETS);
+        const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g)].map((m) => m[1]);
+        expect(styles.length, page).toBeGreaterThan(0);
+        for (const href of styles) expect(href, page).toMatch(STANDALONE_ASSETS);
+        const refs = [...html.matchAll(/\s(?:href|src)="([^"#]*)(?:#[^"]*)?"/g)].map((m) => m[1]).filter(Boolean);
+        expect(refs.filter((r) => !/^(?:\/|https:)/.test(r)), page).toEqual([]); // nothing relative to the URL
+        for (const ref of refs.filter((r) => r.startsWith('/'))) {
+          expect(existsSync(join(out, ref)) || existsSync(join(out, `${ref}.html`)), `${page} → ${ref}`).toBe(true);
+        }
+        continue;
+      }
       expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
       // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
       expect(html, page).not.toMatch(/<script(?![^>]*\ssrc="\/_astro\/)[^>]*>/);
@@ -275,6 +299,23 @@ describe('static build', () => {
     const outside = [...special.matchAll(/<a href="https:[^"]*"([^>]*)>/g)].map((m) => m[1]);
     expect(outside.length).toBeGreaterThan(0);
     for (const attrs of outside) expect(attrs).toContain('rel="noopener noreferrer"');
+    // The project guide (owner, 2026-11-10): right below the AI guide, a slashless canonical, modules that link to
+    // the reading page and the JSON by their served URLs, and a reading page that links back.
+    const ai = editions.indexOf('/especiais/governanca-de-ia"');
+    const projects = editions.indexOf('/especiais/governanca-de-projetos"');
+    expect(projects).toBeGreaterThan(ai);
+    expect(projects).toBeLessThan(editions.indexOf('/especiais/dez-layouts-governanca-de-ia"'));
+    const gproj = read(out, 'especiais/governanca-de-projetos.html');
+    expect(gproj).toContain('<link rel="canonical" href="https://linkedia.web.app/especiais/governanca-de-projetos">');
+    expect(gproj).toContain('<meta property="og:url" content="https://linkedia.web.app/especiais/governanca-de-projetos">');
+    expect(gproj).toContain('href="/especiais/governanca-de-projetos/guia-completo"');
+    expect(read(out, 'especiais/governanca-de-projetos/guia-completo.html')).toContain('href="/especiais/governanca-de-projetos"');
+    const moduleDir = gproj.match(/src="\/(especiais\/governanca-de-projetos\/assets\/[0-9a-f]{16})\/app\.mjs"/)[1];
+    for (const view of ['biblioteca', 'metodo']) {
+      expect(read(out, `${moduleDir}/views/${view}.mjs`)).toContain('href="/especiais/governanca-de-projetos/guia-completo"');
+    }
+    expect(read(out, `${moduleDir}/views/biblioteca.mjs`)).toContain('href="/especiais/governanca-de-projetos/conteudo.json"');
+    expect(JSON.parse(read(out, 'especiais/governanca-de-projetos/conteudo.json')).stations.length).toBeGreaterThan(0);
     // The sketch showcase (3-23, D-077): listed right after the guide; one desktop and one phone shot per sketch, small.
     expect(editions.indexOf('/especiais/dez-layouts-governanca-de-ia')).toBeGreaterThan(editions.indexOf('/especiais/governanca-de-ia"'));
     const layouts = read(out, 'especiais/dez-layouts-governanca-de-ia.html');
@@ -374,8 +415,8 @@ describe('static build', () => {
   it('ships three slots with lab themes: pre-paint script, runtime everywhere, switcher on /visual, lazy enhancement', async () => {
     const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
     const pages = htmlFiles(out);
-    expect(pages).toHaveLength(13 + COVERS.length);
-    for (const page of pages.filter((p) => !isCover(p))) {
+    expect(pages).toHaveLength(13 + COVERS.length + STANDALONE_PAGES.length);
+    for (const page of pages.filter((p) => !isCover(p) && !STANDALONE_PAGES.includes(p))) {
       const html = read(out, page);
       expect(html, page).toContain(
         '<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" ' +
@@ -444,6 +485,7 @@ describe('static build', () => {
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
         'especiais/governanca-de-ia.html',
+        ...STANDALONE_PAGES,
         'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
         '404.html',
