@@ -1,0 +1,336 @@
+/* "Micélio" (docs/COVERS.md): the masthead in the middle of the night, the work and the edition's lead headlines around
+   it. Complete without JS: the text is real HTML over a flat CSS poster (a dim glow of the organism's colour ramp).
+   With WebGL2 the canvas grows the organism over the whole viewport once its first frame is verified
+   (html[data-art='live']); the organism then writes the masthead itself (the h1 turns transparent but stays in the
+   accessibility tree) and joins the headlines' nodes. The text sits above the canvas with a shadow of the night.
+   Scoped to html[data-cover='micelio'].
+   Contrast on --cover-bg: --mc-ink 18.0:1 (0.75 opacity: 10.0:1), --mc-link 17.1:1; fine print --cover-fine 11.3:1.
+   On the brightest point of the poster (#461546) --mc-ink is 12.7:1. */
+html[data-cover='micelio'] {
+  --mc-night: #05030a;
+  --mc-ink: #fbefd8;
+  --mc-link: #ffe9a8;
+  --mc-violet: #3b0f6b;
+  --mc-rose: #ff4d6d;
+  --cover-bg: var(--mc-night);
+  --cover-ink: var(--mc-ink);
+  --cover-fine: #cbbfa9;
+  --cover-link: var(--mc-link);
+  --cover-focus: var(--mc-link);
+}
+
+html[data-cover='micelio'] .mc {
+  position: relative; /* no z-index: the canvas, the link layer and the text stack with the shell's fine print */
+  display: grid;
+  min-height: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The art covers the whole viewport, behind everything. */
+html[data-cover='micelio'] .mc-room {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* The flat poster: what devices without the art keep. */
+html[data-cover='micelio'] .mc-poster {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 46% 30% at 50% 45%, rgba(255, 77, 109, 0.16), transparent 70%),
+    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(59, 15, 107, 0.55), transparent 75%),
+    radial-gradient(circle at 12% 18%, rgba(255, 233, 168, 0.07), transparent 22%),
+    radial-gradient(circle at 88% 74%, rgba(255, 77, 109, 0.08), transparent 26%),
+    var(--mc-night);
+}
+
+html[data-cover='micelio'] .mc-canvas {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+/* The text: above the canvas, a grid around the masthead; only the entry link takes clicks. */
+html[data-cover='micelio'] .mc-text {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr auto auto;
+  grid-template-areas: 'kick kick' 'hl1 work' 'mast mast' 'hl3 hl2' 'foot foot';
+  gap: clamp(0.5rem, 2vh, 1.25rem) clamp(1rem, 4vw, 3rem);
+  min-height: 0;
+  padding: clamp(0.8rem, 4vh, 2.2rem) clamp(1rem, 5vw, 4.5rem) 0.3rem;
+  pointer-events: none;
+  text-shadow:
+    0 0 3px var(--mc-night),
+    0 0 9px var(--mc-night),
+    0 0 18px var(--mc-night);
+  transition: opacity 0.8s ease;
+}
+
+html[data-cover='micelio'] :where(.mc-text p, .mc-text ol, .mc-masthead) {
+  margin: 0;
+}
+
+html[data-cover='micelio'] :is(.mc-kicker, .mc-meta, .mc-more, .mc-hint) {
+  font: 600 0.69rem / 1.6 var(--cover-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+html[data-cover='micelio'] .mc-kicker {
+  grid-area: kick;
+  text-align: center;
+  opacity: 0.8;
+}
+
+html[data-cover='micelio'] .mc-masthead {
+  grid-area: mast;
+  align-self: center;
+  justify-self: center;
+  font-size: min(16.8vw, 30vh);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  transition: opacity 0.6s ease;
+}
+
+html[data-cover='micelio'] .mc-work {
+  grid-area: work;
+  justify-self: end;
+  max-width: 30ch;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  text-align: right;
+}
+
+html[data-cover='micelio'] .mc-work cite {
+  font-style: italic;
+  font-weight: 700;
+}
+
+html[data-cover='micelio'] .mc-caption {
+  opacity: 0.85;
+}
+
+html[data-cover='micelio'] .mc-heads {
+  display: contents;
+  list-style: none;
+}
+
+html[data-cover='micelio'] .mc-hl {
+  display: flex;
+  gap: clamp(0.9rem, 3.4vw, 2.5rem);
+  max-width: min(27ch, 42vw);
+  font-size: clamp(0.94rem, 1.4vw, 1.25rem);
+  font-weight: 650;
+  line-height: 1.22;
+}
+
+html[data-cover='micelio'] .mc-hl1 {
+  grid-area: hl1;
+  align-self: start;
+}
+
+html[data-cover='micelio'] .mc-hl2 {
+  grid-area: hl2;
+  justify-self: end;
+}
+
+html[data-cover='micelio'] .mc-hl3 {
+  grid-area: hl3;
+  margin-left: 3vw;
+}
+
+html[data-cover='micelio'] .mc-hl > span {
+  min-width: 0;
+}
+
+/* The ring the organism feeds on (its food disc is painted under it, main.ts). */
+html[data-cover='micelio'] .mc-node {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-top: 1.9em;
+  border: 1.5px solid var(--mc-link);
+  border-radius: 50%;
+}
+
+html[data-cover='micelio'] .mc-meta {
+  display: block;
+  opacity: 0.75;
+}
+
+html[data-cover='micelio'] .mc-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+html[data-cover='micelio'] .mc-empty {
+  grid-area: hl1;
+}
+
+html[data-cover='micelio'] .mc-foot {
+  grid-area: foot;
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  text-align: center;
+}
+
+html[data-cover='micelio'] .mc-more {
+  opacity: 0.8;
+}
+
+html[data-cover='micelio'] .mc-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.2rem 1.2rem;
+}
+
+html[data-cover='micelio'] .mc-hint {
+  letter-spacing: 0.12em;
+  text-transform: none;
+  opacity: 0.8;
+}
+
+html[data-cover='micelio'] .mc-enter {
+  pointer-events: auto;
+  color: var(--mc-link);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none; /* a long touch feeds the organism; the fine-print links keep their menus */
+}
+
+/* The whole viewport is this link. */
+html[data-cover='micelio'] .mc-enter::after {
+  content: '';
+  position: fixed;
+  z-index: 2;
+  inset: 0;
+  cursor: pointer;
+}
+
+/* Portrait or very narrow screens: one column; the organism writes the name in two lines in the upper half and the
+   headlines stack below it. */
+@media (max-width: 36rem), (orientation: portrait) {
+  html[data-cover='micelio'] .mc-text {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto auto auto auto;
+    grid-template-areas: 'kick' 'work' 'mast' 'hl1' 'hl2' 'hl3' 'foot';
+    row-gap: clamp(0.4rem, 1.6vh, 1rem);
+  }
+
+  html[data-cover='micelio'] .mc-masthead {
+    font-size: min(19vw, 14vh);
+  }
+
+  html[data-cover='micelio'] .mc-kicker {
+    letter-spacing: 0.1em;
+  }
+
+  /* The caption stays above the name the organism writes (from ~15% of the height down). */
+  html[data-cover='micelio'] .mc-work {
+    justify-self: center;
+    font-size: 0.76rem;
+    line-height: 1.35;
+    text-align: center;
+  }
+
+  html[data-cover='micelio'] :is(.mc-hl1, .mc-hl2, .mc-hl3) {
+    justify-self: start;
+    max-width: none;
+    margin-left: 0;
+  }
+
+  html[data-cover='micelio'] .mc-title {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+/* Short portrait screens: a three-line caption. */
+@media (max-width: 36rem) and (max-height: 50rem), (orientation: portrait) and (max-height: 50rem) {
+  html[data-cover='micelio'] .mc-work {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+}
+
+/* Short screens: one line per headline and a two-line caption, so the cover fits and the art can start. */
+@media (max-height: 30rem) {
+  html[data-cover='micelio'] .mc-title {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  html[data-cover='micelio'] .mc-work {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+}
+
+/* Live art: the organism draws over the whole viewport and writes the masthead; the page does not scroll or pan, and
+   a drag feeds the organism instead of moving the page. Pinch zoom stays where supported. */
+html[data-cover='micelio'][data-art='live'] body {
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  touch-action: none;
+  touch-action: pinch-zoom;
+}
+
+html[data-cover='micelio'][data-art='live'] .mc-canvas {
+  opacity: 1;
+}
+
+html[data-cover='micelio'][data-art='live'] .mc-masthead {
+  opacity: 0;
+}
+
+/* Entering: the text leaves while the organism rushes to the tap. */
+html[data-cover='micelio'][data-leaving] .mc-text {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-cover='micelio'][data-art='live'] .mc-hint {
+    animation: mc-pulse 2.8s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-cover='micelio'] :is(.mc-canvas, .mc-text, .mc-masthead) {
+    transition: none;
+  }
+}
+
+/* The hint never dims below AA: --mc-ink at 0.8 × 0.8 on the night is still above 9:1. */
+@keyframes mc-pulse {
+  50% {
+    opacity: 0.8;
+  }
+}

@@ -27,8 +27,9 @@ no client code imports it.
    it works without JS. The shell's visible skip link comes first in the tab order. A middle or modified click keeps
    the browser's behaviour. Enter, Space and Escape from the page enter; no single-character key shortcuts (WCAG
    2.1.4); a focused control (fine print, skip link) keeps its own behaviour. An exit animation may play for at most
-   ~1 s under an independent navigation deadline; a second activation enters at once; reduced motion, a fallback or
-   a still frame enter at once. A drag, a long touch or a multi-touch never counts as a tap.
+   ~1 s under an independent navigation deadline (exception: Micélio, 3 s, the owner's choice on 2026-11-11); a
+   second activation enters at once; reduced motion, a fallback or a still frame enter at once. A drag, a long touch
+   or a multi-touch never counts as a tap.
 2. **The HTML is a complete cover.** Semantic text (one `<h1>`, the edition date and lead headlines as text) that reads
    well without JS, without WebGL, with reduced motion and in forced colours; the art enhances it and hides it only
    after its own first frame is verified (`html[data-art]`), keeping it in the accessibility tree.

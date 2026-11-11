@@ -1,0 +1,69 @@
+---
+// "Micélio" (2026-W46; docs/COVERS.md, ./README.md). The HTML below is a complete cover on its own — the masthead, the
+// work, the edition's lead headlines around it and a flat poster — without JS, without WebGL2, with reduced motion.
+// With WebGL2 the script grows a living network over it: a Physarum-style organism of blind agents that finds the
+// letters of LinkedIA and joins the headlines' nodes with veins; the pointer is food. The viewport-wide link into the
+// magazine is a real link, so every click, tap or key press ends in /revista.
+import './cover.css';
+import type { EditionWithArticles } from '../../lib/content';
+import { longDate } from '../../lib/labels';
+import { editionSeed } from './motion';
+
+interface Props {
+  latest: EditionWithArticles | undefined;
+}
+const { latest } = Astro.props;
+const LEAD = 3; // headlines on the cover; the rest are counted
+const heads = latest?.articles.slice(0, LEAD) ?? [];
+const more = (latest?.articles.length ?? 0) - heads.length;
+const date = latest?.edition.edition_date ?? '';
+const seed = editionSeed(date, heads.map((a) => a.title));
+const pad = (n: number): string => String(n).padStart(2, '0');
+---
+
+<main class="mc" data-mc data-cover-art="micelio" data-seed={seed}>
+  <div class="mc-room" data-room aria-hidden="true">
+    <div class="mc-poster"></div>
+    <canvas class="mc-canvas" data-canvas></canvas>
+  </div>
+  <section class="mc-text">
+    <p class="mc-kicker">Revista diária · Inteligência artificial</p>
+    <h1 class="mc-masthead">LinkedIA</h1>
+    <p class="mc-work">
+      <cite>Micélio</cite>, 2026 <span class="mc-caption">— um organismo simulado no seu aparelho: milhares de agentes
+      cegos, como o mofo Physarum, encontram o nome e ligam as manchetes{latest && <> da edição de <time datetime={date}>{longDate(date)}</time></>}.</span>
+    </p>
+    {
+      heads.length > 0 ? (
+        <ol class="mc-heads">
+          {heads.map((a, i) => (
+            <li class={`mc-hl mc-hl${i + 1}`}>
+              <i class="mc-node" data-node data-min={a.read_minutes} />
+              <span>
+                <small class="mc-meta">
+                  {pad(i + 1)} · {a.read_minutes} min
+                </small>
+                <span class="mc-title">{a.title}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="mc-empty">Nenhuma edição publicada ainda.</p>
+      )
+    }
+    <div class="mc-foot">
+      {more > 0 && <p class="mc-more">+ {more} {more === 1 ? 'matéria' : 'matérias'} nesta edição</p>}
+      <p class="mc-bar">
+        <span class="mc-hint" data-hint>Clique ou toque em qualquer lugar para entrar.</span>
+        <a class="mc-enter" href="/revista" draggable="false" data-enter>Entrar na revista <span aria-hidden="true">→</span></a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<script>
+  import { boot } from './main';
+
+  boot();
+</script>

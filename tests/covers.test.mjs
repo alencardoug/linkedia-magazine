@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { COVERS, coverBySlug, coverEdition, coverPath, CURRENT_COVER, weekLabel } from '../src/covers/registry';
 import * as entrySingularidade from '../src/covers/singularidade/controller';
 import * as entryDuasSombras from '../src/covers/duas-sombras/controller';
+import * as entryMicelio from '../src/covers/micelio/controller';
 import {
   BIRTH_DELAY_MS,
   BIRTH_MS,
@@ -20,8 +21,10 @@ import {
 } from '../src/covers/singularidade/motion';
 import * as qualitySingularidade from '../src/covers/singularidade/quality';
 import * as qualityDuasSombras from '../src/covers/duas-sombras/quality';
+import * as qualityMicelio from '../src/covers/micelio/quality';
 import { isSoftwareRenderer as softwareSingularidade } from '../src/covers/singularidade/renderer';
 import { isSoftwareRenderer as softwareDuasSombras } from '../src/covers/duas-sombras/renderer';
+import { isSoftwareRenderer as softwareMicelio } from '../src/covers/micelio/renderer';
 import { bitmapScale } from '../src/covers/singularidade/snapshot';
 
 describe('cover registry', () => {
@@ -65,7 +68,7 @@ const click = (over = {}) => ({ button: 0, ctrlKey: false, metaKey: false, shift
 const key = (k, over = {}) => ({ key: k, ctrlKey: false, metaKey: false, altKey: false, repeat: false, focus: 'page', ...over });
 
 // Each cover keeps its own copy of the entry gestures and the adaptive quality (docs/COVERS.md); both are tested.
-for (const [cover, { EntryController, LONG_PRESS_MS, TAP_SLOP_PX }] of [['singularidade', entrySingularidade], ['duas-sombras', entryDuasSombras]]) {
+for (const [cover, { EntryController, LONG_PRESS_MS, TAP_SLOP_PX }] of [['singularidade', entrySingularidade], ['duas-sombras', entryDuasSombras], ['micelio', entryMicelio]]) {
   describe(`entry controller (${cover})`, () => {
     it('lets the link navigate natively without live art, and plays the exit with it', () => {
       const c = new EntryController();
@@ -205,6 +208,7 @@ describe('motion', () => {
 for (const [cover, { calibratedScale, createQuality, initialScale, MAX_SCALE, MIN_SCALE, observeFrame, START_MAX_MS }, isSoftwareRenderer] of [
   ['singularidade', qualitySingularidade, softwareSingularidade],
   ['duas-sombras', qualityDuasSombras, softwareDuasSombras],
+  ['micelio', qualityMicelio, softwareMicelio],
 ]) {
   describe(`adaptive quality (${cover})`, () => {
     it('starts from a pixel budget within the scale limits', () => {

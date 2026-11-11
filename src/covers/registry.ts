@@ -22,6 +22,17 @@ export interface CoverMeta {
 
 export const COVERS: readonly CoverMeta[] = [
   {
+    slug: 'micelio',
+    title: 'Micélio',
+    weekId: '2026-W46',
+    summary:
+      'Um organismo vivo de milhares de agentes cegos, como o mofo Physarum, encontra o nome da revista e liga as ' +
+      'manchetes com veias. O cursor ou o dedo é comida: a rede corre até ele e desmancha o nome pelo caminho.',
+    credit:
+      'organismo de mais de 100 mil agentes simulado em tempo real (Physarum) no seu aparelho, em código escrito ' +
+      'por IA, sem imagens',
+  },
+  {
     slug: 'duas-sombras',
     title: 'Duas sombras',
     weekId: '2026-W43',
@@ -31,6 +42,7 @@ export const COVERS: readonly CoverMeta[] = [
     credit:
       'escultura calculada para cada edição e iluminada em tempo real (ray marching) no seu aparelho, em código ' +
       'escrito por IA, sem imagens',
+    edition: '2026-11-09',
   },
   {
     slug: 'singularidade',
@@ -47,7 +59,7 @@ export const COVERS: readonly CoverMeta[] = [
 ];
 
 /** The cover shown at `/`. */
-export const CURRENT_COVER = 'duas-sombras';
+export const CURRENT_COVER = 'micelio';
 
 export function coverBySlug(slug: string): CoverMeta {
   const cover = COVERS.find((c) => c.slug === slug);

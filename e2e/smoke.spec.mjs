@@ -9,6 +9,7 @@ const ROUTES = [
   '/',
   '/revista',
   '/visual',
+  '/visual/micelio',
   '/visual/duas-sombras',
   '/visual/singularidade',
   '/edicoes',
