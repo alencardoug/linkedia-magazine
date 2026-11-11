@@ -86,4 +86,8 @@ The folder is self-contained: copy it, render `Cover.astro` inside a page whose 
   after 0.4–0.8 s at 1366×768, 844×390, 390×844 and 320×568 (touch); the name written, veins between the nodes, the
   pointer tearing the name; the click enters `/revista` after 3.1–3.2 s; no page errors. Fixed then: the nodes moved
   under the longer live hint on small portrait screens (now `refood`).
-- Look with the screen on, steering by finger on a phone, a minute of idling: pending, by the owner.
+- 2026-11-11, live at https://linkedia.web.app (deploy `308e57b`, CI green): approved by the owner after trying it
+  ("Testei na linkedia e estava lindo, ótimo, aprovado."). Headless Chrome on the HD 620 against the live site: CSP
+  served, live in 0.8–1.3 s, 60 fps (median 17 ms), `data-leaving` on the click and `/revista` after 3.2–3.4 s; once,
+  a cold first load in a freshly opened browser kept the HTML cover (the start-up calibration timed out: the designed
+  fallback).
