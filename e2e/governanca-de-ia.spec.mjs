@@ -138,6 +138,16 @@ test.describe('guia de governança de IA (S4)', () => {
         await page.goto(ROUTE);
         await expect(page.locator('html')).toHaveAttribute('data-scheme', scheme);
         expect(await axeBlocking(page)).toEqual([]);
+        // every highlight state keeps the reference text at AA (3-22 review)
+        const chips = page.locator('[data-yaml-tools] .chip');
+        for (let i = 0; i < (await chips.count()); i += 1) {
+          await chips.nth(i).click();
+          expect(await axeBlocking(page, '[data-yaml]'), await chips.nth(i).innerText()).toEqual([]);
+        }
+        for (const name of ['Caminho do RAG', 'Caminho do agente']) {
+          await page.getByRole('button', { name }).click();
+          expect(await axeBlocking(page, '[data-arch]'), name).toEqual([]);
+        }
       });
     }
   }

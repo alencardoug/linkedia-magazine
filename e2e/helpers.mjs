@@ -17,8 +17,10 @@ export function watchErrors(page, ignore = /$^/) {
 export const preset = (page, value) => page.addInitScript(([k, v]) => localStorage.setItem(k, v), [KEY, value]);
 
 /** Serious and critical axe violations, as `rule: targets`. */
-export async function axeBlocking(page) {
-  const { violations } = await new AxeBuilder({ page }).analyze();
+export async function axeBlocking(page, include) {
+  const builder = new AxeBuilder({ page });
+  if (include) builder.include(include);
+  const { violations } = await builder.analyze();
   return violations
     .filter((v) => v.impact === 'serious' || v.impact === 'critical')
     .map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);

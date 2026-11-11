@@ -94,7 +94,6 @@
   border-radius: 14px;
   background: var(--card);
   box-shadow: var(--shadow), var(--lift);
-  transition: opacity 0.25s;
 }
 .node[data-node='user'] { grid-area: user; justify-self: center; }
 .node[data-node='api'] { grid-area: api; justify-self: center; width: min(560px, 100%); }
@@ -177,8 +176,15 @@
   stroke: var(--ink);
   stroke-width: 2;
 }
+/* off-route nodes go flat and dashed, only their icon fades: the text keeps its contrast */
 .arch[data-route='rag'] .node:not([data-on~='rag']),
 .arch[data-route='agente'] .node:not([data-on~='agente']) {
+  box-shadow: none;
+  outline: 1.5px dashed var(--line-strong);
+  outline-offset: -1.5px;
+}
+.arch[data-route='rag'] .node:not([data-on~='rag']) .icon,
+.arch[data-route='agente'] .node:not([data-on~='agente']) .icon {
   opacity: 0.35;
 }
 .arch[data-route='rag'] .arch-wires [data-on]:not([data-on~='rag']),

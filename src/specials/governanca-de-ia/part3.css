@@ -274,9 +274,11 @@
   height: 1.75em;
   border-radius: 2px;
   background: var(--kd);
+  opacity: var(--mark, 1);
 }
+/* a highlight fades only the decorative markers: every line keeps its full contrast */
 .yaml[data-show] .ln {
-  opacity: 0.45;
+  --mark: 0.25;
 }
 .yaml[data-show='politica'] .ln[data-kind='politica'],
 .yaml[data-show='risco'] .ln[data-kind='risco'],
@@ -284,7 +286,8 @@
 .yaml[data-show='implementacao'] .ln[data-kind='implementacao'],
 .yaml[data-show='teste'] .ln[data-kind='teste'],
 .yaml[data-show='evidencia'] .ln[data-kind='evidencia'] {
-  opacity: 1;
+  --mark: 1;
+  --picked: underline;
   color: var(--kd);
   font-weight: 600;
 }
@@ -596,6 +599,6 @@
     border: 2px solid Highlight;
   }
   .yaml[data-show] .ln[data-kind] {
-    text-decoration: underline;
+    text-decoration: var(--picked, none);
   }
 }
