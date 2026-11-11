@@ -1,0 +1,81 @@
+---
+// Hero, "Como ler este guia" and the TOC of the guide (S4). The splice is drawn at build time for 1440×900 and
+// redrawn by hero.ts once the real text metrics are known.
+import { longDate } from '../../lib/labels';
+import type { Special } from '../../lib/specials';
+import { TOC } from './data';
+import { spliceSvg } from './geometry';
+import Icon from './Icon.astro';
+import { familyOf, pad2 } from './families';
+
+interface Props {
+  page: Special;
+}
+const { page } = Astro.props;
+---
+
+<section class="hero" aria-labelledby="titulo">
+  <svg
+    class="threads"
+    viewBox="0 0 1440 900"
+    preserveAspectRatio="xMaxYMin slice"
+    aria-hidden="true"
+    focusable="false"
+    set:html={spliceSvg(1440, 900, { x: 560, y: 812 })}
+  />
+  <div class="strip" aria-hidden="true"></div>
+  <div class="wrap hero-grid">
+    <header class="hero-text">
+      <p class="kicker label">
+        <span>Conteúdo especial</span><span class="dot" aria-hidden="true"></span><span class="visually-hidden"> · </span>
+        <time datetime={page.date}>{longDate(page.date)}</time><span class="dot" aria-hidden="true"></span><span
+          class="visually-hidden"> · </span>
+        <span>{page.readMinutes} min de leitura</span>
+      </p>
+      <h1 id="titulo"><span class="h1-kicker">Guia</span> Governança de IA: como implementar em ambientes corporativos</h1>
+      <p class="dek" data-summary>
+        Da estratégia ao software de IA: como ligar as políticas, os riscos e as decisões da empresa aos controles, testes e
+        evidências que a engenharia produz.
+      </p>
+      <p class="lede">
+        Governança de IA é o conjunto de políticas, papéis, processos e controles que permite adotar, construir, operar e
+        desligar sistemas de IA com segurança e alinhados ao negócio. São dois sistemas que precisam conversar: a{' '}
+        <strong>governança corporativa</strong> define o que é permitido, exigido e aceitável; a{' '}
+        <strong>governança técnica</strong> mostra como implementar, testar e comprovar. Este guia monta os dois e,
+        principalmente, <span class="ponte-phrase">a ponte entre eles</span>.
+      </p>
+    </header>
+  </div>
+</section>
+
+<section class="intro" aria-label="Como ler este guia">
+  <div class="wrap">
+    <aside class="card howto" data-family="ponte">
+      <p class="case-tag" aria-hidden="true"><Icon name="hospital" /><b>AI-023</b></p>
+      <p>
+        <strong>Como ler este guia:</strong> um único caso acompanha o texto, o <strong>AI-023</strong>: assistente de
+        atendimento de um hospital que responde dúvidas com RAG e agenda exames por meio de um agente. Códigos (GOV, TEC,
+        CTRL…), gates G0–G4 e limites numéricos são uma proposta de organização, não exigências de normas.
+      </p>
+    </aside>
+  </div>
+</section>
+
+<nav class="toc" aria-labelledby="sumario" data-toc>
+  <div class="wrap">
+    <p class="label" id="sumario">Neste guia</p>
+    <ol class="toc-list">
+      {
+        TOC.map(([id, label], i) => (
+          <li>
+            <a href={`#${id}`}>
+              <span class="sw" data-family={familyOf(i + 1)} aria-hidden="true" />
+              <span class="tn">{pad2(i + 1)}</span>
+              <span class="tl">{label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</nav>

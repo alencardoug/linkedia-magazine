@@ -18,8 +18,9 @@ const pages = (dir) =>
     .map((f) => `/${dir}/${f.slice(0, -'.html'.length)}`);
 const NOT_FOUND = '/pagina-que-nao-existe';
 const ARTICLES = pages('materias').slice(0, 3);
-// A standalone special has its own shell and no magazine theme (its spec: e2e/governanca-de-projetos.spec.mjs).
-const STANDALONE = new Set(SPECIALS.filter((s) => s.standalone).map((s) => `/especiais/${s.slug}`));
+// A standalone or art-directed special has its own shell and no magazine theme (their specs:
+// e2e/governanca-de-projetos.spec.mjs, e2e/governanca-de-ia.spec.mjs).
+const STANDALONE = new Set(SPECIALS.filter((s) => s.standalone || s.artDirected).map((s) => `/especiais/${s.slug}`));
 const SPECIAL_ROUTES = pages('especiais').filter((r) => !STANDALONE.has(r));
 const ROUTES = ['/revista', '/edicoes', pages('edicoes').at(-1), pages('categorias')[0], ...ARTICLES, ...SPECIAL_ROUTES, '/sobre', '/visual', NOT_FOUND];
 const WIDTHS = [1100, 320];

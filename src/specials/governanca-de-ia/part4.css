@@ -1,0 +1,475 @@
+/* §9 the applied example, §10 responsibilities */
+.case {
+  margin-top: 28px;
+  max-width: 1000px;
+  padding: 28px 32px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+}
+.case-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.case-head .label {
+  color: var(--muted);
+}
+.case-tag-sm {
+  width: 52px;
+  padding: 18px 6px 8px;
+}
+.case-tag-sm::before {
+  top: 6px;
+  width: 8px;
+  height: 8px;
+}
+.case dl {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.case dl > div {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--card-2);
+}
+.case dt,
+.bench-head [role='columnheader'],
+.raci-head [role='columnheader'] {
+  font: 600 11px/16px var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.case dd {
+  margin-top: 4px;
+  font-size: 16px;
+  line-height: 25px;
+}
+.case [data-limits] {
+  box-shadow: inset 0 0 0 2px var(--alarm);
+}
+.case [data-limits] dt {
+  color: var(--alarm);
+}
+
+/* §9.2 architecture: nodes on a grid, wires drawn by arch.ts */
+.arch {
+  margin-top: 28px;
+}
+.route-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.arch-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'user user'
+    'api api'
+    'orq orq'
+    'rag agent'
+    'repo sched'
+    'obs obs';
+  gap: 40px 48px;
+  max-width: 1040px;
+  padding: 8px 48px 4px;
+}
+.arch-wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.node {
+  position: relative;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+  transition: opacity 0.25s;
+}
+.node[data-node='user'] { grid-area: user; justify-self: center; }
+.node[data-node='api'] { grid-area: api; justify-self: center; width: min(560px, 100%); }
+.node[data-node='orq'] { grid-area: orq; justify-self: center; width: min(560px, 100%); }
+.node[data-node='rag'] { grid-area: rag; }
+.node[data-node='repo'] { grid-area: repo; }
+.node[data-node='agent'] { grid-area: agent; }
+.node[data-node='sched'] { grid-area: sched; }
+.node[data-node='obs'] { grid-area: obs; }
+.node-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 700 17px/1.25 var(--display);
+}
+.node-name .icon {
+  width: 20px;
+  height: 20px;
+  color: var(--gold-ink);
+}
+.node-detail {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--muted);
+}
+.node-store {
+  border-radius: 14px 14px 26px 26px / 14px 14px 18px 18px;
+  background: var(--card-2);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.node-obs {
+  background: var(--field-bind);
+  color: var(--on-bind);
+}
+.node-obs .node-detail {
+  color: var(--on-bind-muted);
+}
+.node-obs .icon {
+  color: var(--on-bind-accent);
+}
+/* without JS: small CSS arrows between the main nodes */
+.arch:not([data-wired]) .node[data-node='user']::after,
+.arch:not([data-wired]) .node[data-node='api']::after,
+.arch:not([data-wired]) .node[data-node='rag']::after,
+.arch:not([data-wired]) .node[data-node='agent']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -30px;
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: translateX(-50%) rotate(45deg);
+}
+.wire {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  transition: opacity 0.25s, stroke 0.25s;
+}
+.signal,
+.signal-head {
+  fill: none;
+  stroke: var(--gold-ink);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+  transition: opacity 0.25s;
+}
+.signal-head,
+.wire-head {
+  stroke-dasharray: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.wire-head {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.arch[data-route='rag'] .node:not([data-on~='rag']),
+.arch[data-route='agente'] .node:not([data-on~='agente']) {
+  opacity: 0.35;
+}
+.arch[data-route='rag'] .arch-wires [data-on]:not([data-on~='rag']),
+.arch[data-route='agente'] .arch-wires [data-on]:not([data-on~='agente']) {
+  opacity: 0.15;
+}
+.arch[data-route] .arch-wires .wire[data-on],
+.arch[data-route] .arch-wires .wire-head[data-on] {
+  stroke: var(--warm-ink);
+  stroke-width: 3;
+}
+.arch[data-route='rag'] .node[data-on~='rag'],
+.arch[data-route='agente'] .node[data-on~='agente'] {
+  box-shadow: inset 0 0 0 2px var(--warm), var(--lift);
+}
+
+/* §9.3 decisions */
+.decide {
+  margin-top: 24px;
+  display: grid;
+  gap: 12px;
+  max-width: 900px;
+}
+.decide li {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.decide-n {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px var(--cool);
+  font: 800 17px/1 var(--display);
+  color: var(--cool-ink);
+}
+.decide li > span:last-child {
+  padding-top: 5px;
+}
+
+/* §9.4 controls */
+.controls {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.control {
+  padding: 28px 28px 24px;
+}
+.control .label {
+  color: var(--warm-ink);
+}
+.control ul {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+.control li,
+.checks li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 24px;
+}
+.control li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  width: 8px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--warm);
+}
+
+/* §9.5 the test bench */
+.bench,
+.raci {
+  margin-top: 28px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+}
+.bench:focus-visible,
+.raci:focus-visible {
+  outline-offset: 4px;
+}
+.bench-row,
+.raci-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1.3fr);
+  gap: 20px;
+  align-items: start;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.bench-head .bench-row,
+.raci-head .raci-row {
+  padding-top: 18px;
+}
+[role='rowgroup']:last-child > .bench-row:last-child,
+[role='rowgroup']:last-child > .raci-row:last-child {
+  border-bottom: 0;
+}
+.bench-scenario,
+.raci-activity {
+  font: 700 16px/1.35 var(--display);
+}
+.bench-cell {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 15px;
+  line-height: 23px;
+}
+.bench-cell .icon {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  color: var(--muted);
+}
+.bench-criterion .icon {
+  color: var(--ok);
+}
+.bench-criterion span {
+  font-weight: 600;
+}
+
+/* §9.6 pilot evidence */
+.checks {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 32px;
+  max-width: 1100px;
+}
+.checks li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 12px;
+  padding-left: 0;
+}
+.checks .icon {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: var(--ok);
+}
+
+/* §10 three separate decision records */
+.records {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.record-block {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 26px 26px 24px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+  border-top: 4px solid var(--gold);
+}
+.record-n {
+  font: 800 34px/1 var(--display);
+  color: var(--gold-ink);
+}
+.record-kind {
+  font: 800 21px/1.2 var(--display);
+  letter-spacing: -0.015em;
+}
+.record-who {
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--muted);
+}
+.raci-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+.raci-cell {
+  font-size: 15px;
+  line-height: 23px;
+}
+.lean {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.lean li {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 26px 22px 22px;
+  font-size: 15px;
+  line-height: 23px;
+  --tab: var(--ink);
+}
+.lean .icon {
+  width: 24px;
+  height: 24px;
+  color: var(--gold-ink);
+}
+
+@media (max-width: 1100px) {
+  .lean {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 899px) {
+  .case dl,
+  .records {
+    grid-template-columns: 1fr;
+  }
+  .arch-grid {
+    gap: 32px 16px;
+    padding-inline: 28px;
+  }
+  .node {
+    padding: 14px 14px;
+  }
+  .node-name {
+    font-size: 15px;
+  }
+  .node-detail {
+    font-size: 13px;
+    line-height: 19px;
+  }
+}
+@media (max-width: 760px) {
+  .case {
+    padding: 24px 20px;
+  }
+  .controls,
+  .checks,
+  .lean {
+    grid-template-columns: 1fr;
+  }
+  .control {
+    padding: 24px 22px;
+  }
+  .bench-head,
+  .raci-head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .bench-row,
+  .raci-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 16px 18px;
+  }
+  .bench-cell::before,
+  .raci-cell::before {
+    content: attr(data-label);
+    grid-column: 1 / -1;
+    font: 600 11px/16px var(--sans);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .raci-cell {
+    display: grid;
+  }
+}
+@media (forced-colors: active) {
+  .node,
+  .case,
+  .bench,
+  .raci,
+  .record-block {
+    border: 1px solid CanvasText;
+  }
+  .wire,
+  .wire-head,
+  .signal,
+  .signal-head {
+    stroke: CanvasText;
+  }
+  .arch[data-route] .node[data-on] {
+    outline: 2px solid Highlight;
+  }
+}

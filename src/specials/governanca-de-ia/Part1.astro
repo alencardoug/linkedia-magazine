@@ -1,0 +1,149 @@
+---
+// §1 Fundamentos and §2 Arquitetura integrada (S4 tela 1, extended): question cards with links to where the guide
+// develops each question (Codex round 1, checked against the text), the lifecycle strand, the three bands with the
+// two flows, and the five-sentence thesis on its own band.
+import { FLOWS, LAYERS, LIFECYCLE } from './data';
+import Icon from './Icon.astro';
+import { SUB } from './subsections';
+
+const QUESTIONS = [
+  ['list-checks', 'Que soluções de IA usamos, para quê e quem responde por cada uma?', ['4.2', '10']],
+  ['network', 'Que modelos, dados, fornecedores e agentes estão envolvidos?', ['4.2', '5.1', '9.2']],
+  ['gauge', 'Que riscos toleramos e quem pode aceitá-los?', ['4.3', '10']],
+  ['shield-check', 'Como provamos, com evidências, que segurança, privacidade e qualidade foram atendidas?', ['6', '9.4', '9.5']],
+  ['key-round', 'Quem autoriza a produção e quem pode interromper a operação?', ['4.1', '8', '10']],
+  ['siren', 'Como detectamos incidentes, reavaliamos riscos e auditamos decisões?', ['4.1', '8', '10', '12.1']],
+] as const;
+
+const THESIS = [
+  'A governança corporativa estabelece a obrigação.',
+  'A engenharia implementa o controle.',
+  'A avaliação produz a evidência.',
+  'A governança usa a evidência para decidir.',
+  'A operação mostra se o controle continua eficaz.',
+];
+const familyOfLayer = (side: string) => side as 'corp' | 'ponte' | 'tec';
+---
+
+<section class="sec" aria-labelledby="fundamentos">
+  <div class="wrap">
+    <h2 id="fundamentos"><span class="h2n">01</span> Fundamentos: o que a governança precisa responder</h2>
+    <p class="sec-intro">
+      A diretoria — e qualquer auditor — vai fazer seis perguntas. A governança existe para que as respostas estejam
+      prontas e documentadas:
+    </p>
+    <ol class="qs">
+      {
+        QUESTIONS.map(([icon, q, refs], i) => (
+          <li class="card q">
+            <span class="q-n" aria-hidden="true">
+              <Icon name={icon} />
+              Pergunta {i + 1}
+            </span>
+            <p class="q-text">{q}</p>
+            <p class="q-refs">
+              <span class="q-refs-label">Onde o guia desenvolve esta pergunta:</span>
+              {refs.map((n) => (
+                <a href={`#${SUB[n].id}`}>
+                  {n} {SUB[n].short}
+                </a>
+              ))}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+    <aside class="card principle" data-family="ponte">
+      <p>
+        <strong>Princípio central:</strong> a governança não termina na aprovação do projeto. Ela acompanha o sistema por
+        todo o ciclo de vida.
+      </p>
+      <ol class="knots" aria-label="Ciclo de vida de um sistema de IA">
+        {
+          LIFECYCLE.map((s) => (
+            <li>
+              <span class="knot" aria-hidden="true" />
+              <span>{s}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </aside>
+    <div class="refs">
+      <ul class="badges" aria-hidden="true">
+        <li>ISO/IEC 42001</li>
+        <li>NIST AI RMF</li>
+        <li>OWASP GenAI</li>
+      </ul>
+      <p>
+        O modelo se apoia na ISO/IEC 42001, no NIST AI RMF e no OWASP GenAI, entre outras <a href="#referencias"
+          >referências</a
+        >.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-alt" aria-labelledby="arquitetura">
+  <div class="wrap">
+    <h2 id="arquitetura"><span class="h2n">02</span> Arquitetura integrada: duas governanças e uma ponte</h2>
+    <p class="sec-intro">
+      São três camadas, com um catálogo comum no meio que traduz obrigações em controles e devolve evidências para a
+      decisão. Nelas se distribuem os 14 pilares de referência:
+    </p>
+    <figure class="weave">
+      {
+        LAYERS.map((layer, i) => (
+          <>
+            {i > 0 && (
+              <div class="flows">
+                <p data-dir="down">
+                  <Icon name="arrow-down" />
+                  <span class="visually-hidden">Desce:</span> {FLOWS[i - 1][0]}
+                </p>
+                <p data-dir="up">
+                  <Icon name="arrow-up" />
+                  <span class="visually-hidden">Sobe:</span> {FLOWS[i - 1][1]}
+                </p>
+              </div>
+            )}
+            <div class="band" data-family={familyOfLayer(layer.side)}>
+              <div class="band-head">
+                <p class="band-title">{layer.title}</p>
+                <p class="band-sub">{layer.sub}</p>
+              </div>
+              <ul class="band-pillars">
+                {layer.pillars.map((p) => (
+                  <li>
+                    <span class="end" aria-hidden="true" />
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        ))
+      }
+      <figcaption>Os 14 pilares são uma organização prática, não a lista de uma norma.</figcaption>
+    </figure>
+    <p class="sec-para">
+      Integrar não é centralizar tudo em um comitê: é padronizar regras e rastreabilidade, deixando cada decisão com quem
+      tem autoridade para tomá-la. Em uma frase:
+    </p>
+  </div>
+</section>
+
+<section class="thesis" aria-label="A tese em uma frase">
+  <div class="wrap">
+    <p class="thesis-list">
+      {
+        THESIS.map((t) => (
+          <span class="thesis-line">
+            <span class="knot" aria-hidden="true" />
+            {t}{' '}
+          </span>
+        ))
+      }
+    </p>
+  </div>
+</section>

@@ -15,6 +15,8 @@ export interface Special {
   readMinutes?: number;
   /** A self-contained page from `public/` with its own shell (no magazine header, theme or footer). */
   standalone?: boolean;
+  /** An art-directed Astro page on `SpecialLayout.astro`: own fonts, palette and light/dark choice, no weekly theme. */
+  artDirected?: boolean;
 }
 
 export const SPECIALS: readonly Special[] = [
@@ -25,6 +27,8 @@ export const SPECIALS: readonly Special[] = [
       'Guia prático para ligar políticas, riscos e decisões da empresa aos controles, testes e evidências da engenharia.',
     date: '2026-10-23',
     readMinutes: 15,
+    // 3-22 (D-076/D-077): re-staged in the S4 direction "Fio da Rastreabilidade", with a page-only dark mode.
+    artDirected: true,
   },
   {
     // Standalone interactive guide (owner, 2026-11-10: listed right below the AI guide): its own shell and code,

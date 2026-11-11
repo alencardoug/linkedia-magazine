@@ -1,0 +1,14 @@
+---
+// A decorative Lucide icon, inline (the CSP allows no data: URIs), coloured by currentColor.
+import { ICONS } from './icons';
+
+interface Props {
+  name: keyof typeof ICONS | string;
+  class?: string;
+}
+const { name, class: cls = 'icon' } = Astro.props;
+const inner = ICONS[name];
+if (!inner) throw new Error(`Ícone desconhecido: ${name}`);
+---
+
+<svg class={cls} viewBox="0 0 24 24" aria-hidden="true" focusable="false" set:html={inner} />

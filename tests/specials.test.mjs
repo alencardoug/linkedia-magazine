@@ -16,8 +16,9 @@ describe('governança de projetos snapshot', () => {
 
   it('ships only the two pages, the JSON and one hashed asset directory named after its bytes', () => {
     expect(extra).toEqual([]);
+    // Besides the snapshot, `especiais/` holds only the AI guide's pre-paint scheme script (3-22).
     expect(files(join(PUBLIC, 'especiais')).filter((f) => !f.startsWith(`${SLUG}/assets/`)).sort()).toEqual(
-      [`${SLUG}.html`, `${SLUG}/conteudo.json`, `${SLUG}/guia-completo.html`].sort(),
+      [`${SLUG}.html`, `${SLUG}/conteudo.json`, `${SLUG}/guia-completo.html`, 'governanca-de-ia/esquema.js'].sort(),
     );
     expect([...assets.keys()].every((n) => /^[\w/-]+\.(?:m?js|css)$/.test(n))).toBe(true);
     expect(assetHash(assets)).toBe(hash);

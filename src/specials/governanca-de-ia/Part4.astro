@@ -1,0 +1,240 @@
+---
+// §9 the applied example (case file, architecture with its two paths, decisions, controls, homologation bench,
+// pilot evidence) and §10 responsibilities (three separate decision records, who conducts and who validates).
+import { ARCH_BRANCHES, ARCH_FLOW, CASE_CONTROLS, CASE_DECISIONS, DECISIONS, HOMOLOGATION, PILOT_EVIDENCE, RACI } from './data';
+import Icon from './Icon.astro';
+
+const [user, api, orq] = ARCH_FLOW;
+const [rag, agent] = ARCH_BRANCHES;
+const BUREAUCRACY = [
+  ['git-branch', 'O comitê não revisa cada commit ou deploy de rotina.'],
+  ['scale', 'Decisões de baixo risco são delegadas por critérios documentados.'],
+  ['cog', 'Testes e relatórios são automatizados sempre que o requisito permite.'],
+  ['users', 'A análise humana fica para impactos relevantes, exceções e riscos residuais, com revisões na medida do risco.'],
+] as const;
+---
+
+<section class="sec" aria-labelledby="exemplo">
+  <div class="wrap">
+    <h2 id="exemplo"><span class="h2n">09</span> Exemplo aplicado: RAG com agente de agendamento</h2>
+
+    <h3 id="o-caso"><span class="h3n">9.1</span> O caso</h3>
+    <div class="case">
+      <p class="case-head">
+        <span class="case-tag case-tag-sm" aria-hidden="true"><Icon name="hospital" /></span>
+        <span class="label">AI-023 · Assistente de atendimento</span>
+      </p>
+      <dl>
+        <div>
+          <dt>Finalidade</dt>
+          <dd>
+            Esclarecer dúvidas administrativas e de preparo para exames com fontes aprovadas, e agendar por ferramentas
+            autorizadas.
+          </dd>
+        </div>
+        <div data-limits>
+          <dt>Limites</dt>
+          <dd>Não diagnostica, não prescreve, não indica tratamento e não substitui profissionais de saúde.</dd>
+        </div>
+        <div>
+          <dt>Classificação inicial</dt>
+          <dd>Alto risco, como hipótese a confirmar na avaliação formal.</dd>
+        </div>
+      </dl>
+    </div>
+
+    <h3 id="arquitetura-do-caso"><span class="h3n">9.2</span> Arquitetura</h3>
+    <figure class="arch" data-arch>
+      <div class="route-tools" role="group" aria-label="Destacar um caminho da arquitetura" hidden data-route-tools>
+        <button type="button" class="btn" aria-pressed="false" data-route="rag"><Icon name="search" />Caminho do RAG</button>
+        <button type="button" class="btn" aria-pressed="false" data-route="agente"
+          ><Icon name="calendar-check" />Caminho do agente</button
+        >
+      </div>
+      <div class="arch-grid">
+        <svg class="arch-wires" aria-hidden="true" focusable="false"></svg>
+        <div class="node" data-node="user" data-on="rag agente">
+          <p class="node-name"><Icon name="user" />{user[0]}</p>
+        </div>
+        <div class="node" data-node="api" data-on="rag agente">
+          <p class="node-name">{api[0]}</p>
+          <p class="node-detail">{api[1]}</p>
+        </div>
+        <div class="node" data-node="orq" data-on="rag agente">
+          <p class="node-name">{orq[0]}</p>
+          <p class="node-detail">{orq[1]}</p>
+        </div>
+        <div class="node" data-node="rag" data-on="rag">
+          <p class="node-name"><Icon name="search" />{rag[0]}</p>
+          <p class="node-detail">{rag[1]}</p>
+        </div>
+        <div class="node node-store" data-node="repo" data-on="rag">
+          <p class="node-name"><Icon name="database" />{rag[2]}</p>
+        </div>
+        <div class="node" data-node="agent" data-on="agente">
+          <p class="node-name"><Icon name="bot" />{agent[0]}</p>
+          <p class="node-detail">{agent[1]}</p>
+        </div>
+        <div class="node node-store" data-node="sched" data-on="agente">
+          <p class="node-name"><Icon name="calendar-check" />{agent[2]}</p>
+        </div>
+        <div class="node node-obs" data-node="obs" data-on="rag agente">
+          <p class="node-name"><Icon name="activity" />Observabilidade e governança técnica</p>
+          <p class="node-detail">Traces, avaliações, auditoria e alertas, com sinais da API, da orquestração, do RAG e do agente</p>
+        </div>
+      </div>
+      <figcaption>Cada caminho só alcança o que o usuário pode ver ou fazer, e toda camada deixa rastro na observabilidade.</figcaption>
+    </figure>
+
+    <h3 id="decisoes-do-caso"><span class="h3n">9.3</span> O que a governança corporativa decide</h3>
+    <ol class="decide">
+      {
+        CASE_DECISIONS.map((item, i) => (
+          <li>
+            <span class="decide-n" aria-hidden="true">
+              {i + 1}
+            </span>
+            <span>{item}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <aside class="card warn warn-solo" data-variant="warning">
+      <div class="warn-text">
+        <Icon name="hospital" class="icon warn-icon" />
+        <p>
+          <strong>No setor de saúde:</strong> dados de saúde são dados pessoais sensíveis na LGPD. A avaliação de impacto
+          de IA (ISO/IEC 42005) e o RIPD, quando cabível, não substituem um ao outro. Verifique também se a finalidade
+          enquadra o produto nas regras da Anvisa para software como dispositivo médico.
+        </p>
+      </div>
+    </aside>
+
+    <h3 id="controles-do-caso"><span class="h3n">9.4</span> Como a engenharia implementa os controles</h3>
+    <div class="controls">
+      {
+        CASE_CONTROLS.map(([title, items]) => (
+          <div class="card control" data-family="tec">
+            <p class="label">{title}</p>
+            <ul>
+              {items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <h3 id="homologacao"><span class="h3n">9.5</span> Matriz de homologação</h3>
+    <div class="bench" role="region" aria-label="Matriz de homologação do AI-023" tabindex="0">
+      <div role="table">
+        <div class="bench-head" role="rowgroup">
+          <div class="bench-row" role="row">
+            <span role="columnheader">Cenário</span>
+            <span role="columnheader">Evidência</span>
+            <span role="columnheader">Critério (exemplo)</span>
+          </div>
+        </div>
+        <div role="rowgroup">
+          {
+            HOMOLOGATION.map(([scenario, evidence, criterion]) => (
+              <div class="bench-row" role="row">
+                <span class="bench-scenario" role="rowheader">
+                  {scenario}
+                </span>
+                <span class="bench-cell" role="cell" data-label="Evidência">
+                  <Icon name="flask-conical" />
+                  <span>{evidence}</span>
+                </span>
+                <span class="bench-cell bench-criterion" role="cell" data-label="Critério (exemplo)">
+                  <Icon name="circle-check" />
+                  <span>{criterion}</span>
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+    <p class="figcap">
+      Limites ilustrativos: os reais dependem de risco, impacto e contexto, e passar nos testes não garante ausência de
+      falhas futuras.
+    </p>
+
+    <h3 id="evidencias-do-piloto"><span class="h3n">9.6</span> Evidências mínimas do piloto</h3>
+    <ul class="checks">
+      {
+        PILOT_EVIDENCE.map((item) => (
+          <li>
+            <Icon name="square-check" />
+            <span>{item}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<section class="sec sec-alt" aria-labelledby="responsabilidades">
+  <div class="wrap">
+    <h2 id="responsabilidades"><span class="h2n">10</span> Responsabilidades e modelo organizacional</h2>
+    <p class="sec-intro">
+      Três decisões são distintas e devem ser registradas separadamente, cada uma com responsável e alçada definidos na
+      política:
+    </p>
+    <ol class="records">
+      {
+        DECISIONS.map(([decision, who], i) => (
+          <li class="record-block">
+            <span class="record-n" aria-hidden="true">
+              {i + 1}
+            </span>
+            <span class="record-kind">{decision}</span>
+            <span class="record-who">{who}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <div class="raci" role="region" aria-label="Responsabilidades por atividade" tabindex="0">
+      <div role="table">
+        <div class="raci-head" role="rowgroup">
+          <div class="raci-row" role="row">
+            <span role="columnheader">Atividade</span>
+            <span role="columnheader">Conduz</span>
+            <span role="columnheader">Valida ou aprova</span>
+          </div>
+        </div>
+        <div role="rowgroup">
+          {
+            RACI.map(([activity, leads, validates]) => (
+              <div class="raci-row" role="row">
+                <span class="raci-activity" role="rowheader">
+                  {activity}
+                </span>
+                <span class="raci-cell" role="cell" data-label="Conduz">
+                  {leads}
+                </span>
+                <span class="raci-cell" role="cell" data-label="Valida ou aprova">
+                  {validates}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <h3 id="sem-burocracia"><span class="h3n">10.1</span> Como evitar burocracia</h3>
+    <ul class="lean">
+      {
+        BUREAUCRACY.map(([icon, item]) => (
+          <li class="card">
+            <Icon name={icon} />
+            <span>{item}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

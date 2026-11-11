@@ -1,0 +1,268 @@
+---
+// §6 the thread itself (seven links, the failure counterfactual, the N:N rule), §7 governance as code (the YAML
+// inspector) and §8 the gates (overview map above readable cards).
+import { AUTOMATE, GATES_AFTER, GATES_BEFORE, HUMAN, YAML } from './data';
+import { KIND_LABEL, LINKS, yamlKind } from './chain';
+import Icon from './Icon.astro';
+
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// One span per line of the YAML (same text, same newlines), tagged with the chain link it declares, if any.
+const yamlHtml = YAML.split('\n')
+  .map((line) => {
+    const kind = yamlKind(line);
+    return kind ? `<span class="ln" data-kind="${kind}">${esc(line)}</span>` : `<span class="ln">${esc(line)}</span>`;
+  })
+  .join('\n');
+
+const GATES = [
+  ...GATES_BEFORE.map((g) => ({ g, decision: false })),
+  { g: null, decision: true },
+  ...GATES_AFTER.map((g) => ({ g, decision: false })),
+];
+// Overview map: x of each stop on a 1200-wide drawing.
+const STOPS = [
+  { x: 110, id: 'G0', name: 'Registro' },
+  { x: 290, id: 'G1', name: 'Avaliação' },
+  { x: 470, id: 'G2', name: 'Validação' },
+  { x: 650, id: '?', name: 'Decisão' },
+  { x: 830, id: 'G3', name: 'Produção' },
+  { x: 1010, id: 'G4', name: 'Operação' },
+];
+---
+
+<section class="sec sec-ponte" data-family="ponte" aria-labelledby="integracao">
+  <div class="wrap">
+    <h2 id="integracao"><span class="h2n">06</span> Camada de integração: o fio da rastreabilidade</h2>
+    <p class="sec-intro">
+      O catálogo de controles (GOV-06) é o elo: cada controle aponta a política de origem, os riscos que mitiga, quem o
+      implementa e como se comprova. No AI-023, o isolamento de dados de pacientes fica assim:
+    </p>
+    <figure class="chain" data-chain>
+      <div class="chain-tools" hidden data-chain-tools>
+        <button type="button" class="btn" aria-pressed="false" aria-describedby="chain-loop" data-fail-toggle>
+          <Icon name="circle-x" />Simular falha no teste
+        </button>
+      </div>
+      <div class="chain-track">
+        <svg class="chain-return" viewBox="0 0 100 48" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <path class="chain-return-path" d="M100 46 C 100 0, 0 0, 0 42" />
+        </svg>
+        <span class="chain-return-head" aria-hidden="true"></span>
+        <ol class="chain-list">
+          {
+            LINKS.map((l) => (
+              <li class="link" data-kind={l.kind} data-family={l.family}>
+                <span class="link-knot" aria-hidden="true" />
+                <span class="link-kind">{l.label}</span>
+                {l.code && (
+                  <code class="tag" data-family={l.family}>
+                    {l.code}
+                  </code>
+                )}
+                <span class="link-text">{l.text}</span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+      <p class="chain-loop" id="chain-loop">
+        <Icon name="undo-2" />Se o teste falhar, a implementação é corrigida e reavaliada antes da decisão.
+      </p>
+      <figcaption>Cada elo tem um ID: qualquer teste responde por que existe, que exigência atende e que decisão apoiou.</figcaption>
+    </figure>
+
+    <aside class="card nn" data-family="ponte">
+      <svg class="nn-art" viewBox="0 0 220 120" aria-hidden="true" focusable="false">
+        <g class="nn-edges">
+          <path d="M30 30 C 80 30, 80 20, 110 20" />
+          <path d="M30 30 C 80 30, 80 60, 110 60" />
+          <path d="M30 90 C 80 90, 80 100, 110 100" />
+          <path d="M110 20 C 140 20, 150 40, 190 40" />
+          <path d="M110 60 C 140 60, 150 40, 190 40" />
+          <path d="M110 100 C 140 100, 150 90, 190 90" />
+        </g>
+        <g class="nn-nodes">
+          <circle cx="30" cy="30" r="8" data-family="corp" />
+          <circle cx="30" cy="90" r="8" data-family="corp" />
+          <rect x="102" y="12" width="16" height="16" rx="3" />
+          <rect x="102" y="52" width="16" height="16" rx="3" />
+          <rect x="102" y="92" width="16" height="16" rx="3" />
+          <circle cx="190" cy="40" r="8" data-family="tec" />
+          <circle cx="190" cy="90" r="8" data-family="tec" />
+        </g>
+      </svg>
+      <p>
+        <strong>Regra de desenho:</strong> uma política pode gerar vários controles, e um teste pode comprovar vários; o
+        mesmo vale para as correspondências de entregáveis da seção 4.1. Guarde essas relações N:N no catálogo, em vez de
+        exigir um documento para cada ligação.
+      </p>
+    </aside>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="codigo">
+  <div class="wrap">
+    <h2 id="codigo"><span class="h2n">07</span> Governança como código</h2>
+    <p class="sec-intro">
+      Governança como código não entrega a scripts o julgamento ético ou jurídico: automatiza as verificações objetivas e
+      reserva as pessoas para o que exige julgamento.
+    </p>
+
+    <h3 id="controles-declarados"><span class="h3n">7.1</span> Os controles declarados junto do código</h3>
+    <p class="prose">Cada sistema declara, no próprio repositório, os controles que se aplicam a ele:</p>
+    <figure class="yaml" data-yaml>
+      <div class="yaml-tools" role="group" aria-label="Destacar no arquivo um elo do fio da seção 6" hidden data-yaml-tools>
+        {
+          Object.entries(KIND_LABEL).map(([kind, label]) => (
+            <button type="button" class="chip" aria-pressed="false" data-kind={kind}>
+              <span class="chip-dot" aria-hidden="true" />
+              {label}
+            </button>
+          ))
+        }
+      </div>
+      <div class="yaml-body">
+        <pre tabindex="0" aria-label="governance/control-mapping.yaml"><code set:html={yamlHtml} /></pre>
+      </div>
+      <figcaption>
+        <code>governance/control-mapping.yaml</code> do AI-023: declara controles e verificações; a proteção acontece no
+        sistema e é comprovada pelos testes.
+      </figcaption>
+    </figure>
+
+    <h3 id="automatizar"><span class="h3n">7.2</span> O que automatizar e o que manter com pessoas</h3>
+    <div class="split">
+      <div class="card split-side" data-side="auto">
+        <p class="split-head"><Icon name="cog" /><span class="label">Automatize</span></p>
+        <ul>
+          {
+            AUTOMATE.map((item) => (
+              <li>
+                <Icon name="check" />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="card split-side" data-side="people">
+        <p class="split-head"><Icon name="users" /><span class="label">Mantenha com pessoas</span></p>
+        <ul>
+          {
+            HUMAN.map((item) => (
+              <li>
+                <Icon name="hand" />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-alt" aria-labelledby="gates">
+  <div class="wrap">
+    <h2 id="gates"><span class="h2n">08</span> Ciclo de vida e gates de aprovação</h2>
+    <p class="sec-intro">Cinco gates levam o sistema da ideia à operação, e a operação realimenta a avaliação.</p>
+    <figure class="gates-fig">
+      <svg class="gate-map" viewBox="0 0 1200 290" aria-hidden="true" focusable="false">
+        <path class="gm-thread" d="M30 122 H1170" />
+        <path class="gm-return" d="M1010 93 V40 Q1010 24 994 24 H306 Q290 24 290 40 V91" />
+        <path class="gm-return-head" d="M282 81 L290 93 L298 81" />
+        <text class="gm-note" x="650" y="29" text-anchor="middle">mudança relevante ou incidente</text>
+        <path class="gm-return" d="M640 94 C 622 58, 488 58, 474 91" />
+        <path class="gm-return-head" d="M466 83 L474 94 L483 85" />
+        <text class="gm-note" x="557" y="62" text-anchor="middle">Não</text>
+        <text class="gm-note" x="740" y="110" text-anchor="middle">Sim</text>
+        {
+          STOPS.map((s) =>
+            s.id === '?' ? (
+              <g class="gm-stop" data-decision>
+                <rect x={s.x - 22} y="100" width="44" height="44" rx="6" transform={`rotate(45 ${s.x} 122)`} />
+                <text class="gm-id" x={s.x} y="129" text-anchor="middle">?</text>
+                <text class="gm-name" x={s.x} y="182" text-anchor="middle">{s.name}</text>
+              </g>
+            ) : (
+              <g class="gm-stop">
+                <circle cx={s.x} cy="122" r="27" />
+                <text class="gm-id" x={s.x} y="129" text-anchor="middle">{s.id}</text>
+                <text class="gm-name" x={s.x} y="182" text-anchor="middle">{s.name}</text>
+              </g>
+            ),
+          )
+        }
+        <g class="gm-nist">
+          <path d="M80 198 V204 H320 V198" />
+          <text x="200" y="222" text-anchor="middle">Mapear</text>
+          <path d="M440 198 V204 H500 V198" />
+          <text x="470" y="222" text-anchor="middle">Medir</text>
+          <path d="M800 198 V204 H1040 V198" />
+          <text x="920" y="222" text-anchor="middle">Gerenciar</text>
+        </g>
+        <rect class="gm-govern" x="30" y="244" width="1140" height="30" rx="15" />
+        <text class="gm-govern-label" x="600" y="264" text-anchor="middle">Governar — atravessa todos os gates</text>
+      </svg>
+      <ol class="gates">
+        {
+          GATES.map(({ g, decision }) =>
+            decision ? (
+              <li class="gate" data-decision>
+                <span class="gate-id" aria-hidden="true">
+                  ?
+                </span>
+                <div>
+                  <p class="gate-name">Decisão: critérios atendidos e risco residual aceito?</p>
+                  <p>
+                    <strong>Sim:</strong> segue para o G3. <strong>Não:</strong> corrigir, mitigar ou reavaliar, e voltar ao
+                    G2.
+                  </p>
+                </div>
+              </li>
+            ) : (
+              g && (
+                <li class="gate">
+                  <span class="gate-id">{g[0]}</span>
+                  <div>
+                    <p class="gate-name">
+                      {g[1]} <span class="tag gate-nist">NIST: {g[5]}</span>
+                    </p>
+                    <p>{g[2]}</p>
+                    <dl class="pairs">
+                      <div>
+                        <dt>Evidência</dt>
+                        <dd>{g[3]}</dd>
+                      </div>
+                      <div>
+                        <dt>Quem</dt>
+                        <dd>{g[4]}</dd>
+                      </div>
+                    </dl>
+                    {g[0] === 'G4' && (
+                      <p class="gate-loop">
+                        <Icon name="undo-2" />
+                        Mudança relevante ou incidente: o sistema volta ao G1.
+                      </p>
+                    )}
+                  </div>
+                </li>
+              )
+            ),
+          )
+        }
+      </ol>
+      <figcaption>Correspondência aproximada com o NIST AI RMF; a função Governar atravessa todos os gates.</figcaption>
+    </figure>
+    <aside class="card warn warn-solo" data-variant="warning">
+      <div class="warn-text">
+        <Icon name="triangle-alert" class="icon warn-icon" />
+        <p>
+          <strong>Exceções:</strong> exigem base na política, justificativa, aprovação de quem tem alçada, prazo, riscos
+          documentados e controles compensatórios, e nunca autorizam descumprir obrigação legal ou requisito essencial de
+          segurança.
+        </p>
+      </div>
+    </aside>
+  </div>
+</section>

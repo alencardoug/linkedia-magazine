@@ -1,0 +1,191 @@
+---
+// §11 the roadmap braid, §12 indicators and the two maturity rulers, §13 the capability register, §14 references by
+// issuer, and the guide's AI note.
+import { KPIS, MATURITY, REFERENCES, ROADMAP, STACK, SUCCESS } from './data';
+import Icon from './Icon.astro';
+
+const STACK_ICONS = ['archive', 'git-merge', 'file-code', 'flask-conical', 'activity', 'package', 'key-round', 'chart-column'];
+const ISSUERS = ['ISO/IEC', 'NIST', 'OWASP', 'ANPD'];
+const issuerOf = (name: string) => ISSUERS.find((i) => name.startsWith(i)) ?? name;
+const GROUPS = ISSUERS.map((issuer) => ({ issuer, items: REFERENCES.filter(([, name]) => issuerOf(name) === issuer) }));
+const LEVELS = [1, 2, 3, 4, 5];
+---
+
+<section class="sec" aria-labelledby="roadmap">
+  <div class="wrap">
+    <h2 id="roadmap"><span class="h2n">11</span> Roadmap de 90 dias</h2>
+    <p class="sec-intro">A meta é avançar nas duas governanças em paralelo, com uma ou duas aplicações reais como piloto.</p>
+    <figure class="braid">
+      <p class="braid-head" aria-hidden="true">
+        <span data-family="corp">Corporativa</span>
+        <span data-family="tec">Técnica</span>
+      </p>
+      <ol class="braid-rows">
+        {
+          ROADMAP.map(([period, corp, tec, milestone]) => (
+            <li class="braid-row">
+              <p class="braid-period">{period}</p>
+              <p class="braid-lane" data-family="corp">
+                <span class="k">Corporativa</span> {corp}
+              </p>
+              <p class="braid-lane" data-family="tec">
+                <span class="k">Técnica</span> {tec}
+              </p>
+              <p class="braid-knot">
+                <span class="k">Entrega integrada:</span> {milestone}
+              </p>
+            </li>
+          ))
+        }
+      </ol>
+    </figure>
+
+    <h3 id="criterios-de-sucesso"><span class="h3n">11.1</span> Critérios de sucesso aos 90 dias</h3>
+    <ul class="checks checks-flag">
+      {
+        SUCCESS.map((item) => (
+          <li>
+            <Icon name="flag" />
+            <span>{item}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="figcap">Um programa mínimo em 90 dias não equivale a certificação nem a conformidade integral com a ISO/IEC 42001.</p>
+  </div>
+</section>
+
+<section class="sec sec-alt" aria-labelledby="indicadores">
+  <div class="wrap">
+    <h2 id="indicadores"><span class="h2n">12</span> Indicadores e maturidade</h2>
+    <h3 id="lista-de-indicadores"><span class="h3n">12.1</span> Indicadores</h3>
+    <div class="kpis">
+      {
+        KPIS.map(([group, items]) => (
+          <div class="card kpi-group" data-wide={items.length === 1 ? '' : undefined}>
+            <p class="label">{group}</p>
+            <dl>
+              {items.map(([kpi, question]) => (
+                <div>
+                  <dt>{kpi}</dt>
+                  <dd>{question}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))
+      }
+    </div>
+    <p class="prose">
+      Atenção à leitura: um aumento inicial de incidentes registrados pode refletir melhor capacidade de detecção, não
+      necessariamente mais falhas.
+    </p>
+
+    <h3 id="maturidade"><span class="h3n">12.2</span> Maturidade em duas dimensões</h3>
+    <div class="rulers">
+      <p class="rulers-hint">
+        <Icon name="compass" />
+        Marque, se quiser, um nível em cada régua: as duas são independentes e não somam uma nota.
+      </p>
+      {
+        (
+          [
+            ['corp', 'Corporativa', 1],
+            ['tec', 'Técnica', 2],
+          ] as const
+        ).map(([side, title, col]) => (
+          <fieldset class="ruler" data-family={side}>
+            <legend>{title}</legend>
+            <ol>
+              {MATURITY.map((row, i) => (
+                <li>
+                  <label class="rung">
+                    <input type="radio" name={`regua-${side}`} value={i + 1} />
+                    <span class="rung-n">
+                      {i + 1} · {row[0]}
+                    </span>
+                    <span class="rung-text">{row[col]}</span>
+                  </label>
+                </li>
+              ))}
+            </ol>
+          </fieldset>
+        ))
+      }
+      <div class="ruler-map" aria-hidden="true">
+        <div class="ruler-grid">
+          {LEVELS.map(() => LEVELS.map(() => <i />))}
+          <b class="ruler-mark" />
+        </div>
+        <span class="ruler-axis" data-axis="corp">Corporativa</span>
+        <span class="ruler-axis" data-axis="tec">Técnica</span>
+      </div>
+    </div>
+    <aside class="card principle" data-family="ponte">
+      <p>
+        <strong>Duas réguas, não uma:</strong> a empresa pode estar em níveis diferentes em cada dimensão. Engenharia
+        madura não substitui governança institucional, e políticas sofisticadas não provam segurança sem testes.
+      </p>
+    </aside>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="ferramentas">
+  <div class="wrap">
+    <h2 id="ferramentas"><span class="h2n">13</span> Ferramentas: uma stack de referência</h2>
+    <p class="sec-intro">
+      Nenhuma ferramenta é obrigatória; indispensável é um fio de rastreabilidade comum entre sistema, risco, controle,
+      evidência e decisão. Exemplos:
+    </p>
+    <dl class="stack">
+      {
+        STACK.map(([capability, tools], i) => (
+          <div>
+            <dt>
+              <Icon name={STACK_ICONS[i]} />
+              {capability}
+            </dt>
+            <dd>{tools}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<section class="sec sec-alt" aria-labelledby="referencias">
+  <div class="wrap">
+    <h2 id="referencias"><span class="h2n">14</span> Referências</h2>
+    <div class="ref-groups">
+      {
+        GROUPS.map(({ issuer, items }) => (
+          <div class="ref-group">
+            <p class="label">{issuer}</p>
+            <ul>
+              {items.map(([url, name, use]) => (
+                <li>
+                  <a href={url} rel="noopener noreferrer">
+                    {name}
+                  </a>
+                  : {use}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+    <p class="prose">
+      Normas e guias orientam; a conformidade depende da avaliação de cada organização e do escopo regulatório aplicável.
+    </p>
+  </div>
+</section>
+
+<footer class="guide-foot">
+  <div class="wrap">
+    <p class="meta" data-ai-note>
+      Guia organizado pelo editor da Linkedia, com texto condensado e diagramas feitos com apoio de IA e revisão humana.{' '}
+      <a href="/sobre">Saiba como a Linkedia é feita</a>.
+    </p>
+  </div>
+</footer>

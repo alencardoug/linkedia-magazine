@@ -1,0 +1,601 @@
+/* §6 the thread, §7 governance as code, §8 gates */
+:root {
+  --k-politica: var(--c1);
+  --k-risco: var(--c5);
+  --k-controle: var(--gold);
+  --k-implementacao: var(--w1);
+  --k-teste: var(--w3);
+  --k-evidencia: var(--c3);
+  --k-decisao: var(--ink);
+}
+[data-kind='politica'] { --k: var(--k-politica); }
+[data-kind='risco'] { --k: var(--k-risco); }
+[data-kind='controle'] { --k: var(--k-controle); }
+[data-kind='implementacao'] { --k: var(--k-implementacao); }
+[data-kind='teste'] { --k: var(--k-teste); }
+[data-kind='evidencia'] { --k: var(--k-evidencia); }
+[data-kind='decisao'] { --k: var(--k-decisao); }
+
+.sec-ponte {
+  background-color: var(--field-2);
+  background-image:
+    repeating-linear-gradient(45deg, var(--weave) 0 2px, transparent 2px 12px),
+    var(--grain);
+}
+
+/* §6: seven links on one taut thread, a tag hanging from each knot */
+.chain {
+  margin-top: 40px;
+}
+.chain-tools {
+  margin-bottom: 8px;
+}
+.chain-track {
+  position: relative;
+  padding-top: 64px;
+}
+.chain-list {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.chain-list::before {
+  content: '';
+  position: absolute;
+  left: calc(100% / 14);
+  right: calc(100% / 14);
+  top: 11px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--k-politica),
+    var(--k-risco) 16.7%,
+    var(--k-controle) 33.3%,
+    var(--k-implementacao) 50%,
+    var(--k-teste) 66.7%,
+    var(--k-evidencia) 83.3%,
+    var(--k-decisao)
+  );
+}
+.link {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px;
+  text-align: center;
+}
+.link::before {
+  content: '';
+  width: 2px;
+  height: 20px;
+  margin-top: 26px;
+  order: -1;
+  background: var(--k);
+  position: absolute;
+  top: 0;
+}
+.link::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 46px 6px 0;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+  border-top: 4px solid var(--k);
+}
+.link-knot {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 30px;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: inset 0 0 0 6px var(--k), 0 0 0 4px var(--field-2);
+}
+.link-kind {
+  font: 800 17px/1.1 var(--display);
+  letter-spacing: -0.01em;
+}
+.link .tag {
+  font-size: 12px;
+}
+.link-text {
+  padding: 0 10px 18px;
+  font-size: 14px;
+  line-height: 21px;
+}
+/* the return path from Teste back to Implementação (columns 5 → 4) */
+.chain-return {
+  position: absolute;
+  left: 50%;
+  width: calc(100% / 7);
+  top: 14px;
+  height: 52px;
+  overflow: visible;
+}
+.chain-return-path {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+  vector-effect: non-scaling-stroke;
+}
+.chain-return-head {
+  position: absolute;
+  left: calc(50% - 6px);
+  top: 48px;
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+}
+.chain-loop {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 28px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  font-weight: 600;
+}
+.chain-loop .icon {
+  color: var(--k-teste);
+}
+.chain[data-fail] .link[data-kind='teste'] {
+  --k: var(--alarm);
+}
+.chain[data-fail] .link[data-kind='teste'] .link-knot {
+  background: var(--alarm);
+}
+.chain[data-fail] .chain-return-path {
+  stroke: var(--alarm);
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+.chain[data-fail] .chain-return-head {
+  border-color: var(--alarm);
+}
+.chain[data-fail] .link[data-kind='implementacao']::after {
+  box-shadow: inset 0 0 0 2px var(--alarm), var(--lift);
+}
+.chain[data-fail] .chain-loop {
+  background: var(--alarm);
+  color: light-dark(#fff, #14120f);
+  box-shadow: none;
+}
+.chain[data-fail] .chain-loop .icon {
+  color: inherit;
+}
+/* N:N rule */
+.nn {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  max-width: 1100px;
+  padding: 28px 32px;
+}
+.nn-edges path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.5;
+}
+.nn-nodes circle,
+.nn-nodes rect {
+  fill: var(--card);
+  stroke: var(--gold-ink);
+  stroke-width: 3;
+}
+.nn-nodes circle[data-family='corp'] {
+  stroke: var(--cool);
+}
+.nn-nodes circle[data-family='tec'] {
+  stroke: var(--warm);
+}
+
+/* §7.1 the YAML, with the chain links it declares */
+.yaml {
+  margin-top: 28px;
+  max-width: 1000px;
+}
+.yaml-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 14px 6px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  font: 600 14px/1.2 var(--sans);
+  cursor: pointer;
+}
+.chip:hover {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.chip-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--k);
+}
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--field);
+  box-shadow: none;
+}
+.yaml-body {
+  border-radius: 14px;
+  background: light-dark(#1e1b16, #0c0b09);
+  color: #efe8da;
+  box-shadow: var(--shadow), var(--lift);
+}
+.yaml pre {
+  position: relative;
+  padding: 22px 24px 24px 40px;
+  overflow-x: auto;
+  font: 400 14px/1.75 var(--mono);
+}
+.yaml pre code {
+  font-size: inherit;
+}
+.yaml pre:focus-visible {
+  outline-offset: -4px;
+}
+/* dark-panel twins of the kind colours (the panel is dark in both schemes) */
+.yaml-body [data-kind='politica'] { --kd: #7aa2ff; }
+.yaml-body [data-kind='risco'] { --kd: #ab9dff; }
+.yaml-body [data-kind='controle'] { --kd: #e9c46a; }
+.yaml-body [data-kind='implementacao'] { --kd: #ff9a62; }
+.yaml-body [data-kind='teste'] { --kd: #f578a6; }
+.yaml-body [data-kind='evidencia'] { --kd: #4fd1c5; }
+.ln[data-kind]::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  width: 4px;
+  height: 1.75em;
+  border-radius: 2px;
+  background: var(--kd);
+}
+.yaml[data-show] .ln {
+  opacity: 0.45;
+}
+.yaml[data-show='politica'] .ln[data-kind='politica'],
+.yaml[data-show='risco'] .ln[data-kind='risco'],
+.yaml[data-show='controle'] .ln[data-kind='controle'],
+.yaml[data-show='implementacao'] .ln[data-kind='implementacao'],
+.yaml[data-show='teste'] .ln[data-kind='teste'],
+.yaml[data-show='evidencia'] .ln[data-kind='evidencia'] {
+  opacity: 1;
+  color: var(--kd);
+  font-weight: 600;
+}
+
+/* §7.2 two neutral columns: what machines check, what people judge */
+.split {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.split-side {
+  padding: 30px 30px 26px;
+  --tab: var(--ink);
+}
+.split-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.split-head .icon {
+  width: 22px;
+  height: 22px;
+}
+.split-head .label {
+  font-size: 13px;
+}
+.split ul {
+  display: grid;
+  gap: 10px;
+}
+.split li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 12px;
+  font-size: 16px;
+  line-height: 25px;
+}
+.split li .icon {
+  width: 18px;
+  height: 18px;
+  margin-top: 4px;
+  color: var(--gold-ink);
+}
+
+/* §8 overview map above readable cards */
+.gates-fig {
+  margin-top: 40px;
+}
+.gate-map {
+  width: 100%;
+  height: auto;
+}
+.gm-thread {
+  stroke: var(--gold);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.gm-stop circle,
+.gm-stop rect {
+  fill: var(--card);
+  stroke: var(--ink);
+  stroke-width: 4;
+}
+.gm-stop[data-decision] rect {
+  fill: var(--field-bind);
+  stroke: var(--gold);
+}
+.gm-stop[data-decision] .gm-id {
+  fill: var(--on-bind);
+}
+.gm-id {
+  fill: var(--ink);
+  font: 800 20px var(--display);
+}
+.gm-name {
+  fill: var(--ink);
+  font: 700 17px var(--display);
+}
+.gm-return {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 6;
+}
+.gm-return-head {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.gm-note {
+  fill: var(--muted);
+  font: 600 15px var(--sans);
+  paint-order: stroke;
+  stroke: var(--field-2);
+  stroke-width: 8px;
+}
+.gm-nist path {
+  fill: none;
+  stroke: var(--cool);
+  stroke-width: 2;
+}
+.gm-nist text {
+  fill: var(--cool-ink);
+  font: 600 14px var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.gm-govern {
+  fill: var(--field-bind);
+}
+.gm-govern-label {
+  fill: var(--on-bind);
+  font: 600 14px var(--sans);
+  letter-spacing: 0.06em;
+}
+.gates {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.gate {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 16px;
+  padding: 26px 24px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+  font-size: 15px;
+  line-height: 23px;
+}
+.gate-id {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 4px var(--ink);
+  font: 800 20px/1 var(--display);
+}
+.gate-name {
+  margin-bottom: 6px;
+  font: 700 19px/1.25 var(--display);
+}
+.gate-nist {
+  margin-left: 4px;
+  vertical-align: 2px;
+  --fam: var(--cool);
+}
+.gate[data-decision] {
+  background: var(--field-bind);
+  color: var(--on-bind);
+}
+.gate[data-decision] .gate-id {
+  position: relative;
+  box-shadow: none;
+}
+.gate[data-decision] .gate-id::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 8px;
+  transform: rotate(45deg);
+  box-shadow: inset 0 0 0 4px var(--gold);
+}
+.pairs {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+.pairs dt {
+  font: 600 11px/16px var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.gate-loop {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  font-weight: 600;
+}
+.gate-loop .icon {
+  color: var(--gold-ink);
+}
+.warn-solo {
+  display: block;
+  max-width: 900px;
+}
+
+@media (max-width: 1100px) {
+  .gates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 899px) {
+  .chain-track {
+    padding-top: 0;
+  }
+  .chain-return,
+  .chain-return-head {
+    display: none;
+  }
+  .chain-list {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .chain-list::before {
+    left: 11px;
+    right: auto;
+    top: 13px;
+    bottom: 13px;
+    width: 4px;
+    height: auto;
+    background: linear-gradient(
+      180deg,
+      var(--k-politica),
+      var(--k-risco) 16.7%,
+      var(--k-controle) 33.3%,
+      var(--k-implementacao) 50%,
+      var(--k-teste) 66.7%,
+      var(--k-evidencia) 83.3%,
+      var(--k-decisao)
+    );
+  }
+  .link {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    column-gap: 18px;
+    align-items: start;
+    padding: 0;
+    text-align: left;
+  }
+  .link::before {
+    display: none;
+  }
+  .link::after {
+    inset: 0 0 0 44px;
+    border-top: 0;
+    border-left: 4px solid var(--k);
+  }
+  .link-knot {
+    grid-row: span 3;
+    margin: 14px 0 0;
+  }
+  .link > :not(.link-knot) {
+    grid-column: 2;
+    justify-self: start;
+    margin-left: 16px;
+  }
+  .link-kind {
+    padding-top: 14px;
+  }
+  .link-text {
+    padding: 0 16px 14px 0;
+  }
+  .gate-map {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .nn {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 24px 22px;
+  }
+  .nn-art {
+    max-width: 220px;
+  }
+  .yaml pre {
+    font-size: 12.5px;
+    padding: 16px 16px 16px 32px;
+  }
+  .ln[data-kind]::before {
+    left: 12px;
+  }
+  .split,
+  .gates {
+    grid-template-columns: 1fr;
+  }
+  .gate {
+    grid-template-columns: 1fr;
+    padding: 22px 20px;
+  }
+}
+@media (forced-colors: active) {
+  .link::after,
+  .gate,
+  .yaml-body {
+    border: 1px solid CanvasText;
+  }
+  .chain-list::before,
+  .ln[data-kind]::before {
+    background: CanvasText;
+  }
+  .chain[data-fail] .link[data-kind='teste'] .link-knot,
+  .chain[data-fail] .chain-loop {
+    background: Highlight;
+    color: HighlightText;
+  }
+  .chip[aria-pressed='true'],
+  .btn[aria-pressed='true'] {
+    border: 2px solid Highlight;
+  }
+  .yaml[data-show] .ln[data-kind] {
+    text-decoration: underline;
+  }
+}

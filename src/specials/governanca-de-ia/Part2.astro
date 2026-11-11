@@ -1,0 +1,250 @@
+---
+// §3 Corporativa × técnica (the seam), §4 Parte I (cool field) and §5 Parte II (warm field). Every stable code is a
+// tag; each TEC code a GOV deliverable names is a link to that artefact in §5.1, which names the GOV entries back.
+import { DIFFERENCES, DISCIPLINES, FRONTS, RECORD, RISK_CLASSES, TREE } from './data';
+import Icon from './Icon.astro';
+import { deliverable, govRefsOf, tecId } from './codes';
+---
+
+<section class="sec" aria-labelledby="diferencas">
+  <div class="wrap">
+    <h2 id="diferencas"><span class="h2n">03</span> Corporativa × técnica: quem faz o quê</h2>
+    <div class="seam" role="table" aria-label="Diferenças entre as governanças corporativa e técnica">
+      <div class="seam-head" role="rowgroup">
+        <div class="seam-row" role="row">
+          <span class="seam-dim" role="columnheader"><span class="visually-hidden">Dimensão</span></span>
+          <span class="seam-side" role="columnheader" data-family="corp">Governança corporativa</span>
+          <span class="seam-side" role="columnheader" data-family="tec">Governança técnica</span>
+        </div>
+      </div>
+      <div role="rowgroup">
+        {
+          DIFFERENCES.map(([dim, corp, tec]) => (
+            <div class="seam-row" role="row">
+              <span class="seam-dim" role="rowheader">{dim}</span>
+              <span class="seam-cell" role="cell" data-family="corp" data-label="Corporativa">{corp}</span>
+              <span class="seam-cell" role="cell" data-family="tec" data-label="Técnica">{tec}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+    <aside class="card practice" data-family="ponte">
+      <div class="practice-art" aria-hidden="true">
+        <span class="artefact" data-family="corp"><Icon name="file-text" /></span>
+        <svg class="practice-thread" viewBox="0 0 120 40" preserveAspectRatio="none" focusable="false">
+          <path d="M2 20 C 30 2, 50 38, 60 20 S 92 2, 118 20" />
+        </svg>
+        <span class="artefact" data-family="tec"><Icon name="flask-conical" /></span>
+      </div>
+      <p>
+        <strong>Na prática:</strong> o documento corporativo diz que “dados só podem ser acessados por usuários
+        autorizados”. O artefato técnico mostra <em>como</em> a autorização foi aplicada e <em>qual teste</em> confirmou
+        que ela funciona.
+      </p>
+    </aside>
+  </div>
+</section>
+
+<section class="sec" data-family="corp" aria-labelledby="corporativa">
+  <div class="wrap">
+    <h2 id="corporativa"><span class="h2n">04</span> Parte I — Governança corporativa</h2>
+    <p class="sec-intro">A parte corporativa responde quem decide, com que critérios e com que registros.</p>
+
+    <h3 id="frentes"><span class="h3n">4.1</span> Seis frentes e seus entregáveis</h3>
+    <p class="prose">
+      Cada frente gera entregáveis com código estável (GOV-01 a GOV-10), que os controles e as evidências vão citar. Entre
+      parênteses, os artefatos técnicos correspondentes (seção 5), onde a evidência de cada um é produzida.
+    </p>
+    <ol class="fronts" aria-label="Frentes da governança corporativa e entregáveis">
+      {
+        FRONTS.map(([front, what, items], i) => (
+          <li class="card front">
+            <h4>
+              <span class="front-n">{i + 1}.</span> {front}
+            </h4>
+            <p class="front-what">
+              <span class="k">O que definir</span> {what}
+            </p>
+            <p class="k k-deliv">Entregáveis (correspondência técnica)</p>
+            <ul class="deliverables">
+              {items.map((item) => {
+                const d = deliverable(item);
+                return (
+                  <li>
+                    <span class="tag" data-family="corp" id={d.code.toLowerCase()}>
+                      {d.code}
+                    </span>{' '}
+                    <span class="dl-name">{d.name}</span>
+                    {d.pair.length > 0 && (
+                      <span class="pair">
+                        {'('}
+                        {d.pair.map((piece, k) => (
+                          <>
+                            {k > 0 && ', '}
+                            {/^TEC-\d+$/.test(piece) ? (
+                              <a class="tag" data-family="tec" href={`#${tecId(piece)}`}>
+                                {piece}
+                              </a>
+                            ) : (
+                              piece
+                            )}
+                          </>
+                        ))}
+                        {')'}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="prose">
+      Resultado: a diretoria sabe explicar quais soluções existem, por que foram autorizadas, que controles se aplicam e
+      como os riscos são supervisionados.
+    </p>
+
+    <h3 id="inventario"><span class="h3n">4.2</span> O inventário na prática</h3>
+    <p class="prose">O inventário é a base: sem ele não se sabe o que governar. Um registro mínimo do caso:</p>
+    <figure class="record">
+      <div class="record-card">
+        <p class="record-head">
+          <span class="label">Inventário corporativo · <span class="tag" data-family="ponte">AI-023</span></span>
+        </p>
+        <dl>
+          {
+            RECORD.map(([field, value]) => (
+              <div>
+                <dt>{field}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+      <figcaption>Ficha do inventário (GOV-04). O ID AI-023 se repete em todos os registros do sistema.</figcaption>
+    </figure>
+
+    <h3 id="classes-de-risco"><span class="h3n">4.3</span> Classes de risco</h3>
+    <p class="prose">
+      A metodologia (GOV-05) traduz critérios em classes; cada classe define o mínimo de controles. Um exemplo de política
+      interna:
+    </p>
+    <figure class="risk">
+      <ol class="risk-steps">
+        {
+          RISK_CLASSES.map(([name, example, control], i) => (
+            <li class="risk-step" data-level={i + 1}>
+              <span class="meter" aria-hidden="true">
+                {Array.from({ length: 4 }, (_, k) => (
+                  <i data-on={k <= i ? '' : undefined} />
+                ))}
+              </span>
+              <p class="risk-name">{name}</p>
+              <p>
+                <span class="k">Caso típico</span> {example}
+              </p>
+              <p>
+                <span class="k">Controle típico</span> {control}
+              </p>
+            </li>
+          ))
+        }
+      </ol>
+      <figcaption>
+        Classes ilustrativas: não equivalem automaticamente às de leis ou regulamentos e dependem da finalidade concreta.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="sec" data-family="tec" aria-labelledby="tecnica">
+  <div class="wrap">
+    <h2 id="tecnica"><span class="h2n">05</span> Parte II — Governança técnica</h2>
+    <p class="sec-intro">A parte técnica transforma cada exigência em controle implementado, testado e com evidência guardada.</p>
+
+    <h3 id="disciplinas"><span class="h3n">5.1</span> Sete disciplinas e seus entregáveis</h3>
+    <p class="prose">
+      Os controles técnicos se organizam em sete disciplinas, com artefatos que servem de evidência (TEC-01 a TEC-10).
+      Aplique-os na proporção do risco: um classificador estatístico, um assistente de documentos e um agente que altera
+      registros pedem controles diferentes.
+    </p>
+    <ol class="disciplines" aria-label="Disciplinas da governança técnica e entregáveis">
+      {
+        DISCIPLINES.map(([name, practices, items]) => (
+          <li class="card discipline">
+            <h4>{name}</h4>
+            <p>
+              <span class="k">Práticas e controles</span> {practices}
+            </p>
+            <p class="k k-deliv">Entregáveis</p>
+            <ul class="deliverables">
+              {items.map((item) => {
+                const code = item.slice(0, item.indexOf(' '));
+                const refs = govRefsOf(code);
+                return (
+                  <li id={tecId(code)}>
+                    <span class="tag" data-family="tec">
+                      {code}
+                    </span>{' '}
+                    <span class="dl-name">{item.slice(code.length + 1)}</span>
+                    {refs.length > 0 && (
+                      <span class="backrefs">
+                        <Icon name="undo-2" />
+                        <span class="visually-hidden">Corresponde a</span>
+                        {refs.map((gov) => (
+                          <a class="tag" data-family="corp" href={`#${gov.toLowerCase()}`}>
+                            {gov}
+                          </a>
+                        ))}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        ))
+      }
+    </ol>
+
+    <h3 id="repositorio"><span class="h3n">5.2</span> Um repositório que já nasce governado</h3>
+    <p class="prose">Os artefatos de governança ficam ao lado do código, versionados juntos:</p>
+    <figure class="editor">
+      <pre tabindex="0" aria-label="Estrutura do repositório"><code>{TREE}</code></pre>
+    </figure>
+    <aside class="card warn" data-variant="warning">
+      <div class="warn-text">
+        <Icon name="lock" class="icon warn-icon" />
+        <p>
+          <strong>Evidências sensíveis ficam fora do Git:</strong> segredos, dados pessoais e logs sensíveis vão para
+          armazenamento controlado; o repositório guarda identificadores, referências e hashes.
+        </p>
+      </div>
+      <div class="boundary" aria-hidden="true">
+        <div class="zone" data-zone="repo">
+          <p class="zone-name"><Icon name="git-branch" />Repositório</p>
+          <ul>
+            <li>identificadores</li>
+            <li>referências</li>
+            <li>hashes</li>
+          </ul>
+        </div>
+        <svg class="boundary-links" viewBox="0 0 80 120" preserveAspectRatio="none" focusable="false">
+          <path d="M0 24 H80 M0 60 H80 M0 96 H80" />
+        </svg>
+        <div class="zone" data-zone="vault">
+          <p class="zone-name"><Icon name="lock" />Armazenamento controlado</p>
+          <ul>
+            <li>segredos</li>
+            <li>dados pessoais</li>
+            <li>logs sensíveis</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>

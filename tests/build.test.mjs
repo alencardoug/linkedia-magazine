@@ -72,6 +72,8 @@ const COVER_PAGES = ['index.html', ...COVERS.map((c) => `visual/${c.slug}.html`)
 const isCover = (page) => COVER_PAGES.includes(page);
 // Standalone special (owner, 2026-11-10): a snapshot in `public/` with its own shell, CSS and modules.
 const STANDALONE_PAGES = ['especiais/governanca-de-projetos.html', 'especiais/governanca-de-projetos/guia-completo.html'];
+// Art-directed specials (3-22): Astro pages on their own shell (SpecialLayout.astro).
+const ART_DIRECTED = SPECIALS.filter((s) => s.artDirected).map((s) => `especiais/${s.slug}.html`);
 const STANDALONE_ASSETS = /^\/especiais\/governanca-de-projetos\/assets\/[0-9a-f]{16}\/[\w/.-]+\.(?:m?js|css)$/;
 
 function htmlFiles(dir, prefix = '') {
@@ -219,6 +221,33 @@ describe('static build', () => {
         continue;
       }
       expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
+      if (ART_DIRECTED.includes(page)) {
+        // Its own shell (3-22): no weekly theme or switcher; one classic same-origin script in <head> that applies the
+        // stored light/dark pick before the stylesheet, then only the page's own bundled files; no inline code.
+        expect(html, page).toMatch(/^<!DOCTYPE html><html lang="pt-BR" data-special-layout><head><meta charset="utf-8"><script src="\/especiais\/governanca-de-ia\/esquema\.js"><\/script>/);
+        expect(html, page).not.toContain('data-theme');
+        expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
+        const scripts = [...html.matchAll(/<script([^>]*)>/g)].map((m) => m[1]);
+        expect(scripts, page).toEqual([
+          ' src="/especiais/governanca-de-ia/esquema.js"',
+          expect.stringMatching(/^ type="module" src="\/_astro\/[\w.-]+\.js"$/),
+        ]);
+        expect(existsSync(join(out, 'especiais/governanca-de-ia/esquema.js')), page).toBe(true);
+        expect(html, page).toContain('<a href="/revista" class="sl-brand" data-brand>');
+        expect(html, page).toContain('<a href="/visual">Visual</a>');
+        expect(html, page).not.toMatch(/[\p{L}.,;:]<a\s/u);
+        expect(html, page).not.toMatch(/<pre(?![^>]*\stabindex="0")/);
+        // Budgets (gzipped): page CSS ≤ 30 KB, page JS ≤ 12 KB; self-hosted fonts ≤ 300 KB in all.
+        const gz = (files) => files.reduce((n, f) => n + gzipSync(readFileSync(join(out, f))).length, 0);
+        const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="\/([^"]+)"/g)].map((m) => m[1]);
+        expect(gz(styles), page).toBeLessThanOrEqual(30 * 1024);
+        expect(gz([scripts[1].match(/src="\/([^"]+)"/)[1]]), page).toBeLessThanOrEqual(12 * 1024);
+        const css = styles.map((f) => readFileSync(join(out, f), 'utf8')).join('');
+        const fonts = [...new Set([...css.matchAll(/url\((\/_astro\/[^)]+\.woff2)\)/g)].map((m) => m[1]))];
+        expect(fonts.length, page).toBe(4);
+        expect(fonts.reduce((n, f) => n + statSync(join(out, f)).size, 0), page).toBeLessThanOrEqual(300 * 1024);
+        continue;
+      }
       // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
       expect(html, page).not.toMatch(/<script(?![^>]*\ssrc="\/_astro\/)[^>]*>/);
       expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
@@ -416,7 +445,7 @@ describe('static build', () => {
     const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
     const pages = htmlFiles(out);
     expect(pages).toHaveLength(13 + COVERS.length + STANDALONE_PAGES.length);
-    for (const page of pages.filter((p) => !isCover(p) && !STANDALONE_PAGES.includes(p))) {
+    for (const page of pages.filter((p) => !isCover(p) && !STANDALONE_PAGES.includes(p) && !ART_DIRECTED.includes(p))) {
       const html = read(out, page);
       expect(html, page).toContain(
         '<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" ' +

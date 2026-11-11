@@ -1,0 +1,583 @@
+/* §3 the seam, §4 Parte I, §5 Parte II */
+.k {
+  display: block;
+  margin-bottom: 2px;
+  font: 600 11px/16px var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* §3: dimensions sit on a central seam; corporate answers to its left (cool), technical to its right (warm). */
+.seam {
+  margin-top: 48px;
+}
+.seam-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px minmax(0, 1fr);
+  grid-template-areas: 'corp dim tec';
+  align-items: center;
+  position: relative;
+}
+.seam-row .seam-dim {
+  grid-area: dim;
+}
+.seam-row > [data-family='corp'] {
+  grid-area: corp;
+}
+.seam-row > [data-family='tec'] {
+  grid-area: tec;
+}
+.seam-head .seam-side {
+  padding: 0 28px 16px;
+  font: 800 22px/1.1 var(--display);
+  letter-spacing: -0.02em;
+  color: var(--fam-ink);
+}
+.seam-head .seam-side[data-family='corp'] {
+  text-align: right;
+}
+.seam > [role='rowgroup']:last-child {
+  position: relative;
+}
+.seam > [role='rowgroup']:last-child::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 3px dashed var(--gold);
+  transform: translateX(-1.5px);
+}
+.seam-dim {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  max-width: 180px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--field-bind);
+  color: var(--on-bind);
+  font: 700 14px/1.2 var(--display);
+  text-align: center;
+}
+.seam-head .seam-dim {
+  background: none;
+}
+.seam-cell {
+  position: relative;
+  margin: 8px 0;
+  padding: 18px 24px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+  font-size: 16px;
+  line-height: 25px;
+}
+.seam-cell[data-family='corp'] {
+  text-align: right;
+  border-right: 4px solid var(--cool);
+}
+.seam-cell[data-family='tec'] {
+  border-left: 4px solid var(--warm);
+}
+/* the stitch: each row's thread crosses the seam */
+.seam-row:not(:first-child)::before {
+  content: '';
+}
+.practice {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  padding: 30px 34px;
+}
+.practice p {
+  max-width: 62ch;
+}
+.practice-art {
+  display: flex;
+  align-items: center;
+}
+.artefact {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 64px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--card-2);
+  box-shadow: inset 0 0 0 2px var(--fam);
+  color: var(--fam-ink);
+}
+.artefact .icon {
+  width: 26px;
+  height: 26px;
+}
+.practice-thread {
+  flex: 1;
+  height: 40px;
+}
+.practice-thread path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 3;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Tags inside running text and lists */
+.k-deliv {
+  margin-top: 14px;
+}
+.deliverables {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 24px;
+}
+.deliverables li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: baseline;
+  scroll-margin-top: 96px;
+}
+.deliverables li > .tag {
+  grid-row: span 2;
+  align-self: start;
+}
+.deliverables .pair,
+.deliverables .backrefs {
+  grid-column: 2;
+  margin-left: 0;
+}
+.dl-name {
+  font-weight: 600;
+}
+.pair,
+.backrefs {
+  color: var(--muted);
+}
+.backrefs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+.backrefs .icon {
+  width: 15px;
+  height: 15px;
+}
+.tag:target,
+li:target > .tag {
+  background: var(--fam);
+  color: var(--field);
+}
+li:target {
+  border-radius: 8px;
+  outline: 2px dashed var(--gold);
+  outline-offset: 4px;
+}
+
+/* §4.1 six fronts */
+.fronts,
+.disciplines {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.front,
+.discipline {
+  padding: 30px 28px 28px;
+}
+.front h4,
+.discipline h4 {
+  font: 700 20px/1.2 var(--display);
+  letter-spacing: -0.015em;
+}
+.front-n {
+  color: var(--cool-ink);
+  font-variant-numeric: tabular-nums;
+}
+.front-what,
+.discipline > p {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 24px;
+}
+.fronts .card {
+  --tab: var(--cool);
+}
+.disciplines .card {
+  --tab: var(--warm);
+}
+
+/* §4.2 the index card of AI-023: eyelet, string, ruled lines */
+.record {
+  margin-top: 28px;
+  max-width: 900px;
+}
+.record-card {
+  position: relative;
+  padding: 34px 40px 30px 92px;
+  border-radius: 6px 18px 18px 6px;
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+}
+.record-card::before {
+  content: '';
+  position: absolute;
+  left: 34px;
+  top: 34px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--field-cool);
+  box-shadow: inset 0 0 0 3px var(--gold);
+}
+.record-card::after {
+  content: '';
+  position: absolute;
+  left: 42px;
+  top: 52px;
+  bottom: 24px;
+  border-left: 3px solid var(--gold);
+  border-radius: 2px;
+  opacity: 0.6;
+}
+.record-head .label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+}
+.record dl {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+}
+.record dl div {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.record dt {
+  font: 600 11px/16px var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.record dd {
+  font: 600 16px/24px var(--display);
+}
+figcaption,
+.figcap {
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--muted);
+}
+
+/* §4.3 escalation stair: one more binding wrap per class */
+.risk {
+  margin-top: 28px;
+}
+.risk-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+.risk-step {
+  position: relative;
+  padding: 64px 22px 24px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow), var(--lift);
+  font-size: 15px;
+  line-height: 23px;
+}
+.risk-step[data-level='2'] {
+  padding-top: 96px;
+}
+.risk-step[data-level='3'] {
+  padding-top: 128px;
+}
+.risk-step[data-level='4'] {
+  padding-top: 160px;
+  background: var(--field-bind);
+  color: var(--on-bind);
+}
+.risk-step[data-level='4'] .k {
+  color: var(--on-bind-muted);
+}
+.risk-step p + p {
+  margin-top: 10px;
+}
+.risk-name {
+  margin-bottom: 12px;
+  font: 800 24px/1 var(--display);
+  letter-spacing: -0.02em;
+}
+.meter {
+  position: absolute;
+  left: 22px;
+  top: 30px;
+  display: flex;
+  gap: 4px;
+}
+.meter i {
+  width: 22px;
+  height: 8px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.meter i[data-on] {
+  background: var(--alarm);
+  box-shadow: none;
+}
+.risk-step[data-level='4'] .meter i {
+  box-shadow: inset 0 0 0 1.5px var(--on-bind-muted);
+}
+.risk-step[data-level='4'] .meter i[data-on] {
+  background: #ff6b6b;
+  box-shadow: none;
+}
+
+/* §5.2 the repository in an editor panel */
+.editor {
+  margin-top: 28px;
+  max-width: 900px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: light-dark(#1e1b16, #0c0b09);
+  color: #efe8da;
+  box-shadow: var(--shadow), var(--lift);
+}
+.editor-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(239, 232, 218, 0.12);
+  font: 500 14px/1 var(--mono);
+  color: #cfc6b4;
+}
+.editor-bar .icon {
+  width: 18px;
+  height: 18px;
+  color: #e0b44a;
+}
+.editor pre {
+  padding: 20px 24px 24px;
+  overflow-x: auto;
+  font: 400 14px/1.75 var(--mono);
+}
+.editor pre code {
+  font-size: inherit;
+}
+.editor pre:focus-visible {
+  outline-offset: -4px;
+}
+.warn {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 32px;
+  align-items: center;
+  max-width: 1100px;
+  padding: 28px 32px;
+  --tab: var(--alarm);
+}
+.warn-text {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.warn p {
+  font-size: 16px;
+  line-height: 26px;
+}
+.warn-icon {
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  color: var(--alarm);
+}
+.boundary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr);
+  align-items: stretch;
+}
+.zone {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--card-2);
+  font-size: 14px;
+  line-height: 20px;
+}
+.zone[data-zone='repo'] {
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.zone[data-zone='vault'] {
+  box-shadow: inset 0 0 0 2px var(--alarm);
+}
+.zone-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font: 700 14px/1.2 var(--display);
+}
+.zone-name .icon {
+  width: 16px;
+  height: 16px;
+}
+.zone li {
+  padding: 4px 0;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.zone li + li {
+  border-top: 1px dashed var(--line);
+}
+.boundary-links {
+  width: 100%;
+  height: 100%;
+}
+.boundary-links path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+
+@media (max-width: 1100px) {
+  .fronts,
+  .disciplines {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .risk-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  .risk-step,
+  .risk-step[data-level] {
+    padding-top: 64px;
+  }
+}
+@media (max-width: 760px) {
+  .seam-head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .seam > [role='rowgroup']:last-child::before {
+    display: none;
+  }
+  .seam-row {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'dim' 'corp' 'tec';
+    margin-bottom: 20px;
+  }
+  .seam-dim {
+    justify-self: start;
+    max-width: none;
+  }
+  .seam-cell,
+  .seam-cell[data-family='corp'] {
+    text-align: left;
+    margin: 6px 0 0;
+    border-right: 0;
+    border-left: 4px solid var(--fam);
+  }
+  .seam-cell::before {
+    content: attr(data-label);
+    display: block;
+    font: 600 11px/16px var(--sans);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fam-ink);
+  }
+  .practice {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 26px 22px;
+  }
+  .practice-art {
+    max-width: 240px;
+  }
+  .fronts,
+  .disciplines,
+  .risk-steps {
+    grid-template-columns: 1fr;
+  }
+  .front,
+  .discipline {
+    padding: 26px 22px;
+  }
+  .record-card {
+    padding: 28px 22px 24px 60px;
+  }
+  .record-card::before {
+    left: 20px;
+  }
+  .record-card::after {
+    left: 28px;
+  }
+  .record dl {
+    grid-template-columns: 1fr;
+  }
+  .editor pre {
+    font-size: 12.5px;
+    padding: 16px;
+  }
+  .warn {
+    grid-template-columns: 1fr;
+    padding: 24px 22px;
+  }
+  .boundary {
+    grid-template-columns: 1fr;
+    row-gap: 14px;
+  }
+  .boundary-links {
+    display: none;
+  }
+  .zone[data-zone='vault'] {
+    position: relative;
+  }
+  .zone[data-zone='vault']::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: -16px;
+    height: 16px;
+    border-left: 2px dashed var(--gold);
+  }
+}
+@media (forced-colors: active) {
+  .seam-dim,
+  .seam-cell,
+  .risk-step,
+  .record-card,
+  .editor {
+    border: 1px solid CanvasText;
+  }
+  .practice-art,
+  .boundary-links {
+    display: none;
+  }
+  .meter i[data-on] {
+    background: CanvasText;
+  }
+}

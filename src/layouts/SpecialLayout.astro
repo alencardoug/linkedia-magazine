@@ -1,0 +1,52 @@
+---
+// Shell of an art-directed special page (3-22, D-076/D-077): its own fonts, palette and light/dark choice instead of
+// the weekly theme, so the slot switcher never dresses it. The magazine's header links stay; the page brings its CSS
+// (imported by the page) and its module script. The scheme follows the system until the reader picks one with the
+// header toggle; `esquema.js` is a classic same-origin script in <head> that applies the stored pick before the first
+// paint (no inline script, so the CSP needs no new hash). Without JS the system scheme applies and the toggle stays
+// hidden.
+import bricolage from '../specials/governanca-de-ia/fonts/bricolage-grotesque.woff2?url';
+import instrumentSans from '../specials/governanca-de-ia/fonts/instrument-sans.woff2?url';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Same-origin classic script that applies the stored scheme before the first paint. */
+  schemeScript: string;
+}
+const { title, description, schemeScript } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR" data-special-layout>
+  <head>
+    <meta charset="utf-8" />
+    <script is:inline src={schemeScript}></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content={description} />
+    <title>{`${title} — Linkedia`}</title>
+    <link rel="preload" href={bricolage} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={instrumentSans} as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <a href="#conteudo" class="sl-skip">Pular para o conteúdo</a>
+    <header class="sl-header" data-site-header>
+      <nav aria-label="Principal">
+        <a href="/revista" class="sl-brand" data-brand><strong>Linked<span class="sl-ia">ia</span></strong></a>
+        <span class="sl-links">
+          <a href="/edicoes">Edições</a>
+          <a href="/visual">Visual</a>
+          <a href="/sobre">Sobre</a>
+        </span>
+        <button type="button" class="sl-scheme" aria-pressed="false" data-scheme-toggle hidden>
+          <svg class="sl-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg>
+          <span>Modo escuro</span>
+        </button>
+      </nav>
+    </header>
+    <main id="conteudo">
+      <slot />
+    </main>
+  </body>
+</html>
