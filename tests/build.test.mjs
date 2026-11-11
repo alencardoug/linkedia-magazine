@@ -186,6 +186,7 @@ describe('static build', () => {
         'categorias/conhecimento-de-ia.html',
         'especiais/governanca-de-ia.html',
         ...STANDALONE_PAGES,
+        'especiais/perguntar-ao-banco.html',
         'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
         '404.html',
@@ -222,14 +223,22 @@ describe('static build', () => {
       }
       expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
       if (ART_DIRECTED.includes(page)) {
-        // Its own shell (3-22): no weekly theme or switcher; one classic same-origin script in <head> that applies the
-        // stored light/dark pick before the stylesheet, then only the page's own bundled files; no inline code.
-        expect(html, page).toMatch(/^<!DOCTYPE html><html lang="pt-BR" data-special-layout><head><meta charset="utf-8"><script src="\/especiais\/governanca-de-ia\/esquema\.js"><\/script>/);
+        // Its own shell (3-22): no weekly theme or switcher, then only the page's own bundled files; no inline code.
+        // The AI guide (two schemes) first loads one classic same-origin script in <head> that applies the stored
+        // light/dark pick before the stylesheet; a one-scheme page (the NL→SQL special, dark) has none.
+        const scheme = page === 'especiais/governanca-de-ia.html';
+        expect(html, page).toMatch(
+          scheme
+            ? /^<!DOCTYPE html><html lang="pt-BR" data-special-layout><head><meta charset="utf-8"><script src="\/especiais\/governanca-de-ia\/esquema\.js"><\/script>/
+            : /^<!DOCTYPE html><html lang="pt-BR" data-special-layout><head><meta charset="utf-8"><meta name="viewport"/,
+        );
+        expect(html, page).toContain(`<meta name="color-scheme" content="${scheme ? 'light dark' : 'dark'}">`);
+        expect(html.includes('data-scheme-toggle'), page).toBe(scheme);
         expect(html, page).not.toContain('data-theme');
         expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
         const scripts = [...html.matchAll(/<script([^>]*)>/g)].map((m) => m[1]);
         expect(scripts, page).toEqual([
-          ' src="/especiais/governanca-de-ia/esquema.js"',
+          ...(scheme ? [' src="/especiais/governanca-de-ia/esquema.js"'] : []),
           expect.stringMatching(/^ type="module" src="\/_astro\/[\w.-]+\.js"$/),
         ]);
         expect(existsSync(join(out, 'especiais/governanca-de-ia/esquema.js')), page).toBe(true);
@@ -237,15 +246,18 @@ describe('static build', () => {
         expect(html, page).toContain('<a href="/visual">Visual</a>');
         expect(html, page).not.toMatch(/[\p{L}.,;:]<a\s/u);
         expect(html, page).not.toMatch(/<pre(?![^>]*\stabindex="0")/);
-        // Budgets (gzipped): page CSS ≤ 30 KB, page JS ≤ 12 KB; self-hosted fonts ≤ 300 KB in all.
+        // Budgets (gzipped): page CSS ≤ 30 KB, page JS ≤ 12 KB; self-hosted fonts ≤ 300 KB in all, every one preloaded.
         const gz = (files) => files.reduce((n, f) => n + gzipSync(readFileSync(join(out, f))).length, 0);
         const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="\/([^"]+)"/g)].map((m) => m[1]);
         expect(gz(styles), page).toBeLessThanOrEqual(30 * 1024);
-        expect(gz([scripts[1].match(/src="\/([^"]+)"/)[1]]), page).toBeLessThanOrEqual(12 * 1024);
+        expect(gz([scripts.at(-1).match(/src="\/([^"]+)"/)[1]]), page).toBeLessThanOrEqual(12 * 1024);
         const css = styles.map((f) => readFileSync(join(out, f), 'utf8')).join('');
         const fonts = [...new Set([...css.matchAll(/url\((\/_astro\/[^)]+\.woff2)\)/g)].map((m) => m[1]))];
-        expect(fonts.length, page).toBe(4);
+        expect(fonts.length, page).toBe(scheme ? 4 : 2);
         expect(fonts.reduce((n, f) => n + statSync(join(out, f)).size, 0), page).toBeLessThanOrEqual(300 * 1024);
+        const preloads = [...html.matchAll(/<link rel="preload" href="([^"]+)" as="font"/g)].map((m) => m[1]);
+        expect(preloads.length, page).toBe(2);
+        for (const f of preloads) expect(fonts, page).toContain(f);
         continue;
       }
       // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
@@ -345,6 +357,25 @@ describe('static build', () => {
     }
     expect(read(out, `${moduleDir}/views/biblioteca.mjs`)).toContain('href="/especiais/governanca-de-projetos/conteudo.json"');
     expect(JSON.parse(read(out, 'especiais/governanca-de-projetos/conteudo.json')).stations.length).toBeGreaterThan(0);
+    // The NL→SQL special (owner, 2026-11-11): below the two guides, before the showcase; one h1, every in-page link
+    // lands, every outside link without referrer or opener, the AI note.
+    const nl = editions.indexOf('/especiais/perguntar-ao-banco"');
+    expect(nl).toBeGreaterThan(projects);
+    expect(nl).toBeLessThan(editions.indexOf('/especiais/dez-layouts-governanca-de-ia"'));
+    const nlsql = read(out, 'especiais/perguntar-ao-banco.html');
+    expect(nlsql).toContain('data-article="especial-perguntar-ao-banco"');
+    expect(nlsql.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(nlsql).toContain('data-ai-note');
+    const nlIds = new Set([...nlsql.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
+    const nlAnchors = [...nlsql.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]);
+    expect(nlAnchors.length).toBeGreaterThanOrEqual(18);
+    for (const id of nlAnchors) expect(nlIds.has(id), id).toBe(true);
+    const nlOutside = [...nlsql.matchAll(/<a href="https:[^"]*"([^>]*)>/g)].map((m) => m[1]);
+    expect(nlOutside.length).toBeGreaterThanOrEqual(20);
+    for (const attrs of nlOutside) expect(attrs).toContain('rel="noopener noreferrer"');
+    for (const id of ['gcp', 'aws', 'azure', 'databricks', 'snowflake', 'claude-code', 'codex', 'gemini-cli']) {
+      expect(nlsql, id).toContain(`<h4 id="${id}">`);
+    }
     // The sketch showcase (3-23, D-077): listed right after the guide; one desktop and one phone shot per sketch, small.
     expect(editions.indexOf('/especiais/dez-layouts-governanca-de-ia')).toBeGreaterThan(editions.indexOf('/especiais/governanca-de-ia"'));
     const layouts = read(out, 'especiais/dez-layouts-governanca-de-ia.html');
@@ -444,7 +475,7 @@ describe('static build', () => {
   it('ships three slots with lab themes: pre-paint script, runtime everywhere, switcher on /visual, lazy enhancement', async () => {
     const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
     const pages = htmlFiles(out);
-    expect(pages).toHaveLength(13 + COVERS.length + STANDALONE_PAGES.length);
+    expect(pages).toHaveLength(12 + COVERS.length + STANDALONE_PAGES.length + ART_DIRECTED.length);
     for (const page of pages.filter((p) => !isCover(p) && !STANDALONE_PAGES.includes(p) && !ART_DIRECTED.includes(p))) {
       const html = read(out, page);
       expect(html, page).toContain(
@@ -515,6 +546,7 @@ describe('static build', () => {
         'categorias/conhecimento-de-ia.html',
         'especiais/governanca-de-ia.html',
         ...STANDALONE_PAGES,
+        'especiais/perguntar-ao-banco.html',
         'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
         '404.html',

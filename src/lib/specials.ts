@@ -41,6 +41,16 @@ export const SPECIALS: readonly Special[] = [
     standalone: true,
   },
   {
+    // NL→SQL comparison (owner, 2026-11-11: listed below the two guides), art-directed in S6 "Camadas de Vidro".
+    slug: 'perguntar-ao-banco',
+    title: 'Perguntamos ao banco em português e ele errou três em cada quatro vezes — os benchmarks já sabiam',
+    summary:
+      'Um teste de NL→SQL no Gemini do BigQuery acertou 5 de 20 perguntas. O que a pesquisa mostra e como a governança de dados ajuda cada plataforma a acertar mais.',
+    date: '2026-11-11',
+    readMinutes: 20,
+    artDirected: true,
+  },
+  {
     slug: 'dez-layouts-governanca-de-ia',
     title: 'Dez layouts para as Guias da revista',
     summary:

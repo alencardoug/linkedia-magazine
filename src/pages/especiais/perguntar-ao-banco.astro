@@ -1,0 +1,990 @@
+---
+// `/especiais/perguntar-ao-banco` (owner, 2026-11-11): the NL→SQL comparison, from the owner's own test write-up, with a
+// new section on maximising NL→SQL success per platform; art direction S6 "Camadas de Vidro" (dark only). Reviewed
+// by Codex (read-only, one round); every figure reads in order as text without CSS or JS.
+import SpecialLayout from '../../layouts/SpecialLayout.astro';
+import { special } from '../../lib/specials';
+import Icon from '../../specials/governanca-de-ia/Icon.astro';
+import mona from '../../specials/perguntar-ao-banco/fonts/mona-sans.woff2?url';
+import jetbrains from '../../specials/perguntar-ao-banco/fonts/jetbrains-mono.woff2?url';
+import '../../specials/perguntar-ao-banco/page.css';
+
+const page = special('perguntar-ao-banco');
+
+const toc = [
+  ['o-teste', 'O teste', 'corp'],
+  ['resultado', 'O resultado: 5 de 20', 'corp'],
+  ['pesquisa', 'O que a pesquisa já mostrava', 'corp'],
+  ['plataformas-dizem', 'O que as plataformas dizem', 'corp'],
+  ['comparacao', 'A comparação, lado a lado', 'corp'],
+  ['maximizar', 'Como maximizar o sucesso em NL→SQL', 'ponte'],
+  ['por-plataforma', 'Plataforma por plataforma', 'ponte'],
+  ['roteiro', 'Um piloto em cinco passos', 'ponte'],
+  ['para-quem-usa', 'O que isso quer dizer para quem vai usar', 'tec'],
+  ['limites', 'Limites, próximos passos e fontes', 'tec'],
+] as const;
+
+// §2: 15 known questions (2 right), 5 new (3 right). Positions are illustrative; the counts are the data.
+const known = Array.from({ length: 15 }, (_, i) => i < 2);
+const fresh = Array.from({ length: 5 }, (_, i) => i < 3);
+
+const families = [
+  {
+    icon: 'file-text',
+    title: 'A regra de negócio que não está no nome da coluna',
+    text: 'Receita, no modelo, é só de pedido realizado: há uma coluna booleana para isso. Em quatro perguntas o Gemini somou também pedidos cancelados e pendentes. Na dimensão de clientes, que guarda histórico, ele contou todas as versões de cada cliente. E “voltou em 90 dias” virou “é recomprador”, sem janela de tempo.',
+  },
+  {
+    icon: 'network',
+    title: 'O grão',
+    text: 'Entrega no prazo contada por item expedido, e não por remessa. Tempo médio de entrega calculado por item, e não por pedido. Pedidos contados por número, sem distinguir as duas origens de dados que o datamart unifica.',
+  },
+  {
+    icon: 'chart-column',
+    title: 'O denominador e a data',
+    text: 'A conversão de carrinho foi dividida por todos os carrinhos, e não pelos fechados. A taxa de reembolso foi dividida pelo valor capturado da própria transação reembolsada, o que dá ~100% em todas as linhas.',
+  },
+  {
+    icon: 'database',
+    title: 'O dado que mora em outra tabela',
+    text: 'Na pergunta de margem bruta, o Gemini escreveu no próprio SQL que “não há custo de mercadoria vendida explícito” e devolveu margem de 100%. O custo existe, numa fato de movimentação de estoque. No giro de estoque, ele calculou só a quantidade expedida.',
+  },
+];
+
+const bench = [
+  {
+    label: 'Bases públicas, com esquemas simples ou evidência entregue com a pergunta',
+    rows: [
+      ['Spider 1.0 — métodos com GPT-4', '91,2%', 'w91', 'muted'],
+      ['BIRD — métodos com GPT-4', '73,0%', 'w73', 'muted'],
+      ['BIRD — Gemini-SQL2, segundo o Google (2026)', '80,04%', 'w80', 'muted'],
+    ],
+  },
+  {
+    label: 'Cenário corporativo',
+    rows: [
+      ['Spider 2.0 — agente com o1-preview', '21,3%', 'w21', 'corp'],
+      ['BEAVER, 1ª versão — GPT-4o e Llama 3 70B', '≈ 0%', 'w0', 'corp'],
+      ['BEAVER, versão atual — agentes com GPT-5.2', '10,8%', 'w11', 'corp'],
+      ['BEAVER, versão atual — com dicas de subtarefa como oráculo', '30,1%', 'w30', 'corp'],
+      ['Nosso teste — Gemini no BigQuery, 20 perguntas (IC 95%: ~11% a ~47%)', '25%', 'w25', 'ponte'],
+    ],
+  },
+] as const;
+
+const cmpCols = ['Nosso teste', 'Spider 2.0', 'BEAVER', 'BIRD', 'Fornecedores'];
+const cmpRows: [string, string, string[]][] = [
+  ['cenario', 'Cenário', ['Datamart dimensional com regras de negócio', 'Fluxos reais de empresas', 'Warehouses corporativos privados', 'Bancos públicos', 'Bases do cliente']],
+  ['contexto', 'Conhecimento de negócio entregue', ['Só nomes e descrições de tabela e coluna', 'Documentação parcial', 'Nenhum', '“Evidência” por pergunta', 'Modelo semântico ou instruções']],
+  ['quem', 'Quem mede', ['Nós, com gabarito fixado antes', 'Acadêmicos', 'Acadêmicos', 'Acadêmicos', 'O próprio fornecedor']],
+  ['acerto', 'Acerto', ['25% (Gemini, consola)', '21,3% (artigo)', '≈ 0% (v1); 10,8% (atual)', 'Acima de 75%; 80,04% no topo', '~90%+ declarado']],
+];
+
+const fixes = [
+  {
+    err: 'Regra fora do nome da coluna',
+    art: 'Métrica definida na camada semântica, e a descrição da coluna dizendo como usá-la, não só o que ela é',
+    ex: '“Para receita, some só as linhas com is_realised = true.”',
+  },
+  {
+    err: 'Grão',
+    art: 'Grão declarado em cada fato, métricas que fixam o grão e a cardinalidade das junções documentada',
+    ex: '“Uma linha por item expedido; entrega no prazo se mede por remessa.”',
+  },
+  {
+    err: 'Denominador e data',
+    art: 'Métricas de razão com numerador, denominador e divisão por zero explícitos; qual data usar em cada pergunta',
+    ex: '“Conversão = carrinhos fechados com pedido ÷ carrinhos fechados, pela data de fechamento.”',
+  },
+  {
+    err: 'Dado em outra tabela',
+    art: 'Junções declaradas (chaves primária e estrangeira, inclusive compostas) e um glossário que diz onde o dado mora',
+    ex: '“Custo da mercadoria vendida: fato de movimentação de estoque, saídas por venda.”',
+  },
+];
+
+const layers = [
+  {
+    tone: 'tec',
+    title: 'Dado confiável',
+    text: 'Testes de qualidade; chaves primária e estrangeira declaradas, inclusive as compostas, mesmo quando o motor não as impõe; cardinalidade das junções documentada, para o modelo não multiplicar linhas; dimensões históricas com o registro vigente marcado, ou uma view “atual”.',
+    fixes: 'Ataca: grão, dado em outra tabela',
+  },
+  {
+    tone: 'tec',
+    title: 'Catálogo que diz como usar',
+    text: 'Em cada tabela, o que é uma linha (o grão). Em cada coluna que carrega regra, quando usá-la, e não só o que ela é. Qual data responde a qual pergunta. Glossário com sinônimos (“faturamento” = “receita”) e valores de exemplo das colunas categóricas.',
+    fixes: 'Ataca: regra, grão, data',
+  },
+  {
+    tone: 'ponte',
+    title: 'Camada semântica',
+    text: 'Métricas certificadas, com numerador, denominador, filtro, grão e tratamento de divisão por zero, com dono e versão em Git: receita, margem, conversão, taxas. É aqui que o significado deixa de depender de o modelo adivinhar.',
+    fixes: 'Ataca: as quatro famílias',
+  },
+  {
+    tone: 'ponte',
+    title: 'Superfície curada',
+    text: 'Exponha ao gerador as métricas e as views certificadas, não o warehouse inteiro. Menos tabelas, menos ambiguidade. É o achado lateral do nosso teste: com a view à vista, o Gemini a escolheu.',
+    fixes: 'Ataca: dado em outra tabela, regra',
+  },
+  {
+    tone: 'ponte',
+    title: 'Exemplos verificados',
+    text: 'Pares pergunta → SQL revisados por quem conhece o negócio, para as perguntas mais frequentes e as mais traiçoeiras.',
+    fixes: 'Ataca: denominador, data, grão',
+  },
+  {
+    tone: 'corp',
+    title: 'Instruções e limites',
+    text: 'Convenções em texto curto (moeda, fuso, “pedido realizado”, ano fiscal); papel de leitura com o mínimo de privilégio; mascaramento de dados pessoais; limite de custo por consulta.',
+    fixes: 'Ataca: regra; e protege o dado',
+  },
+  {
+    tone: 'corp',
+    title: 'Avaliação contínua',
+    text: 'Um gabarito de perguntas reais com resultado esperado, rodado a cada mudança de modelo, esquema ou instrução. Separe as perguntas que viram exemplo das que ficam guardadas para medir: medir com as mesmas que viraram exemplo mede memória, não acerto. As perguntas que falharem em produção viram regra, métrica ou exemplo.',
+    fixes: 'Mede se as outras seis funcionaram',
+  },
+];
+
+type Plat = {
+  id: string;
+  name: string;
+  prods: string;
+  kind: 'plataforma' | 'agente';
+  rows: [string, string, string][];
+};
+const plats: Plat[] = [
+  {
+    id: 'gcp',
+    name: 'Google Cloud',
+    prods: 'BigQuery · Looker',
+    kind: 'plataforma',
+    rows: [
+      ['onde', 'Onde está', '“Gerar SQL com o Gemini” no BigQuery Studio, o data canvas, os agentes de dados do Conversational Analytics (no BigQuery e no Looker) e o Looker sobre o modelo LookML.'],
+      ['contexto', 'Onde guardar o contexto', 'Descrições de tabela e coluna no BigQuery e no Knowledge Catalog (o antigo Dataplex Universal Catalog), escritas com a regra de uso; glossário de negócio no Knowledge Catalog; nos agentes de dados, instruções e consultas de exemplo verificadas; no Looker, as medidas já definidas no LookML.'],
+      ['governanca', 'Governança que ajuda', 'Papéis IAM só de leitura no conjunto de dados curado; policy tags e políticas de acesso por linha; limite de bytes faturados por consulta; perfis de dados, que mostram os valores reais de cada coluna.'],
+      ['cuidado', 'Cuidado', 'No nosso teste, as descrições estavam lá, inclusive a da coluna de pedido realizado, e não bastaram: diziam o que a coluna é, não que a receita depende dela. Aponte a geração para as views certificadas, não para as fatos cruas.'],
+    ],
+  },
+  {
+    id: 'aws',
+    name: 'AWS',
+    prods: 'Redshift · Amazon Bedrock',
+    kind: 'plataforma',
+    rows: [
+      ['onde', 'Onde está', 'Amazon Q generative SQL no Query Editor v2 do Redshift; bases de conhecimento do Amazon Bedrock com dados estruturados, que geram SQL sobre o Redshift.'],
+      ['contexto', 'Onde guardar o contexto', 'O contexto personalizado do Query Editor v2: um JSON carregado pelo administrador, com anotações de tabela e de coluna (TableAnnotations, ColumnAnnotations), consultas curadas (CuratedQueries, pares pergunta → SQL) e documentos de apoio. A base estruturada do Bedrock aceita descrições e consultas curadas parecidas. Comentários no Glue Data Catalog.'],
+      ['governanca', 'Governança que ajuda', 'Usuário de banco só de leitura; permissões do Lake Formation; mascaramento dinâmico de dados do Redshift.'],
+      ['cuidado', 'Cuidado', 'O Amazon Q no Redshift exige perguntas em inglês. Escreva anotações e consultas curadas em inglês, traduza a pergunta antes e meça a perda da tradução à parte.'],
+    ],
+  },
+  {
+    id: 'azure',
+    name: 'Microsoft Azure',
+    prods: 'Fabric · Power BI',
+    kind: 'plataforma',
+    rows: [
+      ['onde', 'Onde está', 'Agentes de dados do Microsoft Fabric, que geram SQL, KQL ou DAX conforme a fonte (lakehouse, warehouse, banco SQL, Eventhouse, modelo semântico do Power BI); Copilot no Power BI.'],
+      ['contexto', 'Onde guardar o contexto', 'Instruções do agente. Para fontes SQL e KQL, instruções por fonte e consultas de exemplo (pares pergunta → consulta). Para modelos semânticos, o “Preparar dados para IA” do Power BI, em versão prévia na data desta matéria: o esquema de dados que a IA vê, instruções de IA e respostas verificadas (um visual ligado a frases de gatilho). Medidas DAX com nome e descrição claros.'],
+      ['governanca', 'Governança que ajuda', 'Microsoft Purview (glossário, classificação, rótulos de confidencialidade); segurança por linha no modelo semântico; acesso mínimo ao workspace.'],
+      ['cuidado', 'Cuidado', 'O modelo semântico não aceita as consultas de exemplo do agente: lá, o caminho são as respostas verificadas do Power BI. Se as medidas já existem no Power BI, prefira-as às tabelas cruas.'],
+    ],
+  },
+  {
+    id: 'databricks',
+    name: 'Databricks',
+    prods: 'Genie Agents · Unity Catalog',
+    kind: 'plataforma',
+    rows: [
+      ['onde', 'Onde está', 'Genie Agents (antes Genie Spaces), do AI/BI, sobre tabelas, views e metric views do Unity Catalog; o assistente do editor SQL.'],
+      ['contexto', 'Onde guardar o contexto', 'Comentários de tabela e coluna no Unity Catalog; chaves primária e estrangeira declaradas; instruções gerais; consultas SQL de exemplo e funções SQL como ativos confiáveis; metric views para as métricas.'],
+      ['governanca', 'Governança que ajuda', 'O acesso ao dado é avaliado com as permissões de Unity Catalog de cada usuário (o processamento usa a credencial do warehouse que o autor configurou); filtros de linha e máscaras de coluna; linhagem.'],
+      ['cuidado', 'Cuidado', 'Agente pequeno e focado vence agente com dezenas de tabelas. Rode os benchmarks do próprio agente com o seu gabarito antes de abrir para o negócio e a cada mudança de instrução, e confira na documentação como cada modo compara as respostas.'],
+    ],
+  },
+  {
+    id: 'snowflake',
+    name: 'Snowflake',
+    prods: 'Cortex Analyst · Snowflake Intelligence',
+    kind: 'plataforma',
+    rows: [
+      ['onde', 'Onde está', 'Cortex Analyst, pela API e no Snowflake Intelligence, sobre um modelo semântico; o Copilot no editor SQL, que a Snowflake está substituindo pelo Cortex Code.'],
+      ['contexto', 'Onde guardar o contexto', 'O modelo semântico, em YAML ou como semantic view: tabelas lógicas, dimensões, dimensões de tempo, métricas, relações, sinônimos e valores de exemplo; consultas verificadas; Cortex Search para casar valores de colunas com muitos valores distintos (nomes de produto, cidades). O Copilot aceita instruções personalizadas, por usuário.'],
+      ['governanca', 'Governança que ajuda', 'Snowflake Horizon (tags, políticas de mascaramento e de acesso por linha); papel de leitura dedicado. Atenção à identidade: o Cortex Search roda com os direitos do dono do serviço, não de quem pergunta.'],
+      ['cuidado', 'Cuidado', 'Os 90%+ que a Snowflake publica são do Cortex Analyst com modelo semântico, medidos pela própria empresa. A ferramenta sem modelo nem instruções é o mais perto do cenário cru que testamos.'],
+    ],
+  },
+  {
+    id: 'claude-code',
+    name: 'Claude Code',
+    prods: 'Anthropic · agente no terminal',
+    kind: 'agente',
+    rows: [
+      ['contexto', 'Contexto', 'CLAUDE.md com as convenções curtas (o que é receita, grão de cada fato, fuso, moeda) e um skill do projeto em .claude/skills/<nome>/SKILL.md com o dicionário de dados, as métricas e as consultas verificadas. O agente decide carregar o skill pela descrição: escreva nela quando usá-lo.'],
+      ['conexao', 'Conexão', 'Um servidor MCP do banco com credencial só de leitura, ou a CLI do banco (bq, snowsql, psql) liberada nas permissões.'],
+      ['governanca', 'Governança', 'O papel de banco só de leitura é a barreira principal. Por cima dele, regras de permissão em .claude/settings.json e um hook PreToolUse que barra comandos de escrita conhecidos; filtro por palavra-chave ajuda, mas não pega tudo. No BigQuery, limite os bytes faturados e use bq query --dry_run para estimar o custo: LIMIT não reduz o volume lido.'],
+      ['avaliacao', 'Avaliação', 'claude -p, em modo não interativo, roda o gabarito. Sem ninguém para aprovar, as ferramentas do banco precisam estar liberadas explicitamente nas permissões.'],
+    ],
+  },
+  {
+    id: 'codex',
+    name: 'Codex',
+    prods: 'OpenAI · CLI no terminal',
+    kind: 'agente',
+    rows: [
+      ['contexto', 'Contexto', 'AGENTS.md com as convenções e skills com o dicionário de dados e as consultas verificadas.'],
+      ['conexao', 'Conexão', 'Servidores MCP em ~/.codex/config.toml, ou a CLI do banco.'],
+      ['governanca', 'Governança', 'Sandbox e política de aprovação: comece em somente leitura, com aprovação para comandos; credencial de banco só de leitura.'],
+      ['avaliacao', 'Avaliação', 'codex exec com --output-schema devolve o resultado num JSON de formato fixo, fácil de comparar com o gabarito.'],
+    ],
+  },
+  {
+    id: 'gemini-cli',
+    name: 'Gemini CLI',
+    prods: 'Google · agente no terminal',
+    kind: 'agente',
+    rows: [
+      ['contexto', 'Contexto', 'GEMINI.md por projeto e por pasta, com as convenções; comandos personalizados em .gemini/commands/ que padronizam o roteiro “pergunta → plano → SQL → checagem”.'],
+      ['conexao', 'Conexão', 'Servidores MCP em .gemini/settings.json (projeto) ou ~/.gemini/settings.json (usuário), ou as extensões de dados do Google para o BigQuery e outros bancos, baseadas no MCP Toolbox for Databases.'],
+      ['governanca', 'Governança', 'Ative o sandbox explicitamente; mantenha a aprovação manual de ferramentas; conta de serviço só de leitura no conjunto curado.'],
+      ['avaliacao', 'Avaliação', 'gemini -p, em modo não interativo, roda o gabarito.'],
+    ],
+  },
+];
+const dtIcon: Record<string, string> = {
+  onde: 'compass',
+  contexto: 'file-code',
+  conexao: 'key-round',
+  governanca: 'shield-check',
+  cuidado: 'triangle-alert',
+  avaliacao: 'list-checks',
+};
+// Words that read as code inside platform text (paths, flags, files, identifiers): set as <code>, escaped.
+const CODE = /(\.claude\/skills\/<nome>\/SKILL\.md|\.claude\/settings\.json|~\/\.codex\/config\.toml|\.gemini\/commands\/|~?\/?\.gemini\/settings\.json|bq query --dry_run|codex exec|--output-schema|claude -p|gemini -p|CLAUDE\.md|AGENTS\.md|GEMINI\.md|PreToolUse|TableAnnotations|ColumnAnnotations|CuratedQueries|LIMIT|\bbq\b|snowsql|psql)/;
+const parts = (s: string) => s.split(CODE).map((t, i) => ({ t, code: i % 2 === 1 }));
+
+const steps = [
+  ['Gabarito', '20 a 50 perguntas reais, com o resultado esperado, escritas antes de configurar nada. Separe um terço que nunca vira exemplo.'],
+  ['Linha de base', 'Rode a ferramenta sem contexto e guarde o número.'],
+  ['Significado', 'Descrições de tabela (grão) e de coluna (regra de uso, data), chaves e cardinalidade das junções, glossário com sinônimos.'],
+  ['Métricas e superfície', 'As 5 a 10 métricas mais pedidas na camada semântica; exponha só a superfície curada.'],
+  ['Exemplos e nova medida', 'Consultas verificadas para as perguntas de ajuste; meça nas guardadas e compare com a linha de base. Daí em diante, a cada mudança.'],
+];
+
+const sources: [string, string][] = [
+  ['Lei, F. et al. Spider 2.0: Evaluating Language Models on Real-World Enterprise Text-to-SQL Workflows. ICLR 2025.', 'https://arxiv.org/abs/2411.07763'],
+  ['Spider 2.0 — placar (variantes Snow, Lite e DBT).', 'https://spider2-sql.github.io/'],
+  ['Chen, P. B. et al. BEAVER: An Enterprise Benchmark for Text-to-SQL. MIT / AWS AI Labs (v1, 2024; v3, 2026).', 'https://arxiv.org/abs/2409.02038'],
+  ['BIRD-SQL — placar.', 'https://bird-bench.github.io/'],
+  ['The Decoder. Google Research’s Gemini-SQL2 tops text-to-SQL benchmarks by a wide margin (jun. 2026).', 'https://the-decoder.com/google-researchs-gemini-sql2-tops-text-to-sql-benchmarks-by-a-wide-margin/'],
+  ['Snowflake Engineering. Cortex Analyst: Evaluating Text-to-SQL Accuracy for Real-World Business Intelligence Scenarios (ago. 2024).', 'https://www.snowflake.com/en/blog/engineering/cortex-analyst-text-to-sql-accuracy-bi/'],
+  ['Databricks. Use benchmarks in a Genie space.', 'https://docs.databricks.com/aws/en/genie/benchmarks'],
+  ['Databricks. Set up a Genie Agent.', 'https://docs.databricks.com/aws/en/genie-agents/set-up'],
+  ['Microsoft ISE Developer Blog. LLM SQL query generation.', 'https://devblogs.microsoft.com/ise/llm-sql-query-generation/'],
+  ['Microsoft. Fabric data agent: add and configure data sources.', 'https://learn.microsoft.com/en-us/fabric/data-science/data-agent-add-datasources'],
+  ['Microsoft. Prepare your data for AI (Power BI, versão prévia).', 'https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai'],
+  ['AWS. Interacting with Amazon Q generative SQL (Redshift).', 'https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-generative-ai.html'],
+  ['Google Cloud. Write queries with Gemini assistance (BigQuery).', 'https://cloud.google.com/bigquery/docs/write-sql-gemini'],
+  ['Google Cloud. Knowledge Catalog: introduction.', 'https://docs.cloud.google.com/knowledge-catalog/docs/introduction'],
+  ['Snowflake. Semantic views: best practices.', 'https://docs.snowflake.com/en/user-guide/views-semantic/best-practices'],
+  ['Snowflake. Snowflake Copilot.', 'https://docs.snowflake.com/en/user-guide/snowflake-copilot'],
+  ['Snowflake. Cortex Search overview.', 'https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/cortex-search-overview'],
+  ['Anthropic. Claude Code: skills.', 'https://code.claude.com/docs/en/skills'],
+  ['Anthropic. Claude Code: headless mode.', 'https://code.claude.com/docs/en/headless'],
+  ['Gemini CLI. Custom commands.', 'https://geminicli.com/docs/cli/custom-commands/'],
+  ['Gemini CLI. Headless mode.', 'https://geminicli.com/docs/cli/headless/'],
+];
+---
+
+<SpecialLayout title={page.title} description={page.summary} fonts={[mona, jetbrains]}>
+  <article data-article="especial-perguntar-ao-banco" data-special>
+    <section class="hero" aria-labelledby="titulo" data-hero>
+      <div class="wrap hero-grid">
+        <div>
+          <p class="kicker mono">Conteúdo especial · NL→SQL</p>
+          <h1 id="titulo">{page.title}</h1>
+          <p class="dek">
+            Um teste com 20 perguntas de negócio no Gemini do BigQuery acertou 25%. O número parece ruim até ser posto ao
+            lado dos benchmarks acadêmicos de cenário corporativo, e fica bem longe dos ~90% que os fornecedores anunciam.
+            A hipótese mais forte para a diferença tem nome: camada semântica.
+          </p>
+          <ul class="chips mono">
+            <li><Icon name="file-text" />Conteúdo especial</li>
+            <li><Icon name="gauge" />{page.readMinutes} min de leitura</li>
+            <li><Icon name="flask-conical" />Teste: 5 de 20</li>
+          </ul>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="scene">
+            <div class="stack" data-stack>
+              <svg class="caustic" viewBox="0 0 440 280" focusable="false">
+                <polygon class="ca" points="280,140 430,60 400,240" />
+                <polygon class="cb" points="280,140 300,275 110,240" />
+              </svg>
+              <div class="plate p-tec">
+                <svg class="glyph" viewBox="0 0 170 110" focusable="false" stroke-width="3">
+                  <path d="M4 10h160M4 40h160M4 70h160M4 100h160M60 10v90M112 10v90" />
+                </svg>
+                <span class="collar"></span>
+              </div>
+              <div class="plate p-ponte">
+                <svg class="glyph" viewBox="0 0 170 110" focusable="false" stroke-width="4">
+                  <path d="M4 14h40M60 14h104M4 46h70M90 46h74M4 78h28M48 78h80" />
+                </svg>
+                <span class="collar"></span>
+              </div>
+              <div class="plate p-corp">
+                <svg class="glyph" viewBox="0 0 170 110" focusable="false" stroke-width="7">
+                  <path d="M20 30c0-16 12-24 26-24s26 8 26 22c0 18-24 18-24 38M48 92v4" />
+                </svg>
+                <span class="collar"></span>
+              </div>
+              <span class="shaft"></span>
+              <span class="shaft shaft-b"></span>
+            </div>
+          </div>
+          <span class="tag tag-corp">Pergunta de negócio</span>
+          <span class="tag tag-ponte">Camada semântica</span>
+          <span class="tag tag-tec">Dados do warehouse</span>
+        </div>
+        <ul class="art-legend mono" aria-hidden="true">
+          <li data-c="corp">Pergunta de negócio</li>
+          <li data-c="ponte">Camada semântica</li>
+          <li data-c="tec">Dados do warehouse</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="intro" aria-label="Apresentação">
+      <div class="wrap intro-grid">
+        <p class="lede">
+          Escrever SQL a partir de uma pergunta em português virou recurso de série nas plataformas de dados e nos agentes
+          de programação. Esta matéria mede um deles numa base com regras de negócio, compara o resultado com a pesquisa e
+          termina no que interessa a quem vai usar: <strong>o que fazer, em cada plataforma, para a ferramenta acertar
+          mais.</strong>
+        </p>
+        <aside class="card howto" aria-label="Como ler esta matéria">
+          <p class="mono howto-tag"><Icon name="compass" />Como ler</p>
+          <p>
+            <strong>NL→SQL</strong> é gerar uma consulta SQL a partir de uma pergunta em linguagem natural. O campo também
+            se chama text-to-SQL ou NL2SQL; o nome acadêmico antigo é NLIDB (Natural Language Interface to Databases).{' '}
+            <strong>Camada semântica</strong> é o conjunto de definições que dá significado ao dado: métricas, grão,
+            junções, sinônimos e regras.
+          </p>
+          <p>
+            Acerto, aqui, é <strong>acurácia por execução</strong> (Execution Accuracy, EX): o resultado da consulta gerada
+            é comparado com o do gabarito. O contraste é a exact match, que compara o texto do SQL.
+          </p>
+          <p>
+            Na arte da abertura, cada placa é uma camada: a pergunta (azul), a camada semântica (âmbar) e os dados (verde-água). A junta de latão que as atravessa são as definições versionadas e validadas que ligam uma à outra.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <nav class="toc" aria-labelledby="sumario">
+      <div class="wrap">
+        <div class="card toc-card">
+          <p class="mono toc-label" id="sumario">Nesta matéria</p>
+          <ol class="toc-list">
+            {
+              toc.map(([id, label, layer], i) => (
+                <li>
+                  <a href={`#${id}`}>
+                    <span class="mono tn" data-layer={layer}>
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span>{label}</span>
+                    <Icon name="arrow-down" class="icon ta" />
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+    </nav>
+
+    <section class="sec" data-layer="corp" aria-labelledby="o-teste">
+      <div class="wrap">
+        <p class="mono sec-n" aria-hidden="true">01</p>
+        <h2 id="o-teste">O teste</h2>
+        <p class="prose">
+          Em 11 de novembro de 2026, durante a replicação de um MVP de engenharia de dados no Google Cloud, fizemos 20
+          perguntas de negócio, em português, ao recurso <strong>“Gerar SQL com o Gemini”</strong> do BigQuery Studio. O
+          alvo era um data warehouse dimensional de um marketplace de varejo, com 25 tabelas de dimensões e fatos e dados
+          sintéticos. O desenho foi fechado antes da primeira pergunta:
+        </p>
+        <ol class="rules">
+          <li class="card rule">
+            <div class="rule-top"><Icon name="database" class="icon rule-icon" /><span class="mono">01</span></div>
+            <p>
+              <strong>Contexto restrito ao datamart.</strong> O Gemini só podia ver as 25 tabelas de dimensões e fatos,
+              com seus nomes e descrições. As views prontas, que já respondem às perguntas, ficaram de fora.
+            </p>
+          </li>
+          <li class="card rule">
+            <div class="rule-top"><Icon name="user" class="icon rule-icon" /><span class="mono">02</span></div>
+            <p>
+              <strong>A pergunta crua.</strong> O texto que um gestor digitaria (“Qual a receita líquida por mês, canal e
+              categoria de produto?”), sem citar tabela, coluna nem regra.
+            </p>
+          </li>
+          <li class="card rule">
+            <div class="rule-top"><Icon name="flag" class="icon rule-icon" /><span class="mono">03</span></div>
+            <p><strong>Uma tentativa,</strong> sem reformular.</p>
+          </li>
+          <li class="card rule">
+            <div class="rule-top"><Icon name="scale" class="icon rule-icon" /><span class="mono">04</span></div>
+            <p>
+              <strong>Acerto pelo resultado, e não pelo texto do SQL.</strong> A consulta gerada é executada e comparada
+              a um gabarito fixado antes do teste, nas colunas que a pergunta pede, com duas casas decimais.
+            </p>
+          </li>
+        </ol>
+        <p class="prose">
+          Das 20 perguntas, 15 reproduziam indicadores que o projeto já tinha em views (receita por canal, ticket médio,
+          margem bruta, giro de estoque, entregas no prazo, recompra após chamado…), e 5 eram novas.
+        </p>
+      </div>
+    </section>
+
+    <section class="sec" data-layer="corp" aria-labelledby="resultado">
+      <div class="wrap">
+        <p class="mono sec-n" aria-hidden="true">02</p>
+        <h2 id="resultado">O resultado: 5 de 20</h2>
+        <figure class="card result" aria-labelledby="resultado-cap">
+          <div>
+            <p class="big">5<span>/20</span></p>
+            <p class="big-cap" id="resultado-cap">
+              Respostas certas: 25%. Com só 20 perguntas, a margem é larga: o intervalo de 95% (Wilson) vai de ~11% a ~47%.
+            </p>
+            <div class="ci" aria-hidden="true">
+              <p class="ci-head">Intervalo de 95%</p>
+              <div class="ci-axis"><span class="ci-band"></span><span class="ci-dot"></span></div>
+              <p class="ci-ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></p>
+            </div>
+          </div>
+          <div>
+            <div class="tiles-block">
+              <p class="mono tiles-label">15 conhecidas: 2 certas</p>
+              <ul class="tiles" aria-label="Perguntas conhecidas: 2 certas e 13 erradas">
+                {known.map((hit) => <li class="tile" data-hit={hit ? '' : undefined}></li>)}
+              </ul>
+            </div>
+            <div class="tiles-block">
+              <p class="mono tiles-label">5 novas: 3 certas</p>
+              <ul class="tiles" aria-label="Perguntas novas: 3 certas e 2 erradas">
+                {fresh.map((hit) => <li class="tile" data-hit={hit ? '' : undefined}></li>)}
+              </ul>
+            </div>
+            <p class="legend" aria-hidden="true">
+              <span><i data-hit></i>certa</span><span><i></i>errada</span>
+            </p>
+            <p class="fig-cap">
+              “Conhecidas” são indicadores que o projeto já tinha em views, não perguntas que o modelo já tivesse visto. A
+              ordem dos quadrados é ilustrativa; as contagens são os dados.
+            </p>
+            <div class="bars">
+              <div class="bar-row">
+                <p class="bar-head"><span>Rodaram sem erro</span><b>20 de 20</b></p>
+                <p class="track" aria-hidden="true"><span class="fill w100"></span></p>
+              </div>
+              <div class="bar-row">
+                <p class="bar-head"><span>Deram a resposta certa</span><b>5 de 20</b></p>
+                <p class="track" aria-hidden="true"><span class="fill w25" data-tone="ponte"></span></p>
+              </div>
+            </div>
+          </div>
+        </figure>
+
+        <p class="prose">
+          O dado mais revelador não é o percentual: <strong>as 20 consultas rodaram sem erro.</strong> O SQL era sempre
+          válido, bem formatado e plausível. O que falhava era o significado. Os erros se agrupam em quatro famílias:
+        </p>
+        <ol class="families">
+          {
+            families.map((f, i) => (
+              <li class="card fam">
+                <div class="fam-top">
+                  <Icon name={f.icon} class="icon fam-icon" />
+                  <h3>
+                    <span class="visually-hidden">{`Família ${i + 1}: `}</span>
+                    {f.title}
+                  </h3>
+                </div>
+                <p>{f.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+        <aside class="card aside-find" aria-label="Achado lateral">
+          <Icon name="search" />
+          <p>
+            <strong>Achado lateral.</strong> Antes de restringirmos o contexto, nas duas vezes em que as views prontas
+            estavam visíveis, o Gemini <strong>escolheu a view</strong>. Quando a camada semântica existe e está à mão, ele
+            a usa. São duas observações, não uma medida: esse cenário não entrou nas 20 perguntas.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="sec" data-layer="corp" aria-labelledby="pesquisa">
+      <div class="wrap">
+        <p class="mono sec-n" aria-hidden="true">03</p>
+        <h2 id="pesquisa">O que a pesquisa já mostrava</h2>
+        <p class="prose">
+          Os 25% não destoam da literatura de cenário corporativo. Destoam, isso sim, do benchmark mais citado.
+        </p>
+        <figure class="card bench" aria-labelledby="bench-cap">
+          {
+            bench.map((g) => (
+              <div class="bench-group">
+                <p class="mono">{g.label}</p>
+                {g.rows.map(([label, value, w, tone]) => (
+                  <div class="bar-row">
+                    <p class="bar-head">
+                      <span>{label}</span>
+                      <b>{value}</b>
+                    </p>
+                    <p class="track" aria-hidden="true">
+                      <span class={`fill ${w}`} data-tone={tone} />
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ))
+          }
+          <figcaption id="bench-cap">
+            Acurácia por execução (EX) publicada em cada fonte. Cada barra vem de um conjunto de perguntas, de uma regra de
+            comparação e de um protocolo diferentes (número de tentativas, contexto entregue): compare a ordem de grandeza,
+            não os pontos.
+          </figcaption>
+        </figure>
+        <div class="papers">
+          <div class="card paper">
+            <h3>Spider 2.0</h3>
+            <p class="mono">Lei et al., ICLR 2025</p>
+            <p>
+              632 tarefas tiradas de fluxos reais de empresas, boa parte em BigQuery e Snowflake. O melhor agente do
+              artigo, com o o1-preview, resolveu <strong>21,3%</strong>. Nos benchmarks clássicos, métodos com o GPT-4
+              chegavam a 91,2% no Spider 1.0 e 73,0% no BIRD. O placar atual separa variantes da prova (Snow, Lite, DBT):
+              consulte-o antes de citar um número recente.
+            </p>
+          </div>
+          <div class="card paper">
+            <h3>BEAVER</h3>
+            <p class="mono">Chen et al., MIT e AWS AI Labs</p>
+            <p>
+              Construído sobre data warehouses corporativos privados. Na primeira versão, GPT-4o e Llama 3 70B ficaram{' '}
+              <strong>perto de 0%</strong> de acerto ponta a ponta. A versão atual relata <strong>10,8%</strong> para
+              agentes com GPT-5.2, e 30,1% quando recebem dicas de subtarefa como oráculo, dicas que nenhuma empresa tem
+              prontas. As causas apontadas:
+            </p>
+            <ul>
+              <li>esquemas corporativos mais complexos que os públicos;</li>
+              <li>perguntas de negócio que exigem junções, agregações e consultas aninhadas;</li>
+              <li>modelos que nunca viram o warehouse privado no treino.</li>
+            </ul>
+          </div>
+          <div class="card paper">
+            <h3>BIRD</h3>
+            <p class="mono">bird-bench</p>
+            <p>
+              É onde estão os números altos: os melhores sistemas passam de 75%, e o Gemini-SQL2 foi anunciado pelo Google
+              com <strong>80,04%</strong> em 2026, gerando vários candidatos por pergunta. O detalhe que importa: o BIRD
+              entrega junto com cada pergunta uma “evidência”, o pedaço de conhecimento de negócio necessário para
+              respondê-la.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" data-layer="corp" aria-labelledby="plataformas-dizem">
+      <div class="wrap">
+        <p class="mono sec-n" aria-hidden="true">04</p>
+        <h2 id="plataformas-dizem">O que as plataformas dizem</h2>
+        <p class="prose">
+          Nenhuma das grandes plataformas publica uma acurácia independente da sua ferramenta de linguagem natural. O que
+          existe é medição própria:
+        </p>
+        <div class="vendors">
+          <div class="card vendor">
+            <h3>Snowflake</h3>
+            <p>
+              A empresa reporta, num <a href={sources[5][1]} rel="noopener noreferrer">blog de engenharia</a> de 2024, que o <strong>Cortex
+              Analyst</strong> é “quase 2x” mais preciso que o GPT-4o em prompt único, que fez <strong>51%</strong> num
+              conjunto interno de 150 perguntas de negócio, e fala em mais de 90% de acerto. Tudo depende de um{' '}
+              <strong>modelo semântico</strong>, que declara métricas, dimensões e junções.
+            </p>
+          </div>
+          <div class="card vendor">
+            <h3>Databricks</h3>
+            <p>
+              Não publica um número para o <strong>Genie</strong> como produto. Oferece <a href={sources[6][1]} rel="noopener noreferrer">benchmarks
+              por agente</a>, em que o cliente escreve perguntas com o SQL de referência e compara com as respostas do
+              Genie. Uma <a href={sources[8][1]} rel="noopener noreferrer">avaliação da equipe de engenharia da Microsoft</a> relata que o Genie foi
+              mal com pouco metadado e ficou forte depois de receber descrições de coluna e instruções de domínio.
+            </p>
+          </div>
+          <div class="card vendor">
+            <h3>AWS</h3>
+            <p>
+              Não encontramos acurácia publicada para o <a href={sources[11][1]} rel="noopener noreferrer">Amazon Q generative SQL</a> do Redshift.
+              A documentação oferece um contexto personalizado (anotações de tabela e coluna, consultas curadas) e exige
+              perguntas em inglês.
+            </p>
+          </div>
+          <div class="card vendor">
+            <h3>Google</h3>
+            <p>
+              Os números públicos são de pesquisa, no BIRD, e não da ferramenta “Gerar SQL” da consola, que testamos.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" data-layer="corp" aria-labelledby="comparacao">
+      <div class="wrap">
+        <p class="mono sec-n" aria-hidden="true">05</p>
+        <h2 id="comparacao">A comparação, lado a lado</h2>
+        <div class="card cmp">
+          <table>
+            <caption>Nosso teste, três benchmarks e os números dos fornecedores</caption>
+            <thead>
+              <tr>
+                <td></td>
+                {cmpCols.map((c, i) => <th scope="col" data-us={i === 0 ? '' : undefined}>{c}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {
+                cmpRows.map(([key, head, cells]) => (
+                  <tr data-row={key}>
+                    <th scope="row">{head}</th>
+                    {cells.map((c, i) => (
+                      <td data-col={cmpCols[i]} data-us={i === 0 ? '' : undefined}>
+                        {c}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="prose">
+          A leitura que a tabela permite: <strong>o nosso teste se parece com o Spider 2.0 e o BEAVER, e o resultado
+          também.</strong> Os números altos aparecem onde alguém entregou o conhecimento de negócio junto com a pergunta: a
+          evidência do BIRD, o modelo semântico do Cortex Analyst, as instruções do Genie.
+        </p>
+        <p class="prose">
+          Os erros que observamos são a versão concreta das causas que o BEAVER lista. “Receita só de pedido realizado”,
+          “cliente na versão vigente” e “entrega por remessa” não estão no nome de nenhuma coluna. Estão na cabeça de quem
+          modelou o warehouse, ou na documentação dele.
+        </p>
+      </div>
+    </section>
+
+    <section class="sec sec-max" data-layer="ponte" aria-labelledby="maximizar">
+      <div class="wrap">
+        <p class="mono sec-n" aria-hidden="true">06</p>
+        <h2 id="maximizar">Como maximizar o sucesso em NL→SQL</h2>
+        <p class="prose">
+          Todo resultado alto citado acima tem uma coisa em comum: alguém escreveu o conhecimento de negócio num lugar
+          onde o modelo consegue ler. Isso é governança de dados com outro nome. Os artefatos que uma equipe de dados
+          madura já deveria manter (glossário, descrições, métricas certificadas, chaves declaradas, consultas de
+          referência, controle de acesso) são, para um gerador de SQL, o contexto que falta.
+        </p>
+        <p class="prose">
+          Uma ressalva antes da receita: nosso teste mediu a ferramenta sem esse contexto; ele não mediu quanto cada
+          artefato acrescenta. O que segue vem da documentação das plataformas e da pesquisa, e é o que a próxima rodada vai
+          testar. Os nomes de recursos mudam rápido: confira a documentação atual antes de configurar.
+        </p>
+
+        <h3 id="exemplo"><span class="mono">6.1</span>Um exemplo do começo ao fim: receita líquida</h3>
+        <ol class="fixes" aria-label="Da pergunta à correção">
+          <li class="fix">
+            <div class="fix-err">
+              <span class="mono fix-k">Pergunta e catálogo</span>
+              <p>
+                <strong>“Qual a receita líquida por mês, canal e categoria de produto?”</strong> O catálogo descrevia{' '}
+                <code>net_revenue_amount</code> (quantidade × preço, menos desconto, no grão do item) e{' '}
+                <code>is_realised</code> (“verdadeiro quando o pedido é venda realizada… o pendente e o cancelado não
+                contam”). Nenhuma das duas dizia que uma depende da outra.
+              </p>
+            </div>
+            <span class="fix-joint" aria-hidden="true"></span>
+            <div class="fix-art">
+              <span class="mono fix-k">SQL gerado e resultado</span>
+              <p>
+                Soma de <code>net_revenue_amount</code> na fato de itens, com junções certas de canal e categoria, agrupada
+                por mês. <strong>Válido e sem o filtro.</strong> Resultado: 1.505 linhas contra 1.494 do gabarito; em
+                janeiro de 2024, Aplicativo, Barracas, 9.522,14 contra 5.149,75.
+              </p>
+            </div>
+          </li>
+          <li class="fix">
+            <div class="fix-err">
+              <span class="mono fix-k">O que faltou</span>
+              <p>
+                <strong>A regra de uso.</strong> A descrição dizia o que a coluna é. Não dizia que receita só conta pedido
+                realizado.
+              </p>
+            </div>
+            <span class="fix-joint" aria-hidden="true"></span>
+            <div class="fix-art">
+              <span class="mono fix-k">A correção a testar</span>
+              <p>
+                <strong>Uma métrica e uma frase.</strong> Na camada semântica, a métrica <code>receita_liquida</code> =
+                soma de <code>net_revenue_amount</code> onde <code>is_realised</code> é verdadeiro. No catálogo, a regra
+                escrita: “Para receita, some só as linhas com <code>is_realised = true</code>.”
+              </p>
+            </div>
+          </li>
+        </ol>
+
+        <h3 id="erro-artefato"><span class="mono">6.2</span>Cada família de erro, um artefato a testar</h3>
+        <ol class="fixes">
+          {
+            fixes.map((f) => (
+              <li class="fix">
+                <div class="fix-err">
+                  <span class="mono fix-k">Erro</span>
+                  <p>
+                    <strong>{f.err}</strong>
+                  </p>
+                </div>
+                <span class="fix-joint" aria-hidden="true" />
+                <div class="fix-art">
+                  <span class="mono fix-k">Artefato</span>
+                  <p>{f.art}</p>
+                  <p class="fix-ex">{f.ex}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+        <p class="fig-cap">
+          Em todas as famílias, o artefato que confirma se a correção funcionou é o mesmo: consultas verificadas e um
+          gabarito que roda a cada mudança.
+        </p>
+
+        <h3 id="pilha"><span class="mono">6.3</span>A pilha que vale em qualquer plataforma</h3>
+        <p class="prose">Sete camadas, da base ao topo. A junta que atravessa todas é a avaliação.</p>
+        <ol class="layers">
+          {
+            layers.map((l, i) => (
+              <li class="layer" data-tone={l.tone}>
+                <div class="layer-head">
+                  <span class="mono layer-n">{`Camada ${i + 1}`}</span>
+                  <h4>{l.title}</h4>
+                </div>
+                <p>{l.text}</p>
+                <p class="mono fixes-of">{l.fixes}</p>
+              </li>
+            ))
+          }
+        </ol>
+        <aside class="card guard" aria-label="Quem executa a consulta">
+          <Icon name="lock" />
+          <p>
+            <strong>Governança também protege, e a pergunta é quem executa.</strong> Em algumas ferramentas, o acesso ao
+            dado segue as permissões de quem pergunta (o Genie, por exemplo); em outras, de uma conta de serviço ou do dono
+            de um serviço (o Cortex Search). Mapeie a identidade em cada etapa (gerar, executar, buscar valores) e aplique a
+            ela acesso por linha, mascaramento e classificação de dado sensível. Um agente com papel de escrita é um risco
+            que nenhuma camada semântica compensa.
+          </p>
+        </aside>
+
+        <h3 id="por-plataforma"><span class="mono">6.4</span>Plataforma por plataforma</h3>
+        <nav class="pnav" aria-label="Plataformas">
+          {
+            plats.map((p) => (
+              <a href={`#${p.id}`} data-kind={p.kind}>
+                {p.name}
+              </a>
+            ))
+          }
+        </nav>
+        <p class="mono group-label">Plataformas de dados</p>
+        <div class="plats">
+          {
+            plats
+              .filter((p) => p.kind === 'plataforma')
+              .map((p) => (
+                <section class="card plat" data-kind={p.kind} aria-labelledby={p.id}>
+                  <h4 id={p.id}>{p.name}</h4>
+                  <p class="mono prods">{p.prods}</p>
+                  <dl>
+                    {p.rows.map(([k, label, text]) => (
+                      <div>
+                        <dt class="mono">
+                          <Icon name={dtIcon[k]} />
+                          {label}
+                        </dt>
+                        <dd data-k={k}>{parts(text).map((x) => (x.code ? <code>{x.t}</code> : x.t))}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              ))
+          }
+        </div>
+        <p class="mono group-label">Agentes no terminal</p>
+        <p class="prose agents-intro">
+          Claude Code, Codex e Gemini CLI não são produtos de NL→SQL: são agentes que leem o repositório, rodam comandos e
+          se corrigem com o resultado. A camada semântica entra como <strong>arquivos</strong> (modelos e métricas do dbt,
+          LookML, YAML de modelo semântico, um dicionário de dados em Markdown), a conexão entra por <strong>MCP</strong>{' '}
+          ou pela linha de comando do banco, e a avaliação pode rodar sem ninguém olhando.
+        </p>
+        <div class="plats">
+          {
+            plats
+              .filter((p) => p.kind === 'agente')
+              .map((p) => (
+                <section class="card plat" data-kind={p.kind} aria-labelledby={p.id}>
+                  <h4 id={p.id}>{p.name}</h4>
+                  <p class="mono prods">{p.prods}</p>
+                  <dl>
+                    {p.rows.map(([k, label, text]) => (
+                      <div>
+                        <dt class="mono">
+                          <Icon name={dtIcon[k]} />
+                          {label}
+                        </dt>
+                        <dd data-k={k}>{parts(text).map((x) => (x.code ? <code>{x.t}</code> : x.t))}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              ))
+          }
+          <section class="card checks" aria-labelledby="checagens">
+            <h4 id="checagens">Três checagens para pedir nas instruções</h4>
+            <p>
+              As plataformas gerenciadas também executam e conferem resultados; nos agentes de terminal, você escreve essas
+              checagens. Nas instruções, peça:
+            </p>
+            <ol>
+              <li>Antes do SQL, dizer o grão, o filtro de negócio e o denominador.</li>
+              <li>
+                Depois de rodar, conferir contagens e os limites que a sua regra define. Margem de exatamente 100% sugere
+                custo ausente; uma taxa de reembolso igual a ~100% em todas as linhas sugere denominador errado: compare
+                com a taxa histórica.
+              </li>
+              <li>Se o dado parecer faltar, procurar em outra tabela antes de responder.</li>
+            </ol>
+          </section>
+        </div>
+
+        <h3 id="roteiro"><span class="mono">6.5</span>Um piloto em cinco passos</h3>
+        <p class="prose">
+          Numa área pequena, com acesso e SQL de referência já em mãos, cabe em uma semana. Fora disso, cada passo leva
+          mais.
+        </p>
+        <ol class="rail">
+          {
+            steps.map(([t, d], i) => (
+              <li>
+                <span class="node" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <h4>{t}</h4>
+                <p>{d}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="thesis" aria-labelledby="para-quem-usa">
+      <div class="wrap">
+        <p class="mono sec-n" aria-hidden="true">07</p>
+        <h2 id="para-quem-usa">O que isso quer dizer para quem vai usar</h2>
+        <ol class="thesis-list">
+          <li>
+            <strong>SQL válido não é resposta certa.</strong>
+            <span>A ferramenta nunca errou a sintaxe e errou o significado três vezes em quatro. Sem gabarito, ninguém percebe.</span>
+          </li>
+          <li>
+            <strong>A camada semântica é a principal aposta.</strong>
+            <span>
+              Os ~90% anunciados pressupõem métricas definidas, descrições e regras declaradas. No nosso teste, só com nomes
+              e descrições, o acerto ficou em 25%; quanto a camada semântica acrescenta é o que a próxima rodada vai medir.
+            </span>
+          </li>
+          <li>
+            <strong>Meça na sua base.</strong>
+            <span>
+              Benchmarks públicos e números de fornecedor não dizem quanto a ferramenta acerta nas suas regras. O desenho
+              que usamos cabe numa tarde: perguntas reais, gabarito fixado antes, uma tentativa, comparação pelo resultado.
+            </span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="sec" data-layer="tec" aria-labelledby="limites">
+      <div class="wrap">
+        <p class="mono sec-n" aria-hidden="true">08</p>
+        <h2 id="limites">Limites, próximos passos e fontes</h2>
+        <p class="prose">
+          Foi <strong>uma rodada</strong>, com 20 perguntas, numa ferramenta e numa base sintética. A geração não é
+          determinística, e a repetibilidade não foi medida. As perguntas foram escolhidas, não sorteadas: o intervalo de
+          confiança mostra a incerteza desta amostra, não a acurácia geral da ferramenta. O gabarito codifica regras do
+          próprio modelo de dados. Numa pergunta, a de recompra após chamado, a leitura do Gemini (por cliente, e não por
+          pedido) é defensável.
+        </p>
+        <p class="prose">
+          O mesmo pacote (as 25 tabelas, as 20 perguntas e o gabarito) será repetido no Databricks Genie, no Snowflake
+          (Copilot e Cortex Analyst), no Amazon Q, com tradução para o inglês, e em agentes locais (Claude Code, Codex e
+          Gemini CLI). Cada plataforma terá dois cenários: crua, como neste teste, e com a camada semântica.
+        </p>
+        <aside class="card terms" aria-labelledby="pesquisar">
+          <h3 id="pesquisar">Para pesquisar</h3>
+          <dl>
+            <div><dt>text-to-SQL benchmark · NL2SQL evaluation</dt><dd>o tema geral</dd></div>
+            <div><dt>execution accuracy text-to-SQL</dt><dd>a métrica deste teste; o contraste é exact match accuracy</dd></div>
+            <div><dt>enterprise text-to-SQL</dt><dd>o cenário mais próximo do nosso (Spider 2.0, BEAVER)</dd></div>
+            <div><dt>semantic layer text-to-SQL · text-to-SQL with business context</dt><dd>o fator que muda o resultado</dd></div>
+            <div><dt>text-to-SQL ambiguity</dt><dd>perguntas com mais de uma leitura, como a de recompra após chamado</dd></div>
+            <div><dt>LLM data analyst agent evaluation</dt><dd>a versão com agentes</dd></div>
+            <div><dt>Spider · Spider 2.0 · BIRD-SQL · BEAVER · KaggleDBQA · Archer</dt><dd>benchmarks por nome; o BIRD tem também o Valid Efficiency Score (VES), que mede custo além de acerto</dd></div>
+          </dl>
+        </aside>
+        <h3 id="fontes">Fontes</h3>
+        <ol class="sources">
+          {
+            sources.map(([t, url]) => (
+              <li>
+                <span>
+                  {t} <a href={url} rel="noopener noreferrer">{url.replace(/^https:\/\//, '')}</a>
+                </span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <footer class="guide-foot">
+      <div class="wrap">
+        <p class="note" data-ai-note>
+          Matéria do editor da Linkedia a partir de um teste próprio, com texto e diagramas feitos com apoio de IA, crítica
+          do Codex e revisão humana. <a href="/sobre">Saiba como a Linkedia é feita</a>.
+        </p>
+      </div>
+    </footer>
+  </article>
+  <p class="guide-back"><a href="/edicoes">Voltar às edições</a></p>
+</SpecialLayout>
+
+<script>
+  import '../../specials/perguntar-ao-banco/parallax';
+</script>

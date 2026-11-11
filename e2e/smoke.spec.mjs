@@ -19,6 +19,7 @@ const ROUTES = [
   '/categorias/lideranca-de-ia',
   '/categorias/conhecimento-de-ia',
   '/especiais/governanca-de-ia',
+  '/especiais/perguntar-ao-banco',
   '/especiais/dez-layouts-governanca-de-ia',
   '/sobre',
 ];

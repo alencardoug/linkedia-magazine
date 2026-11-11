@@ -10,6 +10,8 @@ import Part3 from '../../specials/governanca-de-ia/Part3.astro';
 import Part4 from '../../specials/governanca-de-ia/Part4.astro';
 import Part5 from '../../specials/governanca-de-ia/Part5.astro';
 import Top from '../../specials/governanca-de-ia/Top.astro';
+import bricolage from '../../specials/governanca-de-ia/fonts/bricolage-grotesque.woff2?url';
+import instrumentSans from '../../specials/governanca-de-ia/fonts/instrument-sans.woff2?url';
 import '../../specials/governanca-de-ia/base.css';
 import '../../specials/governanca-de-ia/hero.css';
 import '../../specials/governanca-de-ia/part1.css';
@@ -21,7 +23,12 @@ import '../../specials/governanca-de-ia/part5.css';
 const page = special('governanca-de-ia');
 ---
 
-<SpecialLayout title={page.title} description={page.summary} schemeScript="/especiais/governanca-de-ia/esquema.js">
+<SpecialLayout
+  title={page.title}
+  description={page.summary}
+  fonts={[bricolage, instrumentSans]}
+  schemeScript="/especiais/governanca-de-ia/esquema.js"
+>
   <article data-article="especial-governanca-de-ia" data-special>
     <Top page={page} />
     <Part1 />
