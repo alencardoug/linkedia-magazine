@@ -1,0 +1,14 @@
+---
+// `/visual/sismograma`: the 2026-W47 cover, reachable for good (docs/COVERS.md). One page per cover, so each page
+// ships only its own cover's CSS and JS.
+import CoverPage from '../../layouts/CoverPage.astro';
+import Cover from '../../covers/sismograma/Cover.astro';
+import { coverBySlug, coverEdition } from '../../covers/registry';
+import { loadContent } from '../../lib/content';
+
+const cover = coverBySlug('sismograma');
+---
+
+<CoverPage cover={cover} title={`Capa “${cover.title}” — Linkedia`} description={cover.summary}>
+  <Cover latest={coverEdition(cover, loadContent().editions)} />
+</CoverPage>

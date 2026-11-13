@@ -1,0 +1,321 @@
+/* "Sismograma" (docs/COVERS.md): a lab sheet. The masthead, the work and its caption on top, the plot in the middle,
+   the edition's lead headlines under it. Complete without JS: the text is real HTML and the plot is a ruled CSS
+   poster (parallel lines and the two cyan markers) on beige paper with scanlines. With Canvas 2D the canvas plots
+   the living sheet over the whole viewport once its first frame is verified (html[data-art='live']); the text stays
+   real HTML above it, with a halo of paper. Scoped to html[data-cover='sismograma'].
+   Contrast on --sg-paper (#f0e5d5): --sg-ink 15.2:1, --sg-violet 12.5:1, --cover-fine 7.7:1, --cover-link 10.7:1;
+   under the vignette and the rolling band (about #dcd2c0) the fine print is still 6.4:1. */
+html[data-cover='sismograma'] {
+  color-scheme: light;
+  --sg-paper: #f0e5d5;
+  --sg-ink: #131016;
+  --sg-violet: #2e1650;
+  --sg-cyan: #19b8d6;
+  --sg-rule: rgba(19, 16, 22, 0.42);
+  --cover-bg: var(--sg-paper);
+  --cover-ink: var(--sg-ink);
+  --cover-fine: #4d4150;
+  --cover-link: #4a1466;
+  --cover-focus: var(--sg-violet);
+  --cover-font: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+html[data-cover='sismograma'] .sg {
+  position: relative; /* no z-index: the room, the link layer and the text stack with the shell's fine print */
+  display: grid;
+  min-height: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The paper covers the whole viewport, behind everything: beige, a vignette, grain (canvas), the art (canvas),
+   scanlines and a darker band that rolls down like an old monitor. */
+html[data-cover='sismograma'] .sg-room {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(40, 32, 10, 0.07)),
+    var(--sg-paper);
+}
+
+html[data-cover='sismograma'] .sg-room::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgba(40, 32, 10, 0.05) 0 1px, transparent 1px 3px);
+}
+
+html[data-cover='sismograma'] :is(.sg-grain, .sg-canvas) {
+  position: absolute;
+  opacity: 0;
+}
+
+html[data-cover='sismograma'] .sg-grain {
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+}
+
+html[data-cover='sismograma'] .sg-canvas {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+html[data-cover='sismograma'] .sg-band {
+  position: absolute;
+  inset: -120px 0 auto;
+  height: 120px;
+  background: linear-gradient(to bottom, transparent, rgba(19, 16, 22, 0.035) 35% 65%, transparent);
+}
+
+/* The text: above the art; only the entry link takes clicks. */
+html[data-cover='sismograma'] .sg-text {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-rows: auto minmax(7rem, 1fr) auto;
+  min-height: 0;
+  padding: clamp(0.6rem, 2.6vh, 1.5rem) clamp(1rem, 4vw, 3.5rem) 0.25rem;
+  pointer-events: none;
+  text-shadow:
+    0 0 2px var(--sg-paper),
+    0 0 5px var(--sg-paper),
+    0 0 11px var(--sg-paper);
+  transition: opacity 0.45s ease;
+}
+
+html[data-cover='sismograma'] :where(.sg-text p, .sg-text ol, .sg-masthead) {
+  margin: 0;
+}
+
+html[data-cover='sismograma'] :is(.sg-kicker, .sg-meta) {
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+html[data-cover='sismograma'] .sg-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: 'kick work' 'mast work';
+  align-items: end;
+  column-gap: clamp(1.5rem, 6vw, 5rem);
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--sg-rule);
+}
+
+html[data-cover='sismograma'] .sg-kicker {
+  grid-area: kick;
+  color: var(--sg-violet);
+}
+
+html[data-cover='sismograma'] .sg-masthead {
+  grid-area: mast;
+  font-size: clamp(1.9rem, 4.4vw, 3.3rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+html[data-cover='sismograma'] .sg-work {
+  grid-area: work;
+  justify-self: end;
+  max-width: 50ch;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  text-align: right;
+}
+
+html[data-cover='sismograma'] .sg-work cite {
+  font-style: italic;
+  font-weight: 700;
+}
+
+/* The plot. Its poster: ruled lines and the two markers, what devices without the art keep. */
+html[data-cover='sismograma'] .sg-chart {
+  position: relative;
+}
+
+html[data-cover='sismograma'] .sg-poster {
+  position: absolute;
+  inset: 0.9rem 0;
+  background:
+    linear-gradient(to right, transparent calc(24% - 0.5px), var(--sg-cyan) 0 calc(24% + 0.5px), transparent 0),
+    linear-gradient(to right, transparent calc(76% - 0.5px), var(--sg-cyan) 0 calc(76% + 0.5px), transparent 0),
+    repeating-linear-gradient(to bottom, rgba(46, 22, 80, 0.85) 0 1px, transparent 1px 1.45rem);
+  transition: opacity 0.25s ease;
+}
+
+html[data-cover='sismograma'] .sg-foot {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--sg-rule);
+}
+
+html[data-cover='sismograma'] .sg-heads {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem clamp(1rem, 3vw, 2.5rem);
+  padding: 0;
+  list-style: none;
+}
+
+html[data-cover='sismograma'] .sg-hl {
+  min-width: 0;
+  font-size: clamp(0.82rem, 1.05vw, 0.95rem);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+html[data-cover='sismograma'] .sg-meta {
+  display: block;
+  color: var(--sg-violet);
+}
+
+html[data-cover='sismograma'] .sg-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+html[data-cover='sismograma'] .sg-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.1rem 1.4rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+html[data-cover='sismograma'] .sg-hint {
+  flex: 1 1 14rem;
+}
+
+html[data-cover='sismograma'] .sg-enter {
+  pointer-events: auto;
+  color: var(--cover-link);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none; /* a long touch launches a wave; the fine-print links keep their menus */
+}
+
+/* The whole viewport is this link. */
+html[data-cover='sismograma'] .sg-enter::after {
+  content: '';
+  position: fixed;
+  z-index: 2;
+  inset: 0;
+  cursor: pointer;
+}
+
+/* Portrait or narrow screens: one column. */
+@media (max-width: 44rem), (orientation: portrait) {
+  html[data-cover='sismograma'] .sg-head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'kick' 'mast' 'work';
+    row-gap: 0.15rem;
+  }
+
+  html[data-cover='sismograma'] .sg-kicker {
+    letter-spacing: 0.08em;
+  }
+
+  html[data-cover='sismograma'] .sg-work {
+    justify-self: start;
+    font-size: 0.74rem;
+    text-align: left;
+  }
+
+  html[data-cover='sismograma'] .sg-heads {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The narrowest phones: the kicker on one line. */
+@media (max-width: 22.5rem) {
+  html[data-cover='sismograma'] .sg-kicker {
+    font-size: 0.62rem;
+    letter-spacing: 0.03em;
+  }
+}
+
+/* Small portrait screens and short ones: one line per headline and a short caption, so the plot keeps its room, the
+   cover fits and the art can start. */
+@media (max-width: 44rem) and (max-height: 46rem), (orientation: portrait) and (max-height: 46rem), (max-height: 30rem) {
+  html[data-cover='sismograma'] .sg-title {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  html[data-cover='sismograma'] .sg-work {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+}
+
+/* Live art: the canvas plots the sheet over the whole viewport and the ruled poster leaves; the page does not scroll
+   or pan, and a drag stirs the lines instead of moving the page. Pinch zoom stays where supported. */
+html[data-cover='sismograma'][data-art='live'] body {
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  touch-action: none;
+  touch-action: pinch-zoom;
+}
+
+html[data-cover='sismograma'][data-art='live'] :is(.sg-grain, .sg-canvas) {
+  opacity: 1;
+}
+
+html[data-cover='sismograma'][data-art='live'] .sg-poster {
+  opacity: 0;
+}
+
+/* Entering: the text leaves while the sheet is erased from the tap. */
+html[data-cover='sismograma'][data-leaving] .sg-text {
+  opacity: 0;
+}
+
+/* The monitor band rolls only while the sheet is animated (no data-rest: main.ts). */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-cover='sismograma'][data-art='live']:not([data-rest]) .sg-band {
+    animation-name: sg-roll;
+    animation-duration: 9s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-cover='sismograma'] :is(.sg-text, .sg-poster) {
+    transition: none;
+  }
+}
+
+/* System colours: no paper effects, the text on the system background. */
+@media (forced-colors: active) {
+  html[data-cover='sismograma'] :is(.sg-room, .sg-poster) {
+    display: none;
+  }
+}
+
+@keyframes sg-roll {
+  to {
+    transform: translateY(calc(100vh + 120px));
+  }
+}

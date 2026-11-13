@@ -1,0 +1,73 @@
+---
+// "Sismograma" (2026-W47; docs/COVERS.md, ./README.md). The HTML below is a complete cover on its own — a lab sheet
+// with the masthead, the work, the edition's lead headlines and a ruled poster — without JS, without Canvas, with
+// reduced motion. With Canvas 2D the script plots the sheet over it: parallel lines that breathe, rise in relief to
+// write "IA", open under the pointer and carry the ripples of a touch. The viewport-wide link into the magazine is a
+// real link, so every click, tap or key press ends in /revista.
+import './cover.css';
+import type { EditionWithArticles } from '../../lib/content';
+import { longDate } from '../../lib/labels';
+import { lineCount } from './field';
+import { editionSeed } from './noise';
+
+interface Props {
+  latest: EditionWithArticles | undefined;
+}
+const { latest } = Astro.props;
+const LEAD = 3; // headlines on the cover; the rest are counted
+const articles = latest?.articles ?? [];
+const heads = articles.slice(0, LEAD);
+const more = articles.length - heads.length;
+const date = latest?.edition.edition_date ?? '';
+const seed = editionSeed(date, heads.map((a) => a.title));
+const lines = lineCount(articles.length);
+const pad = (n: number): string => String(n).padStart(2, '0');
+---
+
+<main class="sg" data-sg data-cover-art="sismograma" data-seed={seed} data-lines={lines} data-date={date}>
+  <div class="sg-room" data-room aria-hidden="true">
+    <canvas class="sg-grain" data-grain></canvas>
+    <canvas class="sg-canvas" data-canvas></canvas>
+    <div class="sg-band"></div>
+  </div>
+  <section class="sg-text">
+    <header class="sg-head">
+      <p class="sg-kicker">Revista diária · Inteligência artificial</p>
+      <h1 class="sg-masthead">LinkedIA</h1>
+      <p class="sg-work">
+        <cite>Sismograma</cite>, 2026 <span class="sg-caption">— uma folha de plotter que sente o toque: {lines} linhas
+        respiram no seu aparelho e se levantam em relevo para escrever IA{latest && <>, na edição de <time datetime={date}>{longDate(date)}</time></>}.</span>
+      </p>
+    </header>
+    <div class="sg-chart" data-chart aria-hidden="true"><div class="sg-poster"></div></div>
+    <div class="sg-foot">
+      {
+        heads.length > 0 ? (
+          <ol class="sg-heads">
+            {heads.map((a, i) => (
+              <li class="sg-hl">
+                <small class="sg-meta">
+                  {pad(i + 1)} · {a.read_minutes} min
+                </small>
+                <span class="sg-title">{a.title}</span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p class="sg-empty">Nenhuma edição publicada ainda.</p>
+        )
+      }
+      <p class="sg-bar">
+        {more > 0 && <span class="sg-more">+ {more} {more === 1 ? 'matéria' : 'matérias'} nesta edição</span>}
+        <span class="sg-hint" data-hint>Clique ou toque em qualquer lugar para entrar.</span>
+        <a class="sg-enter" href="/revista" draggable="false" data-enter>Entrar na revista <span aria-hidden="true">→</span></a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<script>
+  import { boot } from './main';
+
+  boot();
+</script>

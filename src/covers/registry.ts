@@ -22,6 +22,17 @@ export interface CoverMeta {
 
 export const COVERS: readonly CoverMeta[] = [
   {
+    slug: 'sismograma',
+    title: 'Sismograma',
+    weekId: '2026-W47',
+    summary:
+      'Uma folha de plotter antiga que sente o toque: linhas paralelas respiram, sobem em relevo para escrever IA e ' +
+      'se abrem sob o cursor ou o dedo. Segurar lança uma onda que atravessa todas as linhas.',
+    credit:
+      'linhas elásticas simuladas em tempo real (molas, ruído coerente e ondas) no seu aparelho, em código escrito ' +
+      'por IA, sem imagens',
+  },
+  {
     slug: 'micelio',
     title: 'Micélio',
     weekId: '2026-W46',
@@ -31,6 +42,7 @@ export const COVERS: readonly CoverMeta[] = [
     credit:
       'organismo de mais de 100 mil agentes simulado em tempo real (Physarum) no seu aparelho, em código escrito ' +
       'por IA, sem imagens',
+    edition: '2026-11-09',
   },
   {
     slug: 'duas-sombras',
@@ -59,7 +71,7 @@ export const COVERS: readonly CoverMeta[] = [
 ];
 
 /** The cover shown at `/`. */
-export const CURRENT_COVER = 'micelio';
+export const CURRENT_COVER = 'sismograma';
 
 export function coverBySlug(slug: string): CoverMeta {
   const cover = COVERS.find((c) => c.slug === slug);

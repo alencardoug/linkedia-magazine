@@ -1,11 +1,13 @@
 // Weekly covers (3-01, docs/COVERS.md): the registry, the entry gestures and adaptive quality of every cover (each
 // keeps its own copy), and the pure parts of the "Singularidade" cover — motion and the bitmap budget. The WebGL
-// paths themselves are checked on a real GPU (the owner's Chrome), since headless Chromium has none here.
+// paths themselves are checked on a real GPU (the owner's Chrome), since headless Chromium has none here; a Canvas 2D
+// cover (Sismograma) has no renderer module, and its own pure parts are in tests/sismograma.test.mjs.
 import { describe, expect, it } from 'vitest';
 import { COVERS, coverBySlug, coverEdition, coverPath, CURRENT_COVER, weekLabel } from '../src/covers/registry';
 import * as entrySingularidade from '../src/covers/singularidade/controller';
 import * as entryDuasSombras from '../src/covers/duas-sombras/controller';
 import * as entryMicelio from '../src/covers/micelio/controller';
+import * as entrySismograma from '../src/covers/sismograma/controller';
 import {
   BIRTH_DELAY_MS,
   BIRTH_MS,
@@ -22,6 +24,7 @@ import {
 import * as qualitySingularidade from '../src/covers/singularidade/quality';
 import * as qualityDuasSombras from '../src/covers/duas-sombras/quality';
 import * as qualityMicelio from '../src/covers/micelio/quality';
+import * as qualitySismograma from '../src/covers/sismograma/quality';
 import { isSoftwareRenderer as softwareSingularidade } from '../src/covers/singularidade/renderer';
 import { isSoftwareRenderer as softwareDuasSombras } from '../src/covers/duas-sombras/renderer';
 import { isSoftwareRenderer as softwareMicelio } from '../src/covers/micelio/renderer';
@@ -68,7 +71,12 @@ const click = (over = {}) => ({ button: 0, ctrlKey: false, metaKey: false, shift
 const key = (k, over = {}) => ({ key: k, ctrlKey: false, metaKey: false, altKey: false, repeat: false, focus: 'page', ...over });
 
 // Each cover keeps its own copy of the entry gestures and the adaptive quality (docs/COVERS.md); both are tested.
-for (const [cover, { EntryController, LONG_PRESS_MS, TAP_SLOP_PX }] of [['singularidade', entrySingularidade], ['duas-sombras', entryDuasSombras], ['micelio', entryMicelio]]) {
+for (const [cover, { EntryController, LONG_PRESS_MS, TAP_SLOP_PX }] of [
+  ['singularidade', entrySingularidade],
+  ['duas-sombras', entryDuasSombras],
+  ['micelio', entryMicelio],
+  ['sismograma', entrySismograma],
+]) {
   describe(`entry controller (${cover})`, () => {
     it('lets the link navigate natively without live art, and plays the exit with it', () => {
       const c = new EntryController();
@@ -209,6 +217,7 @@ for (const [cover, { calibratedScale, createQuality, initialScale, MAX_SCALE, MI
   ['singularidade', qualitySingularidade, softwareSingularidade],
   ['duas-sombras', qualityDuasSombras, softwareDuasSombras],
   ['micelio', qualityMicelio, softwareMicelio],
+  ['sismograma', qualitySismograma, null], // Canvas 2D: no WebGL renderer to refuse; the scale drives its point density
 ]) {
   describe(`adaptive quality (${cover})`, () => {
     it('starts from a pixel budget within the scale limits', () => {
@@ -260,7 +269,7 @@ for (const [cover, { calibratedScale, createQuality, initialScale, MAX_SCALE, MI
       expect(calibratedScale(60, 1)).toBe(MIN_SCALE);
     });
 
-    it('recognises software rasterizers by name', () => {
+    it.skipIf(!isSoftwareRenderer)('recognises software rasterizers by name', () => {
       for (const name of [
         'Google SwiftShader',
         'ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)',

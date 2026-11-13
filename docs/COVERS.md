@@ -29,7 +29,8 @@ no client code imports it.
    2.1.4); a focused control (fine print, skip link) keeps its own behaviour. An exit animation may play for at most
    ~1 s under an independent navigation deadline (exception: Micélio, 3 s, the owner's choice on 2026-11-11); a
    second activation enters at once; reduced motion, a fallback or a still frame enter at once. A drag, a long touch
-   or a multi-touch never counts as a tap.
+   or a multi-touch never counts as a tap. Where a long press is itself a gesture of the art (Sismograma: it launches
+   a wave), a long press with the mouse stays on the cover too; the next click enters.
 2. **The HTML is a complete cover.** Semantic text (one `<h1>`, the edition date and lead headlines as text) that reads
    well without JS, without WebGL, with reduced motion and in forced colours; the art enhances it and hides it only
    after its own first frame is verified (`html[data-art]`), keeping it in the accessibility tree.
@@ -53,14 +54,18 @@ no client code imports it.
 4. Add the page to the smoke routes (`e2e/smoke.spec.mjs`); `e2e/cover.spec.mjs` runs its contract checks over `/` and
    every `/visual/<slug>` from the registry, so add only the new cover's own checks there. Copy shared pure modules
    (entry gestures, adaptive quality) into the package instead of importing another cover's, and add the copy to the
-   parameterised tests in `tests/covers.test.mjs`.
+   parameterised tests in `tests/covers.test.mjs`. A Canvas 2D cover has no renderer module (pass `null` there) and
+   goes live in headless Chromium: add its slug to `CANVAS_2D` in `e2e/cover.spec.mjs`, so the generic checks expect
+   its art on and test a missing 2D context instead of a broken WebGL one.
 5. `npm run check && npm test && npm run e2e`, then the acceptance below. The routine and its prompt:
    `docs/prompts/weekly_cover.md`; the idea queue: `docs/prompts/cover_art.md`.
 
 ## Acceptance
 Headless Chromium has no WebGL here, so CI (`e2e/cover.spec.mjs`, `e2e/real-themes.spec.mjs`) covers, on every cover
-page, the HTML cover, entry, a broken or software WebGL context, 320 px, the viewports where the art may start and axe;
-on `/`, drag versus tap, keys and Back; the archive; and each cover's own checks (Singularidade: the fidelity of the
-bitmap its art paints from the HTML, `#pintura`; Duas sombras: the museum label above the art). The art itself is
-accepted on a real GPU: a laptop with an integrated GPU (Intel HD 620) and a phone — frame rate, look, steering by
-mouse and finger, entry, resize, Back, a minute of idling. Record the evidence in the cover's README.
+page, the HTML cover, entry, a context that cannot draw (WebGL broken or software; no 2D context), 320 px, the
+viewports where the art may start and axe; on `/`, drag versus tap, keys and Back; the archive; and each cover's own
+checks (Singularidade: the fidelity of the bitmap its art paints from the HTML, `#pintura`; Duas sombras: the museum
+label above the art; Sismograma, Canvas 2D and therefore live in CI: the sheet is plotted and moves, reduced motion,
+long press, drag and tap, Back, a window too small and large again). The art itself is accepted on the real
+devices: a laptop with an integrated GPU (Intel HD 620) and a phone — frame rate, look, steering by mouse and finger,
+entry, resize, Back, a minute of idling. Record the evidence in the cover's README.

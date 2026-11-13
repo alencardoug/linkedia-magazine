@@ -102,7 +102,8 @@ for (const [slot, theme] of SLOTS) {
 }
 
 // The cover pre-page (3-01) of the production build as every device first sees it (headless Chromium has no WebGL,
-// so this is the HTML cover the art is painted from): 320 and 1100 px, axe, and a screenshot next to the themes'.
+// so a WebGL cover shows its HTML cover here; a Canvas 2D cover shows its art): 320 and 1100 px, axe, and a
+// screenshot next to the themes'.
 for (const width of WIDTHS) {
   test(`cover / at ${width} px`, async ({ page }, testInfo) => {
     const errors = watchErrors(page);

@@ -1,10 +1,11 @@
 // Cover pre-pages (3-01, docs/COVERS.md) on the Hosting emulator: `/` (the current cover) and every archived cover at
-// `/visual/<slug>`. Headless Chromium has no WebGL here, so these specs exercise the HTML cover that every device gets
-// first (and keeps without WebGL2): entry by click, tap or key from anywhere, the skip link, the fine-print links,
-// drag versus tap, Back, the archive, a broken or software WebGL context, 320 px, the viewports where the art may
-// start, and axe — on every cover page — plus each cover's own checks (Singularidade's `#pintura` bitmap against the
-// HTML it is painted from; Duas sombras' museum label). The WebGL art itself is accepted on a real GPU
-// (docs/COVERS.md, "Acceptance").
+// `/visual/<slug>`. Headless Chromium has no WebGL here, so for the WebGL covers these specs exercise the HTML cover
+// that every device gets first (and keeps without WebGL2); a Canvas 2D cover (CANVAS_2D) goes live here, so the same
+// specs run with its art on. On every cover page: entry by click, tap or key from anywhere, the skip link, the
+// fine-print links, drag versus tap, Back, the archive, a context that cannot draw (WebGL broken or software; no 2D
+// context), 320 px, the viewports where the art may start, and axe — plus each cover's own checks (Singularidade's
+// `#pintura` bitmap against the HTML it is painted from; Duas sombras' museum label; Sismograma's living sheet). The
+// WebGL art itself is accepted on a real GPU (docs/COVERS.md, "Acceptance").
 import { expect, test } from '@playwright/test';
 import { COVERS, CURRENT_COVER } from '../src/covers/registry.ts';
 import { axeBlocking, watchErrors, withWebgl } from './helpers.mjs';
@@ -17,6 +18,8 @@ const PAGES = [
   ...COVERS.map((c) => [`/visual/${c.slug}`, c.slug]),
 ];
 const HINT_HTML = 'Clique ou toque em qualquer lugar para entrar.';
+/** Covers drawn with Canvas 2D: their art runs in headless Chromium, so their pages go live in these specs. */
+const CANVAS_2D = new Set(['sismograma']);
 
 test.describe('cover', () => {
   for (const [path, slug] of PAGES) {
@@ -32,7 +35,8 @@ test.describe('cover', () => {
       await expect(page.getByText('Textos gerados com IA')).toHaveCount(0); // the AI note is on /revista only
       await expect(page.getByRole('link', { name: 'Outras capas' })).toBeVisible();
       await expect(page.getByRole('link', { name: /Entrar na revista/ })).toBeVisible();
-      await expect(page.locator('html')).not.toHaveAttribute('data-art', /./); // no WebGL: the HTML cover stays
+      if (CANVAS_2D.has(slug)) await expect(page.locator('html')).toHaveAttribute('data-art', 'live');
+      else await expect(page.locator('html')).not.toHaveAttribute('data-art', /./); // no WebGL: the HTML cover stays
       expect(errors).toEqual([]);
     });
   }
@@ -110,7 +114,27 @@ test.describe('cover', () => {
     await expect(page.locator('h1')).toHaveText('LinkedIA');
   });
 
-  for (const [path] of PAGES) {
+  for (const [path, slug] of PAGES) {
+    if (CANVAS_2D.has(slug)) {
+      test(`${path}: without a 2D context the HTML cover stays, with no page error`, async ({ page }) => {
+        const errors = watchErrors(page);
+        await page.addInitScript(() => {
+          const getContext = HTMLCanvasElement.prototype.getContext;
+          HTMLCanvasElement.prototype.getContext = function (type, ...rest) {
+            return type === '2d' ? null : getContext.call(this, type, ...rest);
+          };
+        });
+        await page.goto(path);
+        await page.waitForTimeout(600);
+        await expect(page.locator('html')).not.toHaveAttribute('data-art', /./);
+        await expect(page.locator('[data-hint]')).toHaveText(HINT_HTML);
+        await page.mouse.click(300, 200);
+        await expect(page).toHaveURL(ENTERED);
+        expect(errors).toEqual([]);
+      });
+      continue;
+    }
+
     test(`${path}: a WebGL context that cannot draw leaves the HTML cover, with no page error`, async ({ page }) => {
       const errors = watchErrors(page);
       await withWebgl(page);
@@ -213,6 +237,172 @@ test.describe('cover', () => {
       expect(await axeBlocking(page)).toEqual([]);
     });
   }
+});
+
+test.describe('Sismograma', () => {
+  const PATH = '/visual/sismograma';
+  const live = (page) => expect(page.locator('html')).toHaveAttribute('data-art', 'live');
+  /** The canvas as a data URL (same origin, so the CSP allows reading it back). */
+  const snapshot = (page) => page.locator('[data-canvas]').evaluate((c) => c.toDataURL());
+  /** Canvas pixels with ink down the middle column, which every line crosses. */
+  const ink = (page) =>
+    page.locator('[data-canvas]').evaluate((c) => {
+      const data = c.getContext('2d').getImageData(Math.floor(c.width / 2), 0, 1, c.height).data;
+      let n = 0;
+      for (let i = 3; i < data.length; i += 4) if (data[i] > 0) n++;
+      return n;
+    });
+
+  test('is a lab sheet: the work, the number of lines and a ruled plot hidden from assistive technology', async ({ page }) => {
+    await page.goto(PATH);
+    await expect(page.locator('.sg-work cite')).toHaveText('Sismograma');
+    const lines = Number(await page.locator('[data-sg]').getAttribute('data-lines'));
+    expect(lines).toBeGreaterThanOrEqual(15);
+    expect(lines).toBeLessThanOrEqual(25);
+    await expect(page.locator('.sg-work')).toContainText(`${lines} linhas respiram`);
+    await expect(page.locator('.sg-work time')).toHaveAttribute('datetime', /^\d{4}-\d{2}-\d{2}$/);
+    await expect(page.locator('[data-room]')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('[data-chart]')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('.sg-hl')).not.toHaveCount(0);
+  });
+
+  test('the sheet is plotted and keeps moving; a second look differs from the first', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(PATH);
+    await live(page);
+    await expect(page.locator('[data-hint]')).not.toHaveText(HINT_HTML); // the live hint tells how to play
+    await page.waitForTimeout(2200); // the pen is done
+    expect(await ink(page)).toBeGreaterThan(14); // every line crosses the middle
+    const first = await snapshot(page);
+    await page.waitForTimeout(500);
+    expect(await snapshot(page)).not.toBe(first);
+    await expect(page.locator('html')).not.toHaveAttribute('data-rest', /.*/);
+    expect(errors).toEqual([]);
+  });
+
+  test('without JS the sheet, its ruled poster and the entry link still work', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto(PATH);
+    await expect(page.locator('h1')).toHaveText('LinkedIA');
+    await expect(page.locator('.sg-poster')).toBeVisible();
+    await expect(page.locator('[data-hint]')).toHaveText(HINT_HTML);
+    await page.getByRole('link', { name: /Entrar na revista/ }).click();
+    await expect(page).toHaveURL(ENTERED);
+    await context.close();
+  });
+
+  test('forced colours keep the HTML cover, in the system colours', async ({ browser }) => {
+    const context = await browser.newContext({ forcedColors: 'active' });
+    const page = await context.newPage();
+    await page.goto(PATH);
+    await page.waitForTimeout(600);
+    await expect(page.locator('html')).not.toHaveAttribute('data-art', /./);
+    await expect(page.locator('[data-room]')).toBeHidden(); // no paper effects under the system colours
+    const [text, background] = await page.locator('h1').evaluate((h1) => [
+      getComputedStyle(h1).color,
+      getComputedStyle(document.body).backgroundColor,
+    ]);
+    expect(text).not.toBe(background);
+    await page.mouse.click(400, 300);
+    await expect(page).toHaveURL(ENTERED);
+    await context.close();
+  });
+
+  test('reduced motion: one still sheet, the plain hint and entry at once', async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
+    await page.goto(PATH);
+    await live(page);
+    await expect(page.locator('html')).toHaveAttribute('data-rest', '');
+    await expect(page.locator('[data-hint]')).toHaveText(HINT_HTML);
+    expect(await ink(page)).toBeGreaterThan(14);
+    const first = await snapshot(page);
+    await page.mouse.move(500, 300); // no lens, no wave
+    await page.waitForTimeout(500);
+    expect(await snapshot(page)).toBe(first);
+    await page.mouse.click(500, 300);
+    await expect(page.locator('html')).not.toHaveAttribute('data-leaving', /.*/); // no exit animation
+    await expect(page).toHaveURL(ENTERED);
+    await context.close();
+  });
+
+  test('a long press launches a wave and stays, a drag stays, a tap plays the exit and enters', async ({ page }) => {
+    await page.goto(PATH);
+    await live(page);
+    await page.waitForTimeout(2200);
+    await page.mouse.move(640, 360);
+    await page.mouse.down();
+    await page.waitForTimeout(800); // longer than the long press
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+    await expect(page).toHaveURL(new RegExp(`${PATH}$`));
+    await expect(page.locator('html')).not.toHaveAttribute('data-leaving', /.*/);
+    await page.mouse.down();
+    await page.mouse.move(900, 300, { steps: 12 });
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+    await expect(page).toHaveURL(new RegExp(`${PATH}$`));
+    await page.mouse.click(640, 360);
+    await expect(page.locator('html')).toHaveAttribute('data-leaving', '');
+    await expect(page).toHaveURL(ENTERED);
+  });
+
+  test('with the art live, every point enters except the fine-print links, which keep working', async ({ page }) => {
+    await page.goto(PATH);
+    await live(page);
+    const hits = await page.evaluate(() => {
+      const name = (x, y) => {
+        const el = document.elementFromPoint(x, y);
+        return el?.closest('a')?.textContent?.trim() ?? el?.tagName ?? null;
+      };
+      const chart = document.querySelector('[data-chart]').getBoundingClientRect();
+      const title = document.querySelector('h1').getBoundingClientRect();
+      const other = document.querySelector('a[href="/visual"]').getBoundingClientRect();
+      return {
+        chart: name(chart.left + chart.width / 2, chart.top + chart.height / 2),
+        title: name(title.left + 10, title.top + title.height / 2),
+        other: name(other.left + 4, other.top + other.height / 2),
+      };
+    });
+    expect(hits.chart).toMatch(/^Entrar na revista/);
+    expect(hits.title).toMatch(/^Entrar na revista/);
+    expect(hits.other).toBe('Outras capas');
+    const z = await page.evaluate(() => [
+      getComputedStyle(document.querySelector('.sg-text')).zIndex,
+      getComputedStyle(document.querySelector('[data-room]')).zIndex,
+    ]);
+    expect(Number(z[0])).toBeGreaterThan(Number(z[1])); // the text stays above the art
+  });
+
+  test('Back from the magazine plots a new sheet, not the erased one', async ({ page }) => {
+    await page.goto(PATH);
+    await live(page);
+    await page.mouse.click(640, 360);
+    await expect(page).toHaveURL(ENTERED);
+    await page.goBack();
+    await expect(page).toHaveURL(new RegExp(`${PATH}$`));
+    await live(page);
+    await expect(page.locator('html')).not.toHaveAttribute('data-leaving', /.*/);
+    await page.waitForTimeout(2200);
+    expect(await ink(page)).toBeGreaterThan(14);
+    await page.mouse.click(640, 360);
+    await expect(page).toHaveURL(ENTERED);
+  });
+
+  test('a window too small returns the HTML cover; a larger one starts the art again', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(PATH);
+    await live(page);
+    await page.setViewportSize({ width: 300, height: 220 }); // the sheet no longer fits: it scrolls
+    await expect(page.locator('html')).not.toHaveAttribute('data-art', /./);
+    await expect(page.locator('[data-hint]')).toHaveText(HINT_HTML);
+    await page.setViewportSize({ width: 1024, height: 700 });
+    await live(page);
+    await page.waitForTimeout(2200);
+    expect(await ink(page)).toBeGreaterThan(14);
+    expect(errors).toEqual([]);
+  });
 });
 
 test.describe('Duas sombras', () => {
