@@ -109,5 +109,5 @@ another word or a shape; `RELIEF = 0` removes it.
   click enters `/revista` after 0.85–0.9 s; CDP touch events at 390×844: a drag, a long touch and two fingers stay
   (no scroll), a tap enters after 0.8 s; reduced motion: one still sheet; idle: 30 fps after 20 s, a still frame with
   `data-rest` after 2 min, awake on the next input; no page errors from the cover.
-- **Not yet done:** the owner's look in his own Chrome and on a phone (docs/COVERS.md, "Acceptance"); nothing is
+- **Not yet done:** the owner's look in their own Chrome and on a phone (docs/COVERS.md, "Acceptance"); nothing is
   pushed or deployed.
