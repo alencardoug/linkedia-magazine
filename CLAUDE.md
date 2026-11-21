@@ -1,5 +1,7 @@
 @AGENTS.md
 
+Caixa de correio: ao iniciar a sessão, leia @alinhamento.md; se houver aviso depois de "a partir daqui", leu, atua, apaga (regras no próprio arquivo).
+
 # Claude Code notes
 - STATUS and the NEXT task live in `../linkedia-engine/docs/STATUS.md`; update it there when a magazine task is done.
 - Prefer zero client JS; vanilla TypeScript for small interactions; React only inside a lab theme that needs it, lazy-loaded.

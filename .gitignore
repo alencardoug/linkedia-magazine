@@ -12,3 +12,6 @@ test-results/
 firebase-debug.log*
 .reviews/
 .claude/settings.local.json
+
+# Caixa de correio entre projetos (local)
+/alinhamento.md
