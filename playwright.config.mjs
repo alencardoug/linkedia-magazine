@@ -4,15 +4,17 @@
 // - e2e:fixtures — example content + fixture themes: smoke (1B-04) and switcher/fallback (1C-01) specs;
 // - e2e:themes (LINKEDIA_E2E=themes) — the production build (real content, real slotted themes): per-theme
 //   axe, 320 px, layout shift, reduced motion, no WebGL and screenshots (1C-03, e2e/real-themes.spec.mjs).
+// `npm run e2e:content` (LINKEDIA_E2E=content) runs only the fast-path smoke on an existing production dist
+// (V2-01, e2e/content-smoke.spec.mjs; CI's content-only path).
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 5000;
-const REAL_THEMES = 'real-themes.spec.mjs';
-const realThemes = process.env.LINKEDIA_E2E === 'themes';
+const SUITES = { themes: 'real-themes.spec.mjs', content: 'content-smoke.spec.mjs' };
+const suite = SUITES[process.env.LINKEDIA_E2E ?? ''];
 
 export default defineConfig({
   testDir: 'e2e',
-  ...(realThemes ? { testMatch: REAL_THEMES } : { testIgnore: REAL_THEMES }),
+  ...(suite ? { testMatch: suite } : { testIgnore: Object.values(SUITES) }),
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',

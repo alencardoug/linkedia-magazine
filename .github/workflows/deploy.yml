@@ -3,6 +3,11 @@
 # Federation (provider accepts only this repo, ref main, push events) -> service account with
 # roles/firebasehosting.admin. No secrets in the repo.
 # Actions are pinned to commit SHAs (tag in the comment); bump them deliberately.
+# Fast path (V2-01): `changes` classifies the run (scripts/ci/classify-changes.mjs). A push or PR that changes only
+# exported content (`content/articles|editions|tags`, added or modified) runs `build` + `smoke` (changed pages and the
+# entry, on the built dist); anything else, or anything unclear, runs `build` + the full `e2e`. `build` always runs
+# and fails if the classification failed, so the required check `build` keeps reporting. Deploy needs the suite
+# its mode selected and refuses any commit that is no longer the head of main (a re-run of an old run).
 name: Build and deploy
 
 on:
@@ -19,10 +24,33 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      mode: ${{ steps.classify.outputs.mode }}
+      files: ${{ steps.classify.outputs.files }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - id: classify
+        run: node scripts/ci/classify-changes.mjs
+
   build:
+    needs: changes
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Classification succeeded
+        env:
+          RESULT: ${{ needs.changes.result }}
+          MODE: ${{ needs.changes.outputs.mode }}
+        run: |
+          echo "changes: $RESULT, mode: $MODE"
+          [ "$RESULT" = success ] && { [ "$MODE" = content ] || [ "$MODE" = full ]; }
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -43,8 +71,10 @@ jobs:
           if-no-files-found: error
 
   e2e:
-    # Browser suites served by the Hosting emulator with firebase.json: smoke (1B-04) and switcher (1C-01) on the
-    # example content + fixture themes, then the real slotted themes on the production build (1C-03).
+    # Full path. Browser suites served by the Hosting emulator with firebase.json: smoke (1B-04) and switcher (1C-01)
+    # on the example content + fixture themes, then the real slotted themes on the production build (1C-03).
+    needs: changes
+    if: needs.changes.outputs.mode == 'full'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -74,9 +104,45 @@ jobs:
             test-results
           retention-days: 7
 
+  smoke:
+    # Content-only path: the changed pages and the entry on the dist that `build` produced (the one that deploys).
+    needs: [changes, build]
+    if: needs.changes.outputs.mode == 'content' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e:content
+        env:
+          LINKEDIA_SMOKE_FILES: ${{ needs.changes.outputs.files }}
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report-smoke
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
   deploy:
-    needs: [build, e2e]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [changes, build, e2e, smoke]
+    if: >-
+      !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.build.result == 'success' &&
+      ((needs.changes.outputs.mode == 'full' && needs.e2e.result == 'success') ||
+       (needs.changes.outputs.mode == 'content' && needs.smoke.result == 'success'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
@@ -96,6 +162,13 @@ jobs:
             firebase.json
             .firebaserc
           sparse-checkout-cone-mode: false
+      - name: Still the head of main
+        run: |
+          head=$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" refs/heads/main | cut -f1)
+          if [ "$head" != "$GITHUB_SHA" ]; then
+            echo "::error::main is at ${head:-?}, this run built $GITHUB_SHA: refusing to deploy an older commit (re-run the newest run instead)."
+            exit 1
+          fi
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: dist
@@ -104,6 +177,13 @@ jobs:
         with:
           workload_identity_provider: projects/991312603178/locations/global/workloadIdentityPools/github/providers/linkedia-magazine
           service_account: github-deploy@linked-ia.iam.gserviceaccount.com
+      - name: Still the head of main (right before deploying)
+        run: |
+          head=$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" refs/heads/main | cut -f1)
+          if [ "$head" != "$GITHUB_SHA" ]; then
+            echo "::error::main is at ${head:-?}, this run built $GITHUB_SHA: refusing to deploy an older commit (re-run the newest run instead)."
+            exit 1
+          fi
       - run: npx --yes firebase-tools@15.34.0 deploy --only hosting --project linked-ia --non-interactive
       - name: Smoke test
         run: |
