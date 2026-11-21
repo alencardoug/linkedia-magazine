@@ -28,15 +28,20 @@ const commit = (msg) => {
   git(['commit', '-q', '--allow-empty', '-m', msg]);
   return git(['rev-parse', 'HEAD']).trim();
 };
+// Minimal valid exports: the classifier reads `article_ids`, `tags` and catalog entries; `rev` makes a new version.
+const article = (path, tags = ['topic:agents'], rev = 1) => write(path, JSON.stringify({ rev, tags }));
+const edition = (path, ids = [ID], rev = 1) => write(path, JSON.stringify({ rev, article_ids: ids }));
+const catalog = (tags) => write('content/tags/catalog.json', JSON.stringify({ tags }));
+const TAG = (key, label = key) => ({ key, kind: key.split(':')[0], label });
 const push = (before, sha, extra = {}) => classify({ event: 'push', payload: { before, ...extra }, sha, git });
 
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'classify-'));
   git(['init', '-q', '-b', 'main']);
   git(['config', 'core.fileMode', 'true']);
-  write(ARTICLE);
-  write('content/editions/2026-11-09.json');
-  write('content/tags/catalog.json');
+  article(ARTICLE);
+  edition('content/editions/2026-11-09.json');
+  catalog([TAG('topic:agents'), TAG('topic:rag')]);
   write('src/pages/index.astro');
 });
 afterEach(() => rmSync(dir, { recursive: true, force: true }));
@@ -44,31 +49,74 @@ afterEach(() => rmSync(dir, { recursive: true, force: true }));
 describe('content-only pushes', () => {
   it('an engine export (new article, new edition, catalog edit) is content', () => {
     const before = commit('base');
-    write(`content/articles/${ID2}.json`);
-    write('content/editions/2026-11-21.json');
-    write('content/tags/catalog.json', 'changed\n');
+    article(`content/articles/${ID2}.json`, ['topic:new']);
+    edition('content/editions/2026-11-21.json', [ID2]);
+    catalog([TAG('topic:agents'), TAG('topic:rag'), TAG('topic:new')]);
     const sha = commit('export');
     expect(push(before, sha)).toEqual({
       mode: 'content',
       files: ['content/articles/' + ID2 + '.json', 'content/editions/2026-11-21.json', 'content/tags/catalog.json'],
+      affected: [],
       reason: 'content only',
     });
   });
 
   it('several commits in one push are diffed as a range', () => {
     const before = commit('base');
-    write(ARTICLE, 'v2\n');
+    article(ARTICLE, undefined, 2);
     commit('one');
-    write('content/editions/2026-11-09.json', 'v2\n');
+    edition('content/editions/2026-11-09.json', [ID], 2);
     const sha = commit('two');
     expect(push(before, sha).mode).toBe('content');
+  });
+});
+
+describe('pages a content change alters without touching their files', () => {
+  beforeEach(() => article(`content/articles/${ID2}.json`, ['topic:rag']));
+
+  it('an edition-only change lists the articles it lists, before and after', () => {
+    edition('content/editions/2026-11-09.json', [ID]);
+    const before = commit('base');
+    edition('content/editions/2026-11-09.json', [ID2], 2);
+    expect(push(before, commit('swap'))).toMatchObject({ mode: 'content', affected: [ARTICLE, `content/articles/${ID2}.json`] });
+  });
+
+  it('a new edition lists its articles', () => {
+    const before = commit('base');
+    edition('content/editions/2026-11-21.json', [ID2]);
+    expect(push(before, commit('new edition')).affected).toEqual([`content/articles/${ID2}.json`]);
+  });
+
+  it('a catalog-only change lists the articles that use an edited, added or removed entry', () => {
+    const before = commit('base');
+    catalog([TAG('topic:agents', 'Agentes de IA')]); // edits topic:agents, removes topic:rag
+    expect(push(before, commit('catalog'))).toMatchObject({ mode: 'content', affected: [ARTICLE, `content/articles/${ID2}.json`] });
+  });
+
+  it('a catalog change that only adds an unused entry, or reorders, lists nothing', () => {
+    const before = commit('base');
+    catalog([TAG('topic:rag'), TAG('topic:agents'), TAG('topic:unused')]);
+    expect(push(before, commit('catalog')).affected).toEqual([]);
+  });
+
+  it('a changed article is not listed twice', () => {
+    const before = commit('base');
+    article(ARTICLE, undefined, 2);
+    edition('content/editions/2026-11-09.json', [ID, ID2], 2);
+    expect(push(before, commit('both'))).toMatchObject({ files: [ARTICLE, 'content/editions/2026-11-09.json'], affected: [`content/articles/${ID2}.json`] });
+  });
+
+  it('content that cannot be read runs full', () => {
+    const before = commit('base');
+    write('content/editions/2026-11-09.json', 'not json\n');
+    expect(push(before, commit('broken'))).toMatchObject({ mode: 'full', reason: expect.stringMatching(/^affected pages unresolved/) });
   });
 });
 
 describe('everything else is full', () => {
   it('a code change, alone or mixed with content', () => {
     const before = commit('base');
-    write(ARTICLE, 'v2\n');
+    article(ARTICLE, undefined, 2);
     write('src/pages/index.astro', 'v2\n');
     expect(push(before, commit('mixed'))).toMatchObject({ mode: 'full', reason: 'non-content path src/pages/index.astro' });
   });
@@ -77,7 +125,7 @@ describe('everything else is full', () => {
     const before = commit('base');
     write('src/pages/index.astro', 'v2\n');
     commit('code');
-    write(ARTICLE, 'v2\n');
+    article(ARTICLE, undefined, 2);
     expect(push(before, commit('content')).mode).toBe('full');
   });
 
@@ -132,10 +180,10 @@ describe('everything else is full', () => {
 
   it('a force push, flagged or detected', () => {
     const base = commit('base');
-    write(ARTICLE, 'old\n');
+    article(ARTICLE, undefined, 2);
     const old = commit('old');
     git(['reset', '-q', '--hard', base]);
-    write(ARTICLE, 'new\n');
+    article(ARTICLE, undefined, 3);
     const sha = commit('new');
     expect(push(old, sha)).toMatchObject({ mode: 'full', reason: 'previous head missing or not an ancestor' });
     expect(push(base, sha, { forced: true })).toMatchObject({ mode: 'full', reason: 'force push' });
@@ -157,7 +205,7 @@ describe('everything else is full', () => {
 describe('pull requests', () => {
   it('diff the tested tree against the base', () => {
     const base = commit('base');
-    write(ARTICLE, 'v2\n');
+    article(ARTICLE, undefined, 2);
     commit('content');
     expect(classify({ event: 'pull_request', payload: { pull_request: { base: { sha: base } } }, sha: 'x', git }).mode).toBe(
       'content',

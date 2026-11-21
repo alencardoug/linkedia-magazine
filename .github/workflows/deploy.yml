@@ -4,8 +4,8 @@
 # roles/firebasehosting.admin. No secrets in the repo.
 # Actions are pinned to commit SHAs (tag in the comment); bump them deliberately.
 # Fast path (V2-01): `changes` classifies the run (scripts/ci/classify-changes.mjs). A push or PR that changes only
-# exported content (`content/articles|editions|tags`, added or modified) runs `build` + `smoke` (changed pages and the
-# entry, on the built dist); anything else, or anything unclear, runs `build` + the full `e2e`. `build` always runs
+# exported content (`content/articles|editions|tags`, added or modified) runs `build` + `smoke` (changed pages, the
+# articles a changed edition or catalog entry alters, and the entry, on the built dist); anything else, or anything unclear, runs `build` + the full `e2e`. `build` always runs
 # and fails if the classification failed, so the required check `build` keeps reporting. Deploy needs the suite
 # its mode selected and refuses any commit that is no longer the head of main (a re-run of an old run).
 name: Build and deploy

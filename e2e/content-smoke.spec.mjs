@@ -1,10 +1,13 @@
 // Fast-path smoke (V2-01): runs instead of the full e2e suite when a push changes only exported content
 // (scripts/ci/classify-changes.mjs). Served by the Hosting emulator from the production build (real content), so
-// it checks the exact output that deploys. LINKEDIA_SMOKE_FILES lists the changed content paths, one per line.
+// it checks the exact output that deploys. LINKEDIA_SMOKE_FILES lists the changed content paths plus the unchanged
+// articles the change alters (listed by a changed edition, or tagged with a changed catalog entry), one per line.
 // - entry: the cover answers with the CSP, links to /revista, and every same-origin asset it references loads
 //   (no graphics checks: the art is not waited for);
-// - each changed article: its text is rendered escaped (title/summary as text, no script in the content), every
-//   citation points at a listed source and every source links to the exported URL;
+// - each listed article: every exported text field (title, summary, block text, list items, quotes, code, captions,
+//   diagrams, image text, prompts, sources) appears verbatim in the page text, so any markup in it was escaped;
+//   no script/iframe/object/embed in the content; every citation points at a listed source and every source links
+//   to the exported URL;
 // - the changed article, edition, category pages plus /revista and /edicoes: 200, CSP, one h1, no page errors,
 //   internal links resolve, axe serious/critical 0, no horizontal scroll at 320 px.
 import AxeBuilder from '@axe-core/playwright';
@@ -38,6 +41,18 @@ async function expectPage(page, path) {
 
 // Every page to check: the changed ones and the ones that list them. Category pages are discovered from the
 // article pages' own links, so this spec keeps no copy of the channel → route map.
+// Every exported string the article page renders as text (attributes such as alt are checked separately).
+function renderedTexts(a) {
+  const texts = [a.title, a.summary];
+  for (const b of a.blocks) {
+    texts.push(b.text, b.attribution, b.code, b.caption, b.long_description, b.diagram_spec, b.credit, ...(b.items ?? []));
+  }
+  for (const p of a.prompt_actions ?? []) texts.push(p.label, p.prompt);
+  for (const s of a.sources) texts.push(s.title, s.publisher, s.attribution);
+  return texts.filter((t) => typeof t === 'string' && t.trim());
+}
+const normalize = (t) => t.replace(/\s+/g, ' ').trim();
+
 async function pagesToCheck(page) {
   const pages = new Set(['/revista', '/edicoes']);
   for (const date of editions) pages.add(`/edicoes/${date}`);
@@ -76,6 +91,17 @@ for (const a of articles) {
     await expectPage(page, articlePath(a));
     await expect(page.locator('h1')).toHaveText(a.title); // a tag in the title shows as text, not markup
     await expect(page.getByText(a.summary, { exact: true }).first()).toBeVisible();
+    // textContent decodes entities and drops tags: an unescaped `<b>` in a field would vanish from it and fail here.
+    const pageText = normalize(await page.locator('main').evaluate((m) => m.textContent ?? ''));
+    for (const t of renderedTexts(a)) expect(pageText.includes(normalize(t)), `rendered as text: ${t.slice(0, 80)}`).toBe(true);
+    // Alt text lives in attributes (diagram aria-label, img alt) or, for a blocked image, in the fallback text.
+    const attrs = new Set(
+      await page.locator('main [data-block="diagram"], main [data-block="image"] img').evaluateAll((els) =>
+        els.map((e) => e.getAttribute('aria-label') ?? e.getAttribute('alt')),
+      ),
+    );
+    for (const b of a.blocks.filter((b) => b.alt))
+      expect(attrs.has(b.alt) || pageText.includes(normalize(b.alt)), `alt rendered: ${b.alt.slice(0, 80)}`).toBe(true);
     // Only the site's own bundled modules (the copy button) may sit in the article; content never adds markup.
     await expect(page.locator('main script:not([src^="/_astro/"]), main iframe, main object, main embed')).toHaveCount(0);
     const sourceIds = new Set(a.sources.map((s) => s.source_id));
@@ -90,9 +116,10 @@ for (const a of articles) {
 }
 
 test('changed and listing pages: status, CSP, errors, links, axe', async ({ page, request }) => {
-  test.setTimeout(120_000);
+  const paths = await pagesToCheck(page);
+  test.setTimeout(60_000 + 10_000 * paths.length); // a catalog change can list many articles
   const checked = new Set();
-  for (const path of await pagesToCheck(page)) {
+  for (const path of paths) {
     const errors = watchErrors(page);
     await expectPage(page, path);
     await expect(page.locator('h1')).toHaveCount(1);
@@ -114,7 +141,9 @@ test('changed and listing pages: status, CSP, errors, links, axe', async ({ page
 test.describe('320 px', () => {
   test.use({ viewport: { width: 320, height: 640 } });
   test('no horizontal scroll on the changed and listing pages', async ({ page }) => {
-    for (const path of await pagesToCheck(page)) {
+    const paths = await pagesToCheck(page);
+    test.setTimeout(30_000 + 3_000 * paths.length);
+    for (const path of paths) {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBeLessThanOrEqual(320);
     }
