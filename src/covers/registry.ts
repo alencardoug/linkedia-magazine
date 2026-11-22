@@ -1,3 +1,4 @@
+// Throwaway change (V2-06c proof: cover PR, covers run). Never merged.
 // Weekly covers (docs/COVERS.md, D-067): every cover ever published, newest first. `/` renders the current one,
 // `/visual` lists them all and `/visual/<slug>` keeps each one reachable for good. Pure data, so the tests can check
 // it; the pages import each cover's component themselves (src/pages/index.astro, src/pages/visual/<slug>.astro).
