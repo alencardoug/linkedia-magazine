@@ -1,10 +1,8 @@
 // firebase.json (1B-03): security headers on every path and exactly one Cache-Control rule per path.
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { IMAGE_HOSTS } from '../src/lib/labels';
-import { THEME_INIT_SCRIPT } from '../src/lib/theme-init';
 
 const hosting = JSON.parse(readFileSync(resolve(import.meta.dirname, '../firebase.json'), 'utf8')).hosting;
 
@@ -68,12 +66,12 @@ describe('firebase.json', () => {
     }
   });
 
-  it('sends a strict CSP that allows only same-origin scripts, styles and images, and the hashed theme script', () => {
+  it('sends a strict CSP that allows only same-origin scripts, styles and images, with no inline-script hash', () => {
     const p = csp();
     expect(p['default-src']).toEqual(["'none'"]);
-    // Same-origin files plus the one inline script the build emits: the pre-paint theme script (1C-01).
-    const hash = createHash('sha256').update(THEME_INIT_SCRIPT).digest('base64');
-    expect(p['script-src']).toEqual(["'self'", `'sha256-${hash}'`]);
+    // Same-origin files only: the reading mode's pre-paint script is the file /modo.js (V2-06), so the hash the
+    // retired theme script needed (1C-01) is gone and no inline script can run.
+    expect(p['script-src']).toEqual(["'self'"]);
     expect(p['style-src']).toEqual(["'self'"]);
     expect(p['frame-ancestors']).toEqual(["'none'"]);
     expect(p['base-uri']).toEqual(["'none'"]);
@@ -83,7 +81,7 @@ describe('firebase.json', () => {
     for (const host of IMAGE_HOSTS) expect(p['img-src']).toContain(`https://${host}`);
   });
 
-  it.each(['/', '/materias/exemplo', '/edicoes/2026-10-14', '/404.html', '/_astro/Base.css'])(
+  it.each(['/', '/materias/exemplo', '/edicoes/2026-10-14', '/404.html', '/_astro/Base.css', '/modo.js'])(
     'sends the security headers on %s',
     (path) => {
       const keys = headersFor(path).map((h) => h.key);
@@ -104,6 +102,8 @@ describe('firebase.json', () => {
     ['/materias/exemplo', 'public, max-age=300, s-maxage=86400'],
     ['/edicoes', 'public, max-age=300, s-maxage=86400'],
     ['/404.html', 'public, max-age=300, s-maxage=86400'],
+    // A stable name, not hashed: a fix to the mode bootstrap reaches readers within 5 minutes (V2-06).
+    ['/modo.js', 'public, max-age=300, s-maxage=86400'],
     ['/_astro/Base.Dxpvqxi0.css', 'public, max-age=31536000, immutable'],
     ['/_astro/a/b.js', 'public, max-age=31536000, immutable'],
   ])('gives %s exactly one Cache-Control', (path, expected) => {

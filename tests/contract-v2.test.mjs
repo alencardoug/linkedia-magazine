@@ -15,7 +15,6 @@ import { EDITORIA_LABELS, EDITORIA_SLUGS, knownLabel, RETIRED_CATEGORY_SLUGS, up
 
 const ROOT = resolve(import.meta.dirname, '..');
 const FIXTURE = join(ROOT, 'tests/fixtures/content-v2');
-const FIXTURE_THEMES = join(ROOT, 'tests/fixtures/themes');
 const OUT_PARENT = join(ROOT, 'node_modules', '.cache'); // same filesystem as the project (Astro renames assets)
 const V1 = '33333333-3333-4333-8333-333333333331';
 const [A, B, C] = ['44444444-4444-4444-8444-444444444441', '44444444-4444-4444-8444-444444444442', '44444444-4444-4444-8444-444444444443'];
@@ -66,7 +65,6 @@ describe('contract v2: validation', () => {
       'edition.schema.json',
       'edition.v2.schema.json',
       'tag_catalog.schema.json',
-      'theme_manifest.schema.json',
     ]);
   });
 
@@ -182,16 +180,8 @@ describe('contract v2: reader helpers', () => {
 });
 
 describe('contract v2: rendering', async () => {
-  // Bootstrap themes (baseline only), as in tests/build.test.mjs.
-  const themes = temp('linkedia-themes-', OUT_PARENT);
-  cpSync(FIXTURE_THEMES, themes, { recursive: true });
-  const manifest = JSON.parse(readFileSync(join(themes, 'manifest.json'), 'utf8'));
-  Object.assign(manifest, { previous_theme_id: null, current_theme_id: null, week_id: null });
-  manifest.themes = manifest.themes.filter((t) => t.kind === 'baseline');
-  writeFileSync(join(themes, 'manifest.json'), JSON.stringify(manifest));
-
   const out = temp('linkedia-dist-', OUT_PARENT);
-  const env = { LINKEDIA_CONTENT_DIR: FIXTURE, LINKEDIA_THEMES_DIR: themes };
+  const env = { LINKEDIA_CONTENT_DIR: FIXTURE };
   const previous = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
   Object.assign(process.env, env);
   try {
@@ -288,7 +278,7 @@ describe('contract v2: rendering', async () => {
       d.prompt_actions = [{ label: `Prompt ${X}`.slice(0, 120), prompt: `Peça ${X}` }];
     });
     const hostileOut = temp('linkedia-dist-', OUT_PARENT);
-    Object.assign(process.env, { LINKEDIA_CONTENT_DIR: dir, LINKEDIA_THEMES_DIR: themes });
+    Object.assign(process.env, { LINKEDIA_CONTENT_DIR: dir });
     try {
       await build({ root: ROOT, outDir: hostileOut, logLevel: 'error' });
     } finally {

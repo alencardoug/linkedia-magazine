@@ -1,7 +1,8 @@
 // Static build (1B-01): every route is emitted from a content dir, and model-produced text is always escaped.
-// Themes (1C-01): the build ships the slotted themes only, and the switcher appears once a lab theme exists.
+// Reading modes (V2-06): every reading page loads the blocking same-origin bootstrap and has the mode button; the
+// retired theme system (slots, switcher, lab themes) leaves nothing behind.
 // Covers (3-01): `/` and `/visual/<slug>` are cover pages with their own shell and code; reading pages load none of it.
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -10,7 +11,6 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { validateContent } from '../scripts/validate-content.mjs';
 import { COVERS, CURRENT_COVER } from '../src/covers/registry';
 import { SPECIALS, specialHref } from '../src/lib/specials';
-import { THEME_INIT_SCRIPT } from '../src/lib/theme-init';
 
 const ROOT = resolve(import.meta.dirname, '..');
 // The six editorias (D-079, D-084): one category page each, filled or not.
@@ -18,7 +18,6 @@ const CATEGORY_PAGES = ['ia-na-pratica', 'lideranca-de-ia', 'marketing', 'saude'
   (slug) => `categorias/${slug}.html`,
 );
 const EXAMPLES = join(ROOT, 'content/examples');
-const FIXTURE_THEMES = join(ROOT, 'tests/fixtures/themes');
 // Breaks out of text (tags) and of a quoted attribute (`"` + event handler).
 const X = '<script>alert(1)</script><img src=x onerror=alert(2)>" onmouseover="alert(3)';
 const temps = [];
@@ -37,25 +36,9 @@ function temp(prefix, parent = tmpdir()) {
   return dir;
 }
 
-// A themes dir from the fixtures, changed by `mutate(dir, manifest)`. `bootstrap` = the baseline only, the state
-// before the first experiment (the real themes/manifest.json changes weekly, so tests do not build from it).
-function themesVariant(mutate = () => {}) {
-  const dir = temp('linkedia-themes-', OUT_PARENT);
-  cpSync(FIXTURE_THEMES, dir, { recursive: true });
-  const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
-  mutate(dir, manifest);
-  writeFileSync(join(dir, 'manifest.json'), JSON.stringify(manifest));
-  return dir;
-}
-const bootstrap = () =>
-  themesVariant((_, m) => {
-    Object.assign(m, { previous_theme_id: null, current_theme_id: null, week_id: null });
-    m.themes = m.themes.filter((t) => t.kind === 'baseline');
-  });
-
-async function buildSite(contentDir, themesDir = bootstrap()) {
+async function buildSite(contentDir) {
   const outDir = temp('linkedia-dist-', OUT_PARENT);
-  const env = { LINKEDIA_CONTENT_DIR: contentDir, LINKEDIA_THEMES_DIR: themesDir };
+  const env = { LINKEDIA_CONTENT_DIR: contentDir };
   const previous = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
   Object.assign(process.env, env);
   try {
@@ -191,8 +174,8 @@ describe('static build', () => {
       ].sort(),
     );
     // The editor is named on /sobre only; the AI note is in the footer of /revista only, each article carries its own
-    // note instead (owner, 2026-10-19). No inline code or third-party file anywhere. Reading pages: one theme and client JS
-    // only with copy buttons; cover pages: their own shell and only their own cover's script, within the budgets.
+    // note instead (owner, 2026-10-19). No inline code or third-party file anywhere. Reading pages: the mode bootstrap first in
+    // <head>, then bundled modules only; cover pages: their own shell and only their own cover's script, within the budgets.
     const AI_NOTE_PAGES = ['revista.html'];
     for (const page of htmlFiles(out)) {
       const html = readFileSync(join(out, page), 'utf8');
@@ -239,7 +222,7 @@ describe('static build', () => {
         continue;
       }
       // The CSP (firebase.json) allows only same-origin files: no inline script, style element or style attribute.
-      expect(html, page).not.toMatch(/<script(?![^>]*\ssrc="\/_astro\/)[^>]*>/);
+      expect(html, page).not.toMatch(/<script(?![^>]*\ssrc="\/(?:_astro\/|modo\.js"))[^>]*>/);
       expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
       if (isCover(page)) {
         expect(html, page).toMatch(/^<!DOCTYPE html><html lang="pt-BR" data-cover="[a-z0-9-]+">/);
@@ -265,12 +248,21 @@ describe('static build', () => {
         expect(gz(styles), page).toBeLessThanOrEqual(10 * 1024);
         continue;
       }
-      expect(html, page).toContain('<html lang="pt-BR" data-theme="minimal-dark">'); // no slots, no switcher
-      expect(html, page).not.toContain('data-theme-switcher');
+      // Reading modes (V2-06): the classic bootstrap runs first, blocking (no async/defer/module), before any
+      // stylesheet; then only bundled module scripts. The button ships hidden (no JS: system mode, no control).
+      expect(html, page).toMatch(/^<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><script src="\/modo\.js"><\/script><meta name="viewport"/);
+      expect(html, page).toContain('<meta name="color-scheme" content="light dark">');
+      const scripts = [...html.matchAll(/<script([^>]*)>/g)].map((m) => m[1]);
+      expect(scripts[0], page).toBe(' src="/modo.js"');
+      for (const s of scripts.slice(1)) expect(s, page).toMatch(/^ type="module" src="\/_astro\/[\w.-]+\.js"$/);
+      expect(scripts.length, page).toBeGreaterThan(1);
+      expect(html, page).toContain('<button type="button" data-mode-toggle aria-describedby="modo-proximo" hidden>');
+      expect(html, page).toContain('<span id="modo-proximo" class="visually-hidden" data-mode-next></span>');
+      expect(html, page).toContain('<span class="visually-hidden" aria-live="polite" data-mode-status></span>');
+      expect(html, page).not.toContain('data-theme');
       expect(html, page).not.toContain('Cover.astro'); // no cover code on reading pages
       expect(html, page).toContain('<a href="/revista" data-brand>');
       expect(html, page).toContain('<a href="/visual">Visual</a>');
-      expect(html.includes('<script'), page).toBe(html.includes('data-copy='));
       // Astro drops the line break between text and a link on the next line: "licençaCC BY 4.0".
       expect(html, page).not.toMatch(/[\p{L}.,;:]<a\s/u);
       // A scrollable code block must be reachable by keyboard (axe scrollable-region-focusable).
@@ -367,7 +359,7 @@ describe('static build', () => {
     expect(cover).toContain('<time datetime="2026-10-14">14 de outubro de 2026</time>');
     expect(cover).toContain('Exemplo ilustrativo de matéria');
     const archive = read(out, 'visual.html');
-    expect(archive).not.toContain('data-theme-choice'); // no lab theme: nothing to choose
+    expect(archive).not.toMatch(/data-theme|Tema de leitura/); // the gallery only (V2-06)
     for (const c of COVERS) {
       expect(archive).toContain(`<a href="/visual/${c.slug}">${c.title}</a>`);
       expect(read(out, `visual/${c.slug}.html`)).toContain(`data-cover-art="${c.slug}"`);
@@ -446,64 +438,26 @@ describe('static build', () => {
     expect(diagram.slice(0, diagram.indexOf('</figure>'))).toMatch(/<figcaption>[\s\S]*href="#fonte-s7"/);
   }, 120_000);
 
-  it('ships three slots with lab themes: pre-paint script, runtime everywhere, switcher on /visual, lazy enhancement', async () => {
-    const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
-    const pages = htmlFiles(out);
-    expect(pages).toHaveLength(9 + CATEGORY_PAGES.length + COVERS.length + ART_DIRECTED.length);
-    for (const page of pages.filter((p) => !isCover(p) && !ART_DIRECTED.includes(p))) {
-      const html = read(out, page);
-      expect(html, page).toContain(
-        '<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" ' +
-          'data-theme-previous="lab-2099-w01" data-theme-current="lab-2099-w02">',
-      );
-      // Exactly one inline script, in <head>: the hashed pre-paint script (firebase.json script-src).
-      const inline = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)];
-      expect(inline.map((m) => m[1]), page).toEqual([THEME_INIT_SCRIPT]);
-      expect(inline[0].index, page).toBeLessThan(html.indexOf('</head>'));
-      expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
-      expect(html, page).toMatch(/<script type="module" src="\/_astro\/ThemeRuntime[^"]*\.js"><\/script>/);
-      expect(html, page).not.toContain('enhance.'); // the enhancement is never preloaded
-      expect(html.includes('data-theme-switcher'), page).toBe(page === 'visual.html');
-      if (page !== 'visual.html') continue;
-      const switcher = html.slice(html.indexOf('<fieldset'), html.indexOf('</fieldset>'));
-      expect(switcher, page).toContain('<fieldset data-theme-switcher hidden><legend>Tema visual</legend>');
-      expect([...switcher.matchAll(/<input type="radio" name="tema" value="(\w+)"([^>]*)>/g)].map((m) => [m[1], m[2]])).toEqual([
-        ['baseline', ' data-theme-title="Minimal Dark"'],
-        ['previous', ' data-theme-title="Fixture Light"'],
-        ['current', ' checked data-theme-title="Fixture Motion"'],
-      ]);
-      expect(switcher).toContain('Fixo: Fixture Light</label>');
-      expect(switcher).toContain('<p data-theme-status aria-live="polite" class="meta"></p>');
+  it('ships the reading modes and nothing of the retired theme system', async () => {
+    const out = await buildSite(EXAMPLES);
+    // The bootstrap is the public file, byte for byte; covers and specials never load it (cover art keeps its palette).
+    expect(read(out, 'modo.js')).toBe(readFileSync(join(ROOT, 'public/modo.js'), 'utf8'));
+    for (const page of htmlFiles(out).filter((p) => isCover(p) || ART_DIRECTED.includes(p))) {
+      expect(read(out, page), page).not.toContain('/modo.js');
+      expect(read(out, page), page).not.toContain('data-mode-toggle');
     }
-    // Slotted lab styles come after the baseline in the one stylesheet.
-    const [css] = assets(out, '.css');
-    const styles = read(out, `_astro/${css}`);
-    expect(styles.indexOf('lab-2099-w01')).toBeGreaterThan(styles.indexOf('minimal-dark'));
-    expect(styles).toContain('lab-2099-w02-pulse');
-    // The enhancement is its own chunk, imported only by the runtime; the runtime stays within budget.
-    const [enhance] = assets(out, '.js').filter((f) => f.startsWith('enhance.'));
-    const [entry] = assets(out, '.js').filter((f) => f.startsWith('ThemeRuntime'));
-    expect(read(out, `_astro/${entry}`)).toContain(`import(\`./${enhance}\`)`);
-    expect(statSync(join(out, '_astro', entry)).size).toBeLessThanOrEqual(6_000);
-  }, 120_000);
-
-  it('disables the previous slot with a single experiment and ships no archived theme', async () => {
-    const themes = themesVariant((_, m) => {
-      m.previous_theme_id = null;
-      m.themes[1].status = 'archived'; // lab-2099-w01 keeps its folder but leaves the slots
-    });
-    const out = await buildSite(EXAMPLES, themes);
-    const html = read(out, 'visual.html');
-    expect(html).toContain('<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" data-theme-current="lab-2099-w02">');
-    expect(html).toContain('<input type="radio" name="tema" value="previous" disabled>Fixo (ainda não há)</label>');
-    const styles = assets(out, '.css').map((f) => read(out, `_astro/${f}`)).join('');
-    expect(styles).toContain('lab-2099-w02');
-    expect(styles).not.toContain('lab-2099-w01');
-  }, 120_000);
-
-  it('refuses to build with a theme that styles outside its scope', async () => {
-    const themes = themesVariant((dir) => writeFileSync(join(dir, 'lab-2099-w01/theme.css'), 'main { display: none }'));
-    await expect(buildSite(EXAMPLES, themes)).rejects.toThrow(/Manifesto de temas inválido[\s\S]*seletor fora do escopo do tema: main/);
+    // One stylesheet: light by default, the system's dark without a pick, the three explicit picks; black only on a pick.
+    const css = assets(out, '.css').map((f) => read(out, `_astro/${f}`)).join('');
+    for (const m of ['light', 'dark', 'black']) expect(css).toMatch(new RegExp(`:root\\[data-mode=['"]?${m}['"]?\\]`));
+    expect(css).toMatch(/@media \(prefers-color-scheme: ?dark\)\{:root:not\(\[data-mode\]\)\{color-scheme:dark;--bg:#111214/);
+    expect(css).not.toMatch(/prefers-color-scheme[^{]*\{[^}]*#000000/);
+    expect(css).not.toMatch(/minimal-dark|lab-20\d\d|data-theme/);
+    // The button's module stays small and never ships the old runtime.
+    const js = assets(out, '.js').map((f) => read(out, `_astro/${f}`));
+    expect(js.join('')).not.toMatch(/data-theme|enhance\.|ThemeRuntime/);
+    const mode = js.filter((code) => code.includes('linkedia:modo:v1'));
+    expect(mode).toHaveLength(1);
+    expect(gzipSync(mode[0]).length).toBeLessThanOrEqual(2 * 1024);
   }, 120_000);
 
   it('renders an empty magazine without editions', async () => {

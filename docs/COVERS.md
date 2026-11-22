@@ -2,13 +2,13 @@
 
 The cover is the pre-page of the magazine (owner's brief: `docs/prompts/cover_art.md`; engine decision D-067). It is
 the one place with no aesthetic limits: unlimited technological art, a new one every week, and one click, tap or key
-press anywhere enters the magazine. Reading pages keep their themes (`docs/VISUAL_LAB.md`) and load no cover code.
+press anywhere enters the magazine. Reading pages keep their reading modes (`docs/VISUAL_LAB.md`) and load no cover code; covers keep their own palette.
 
 ## Routes
 - `/`: the current cover (`CURRENT_COVER` in `src/covers/registry.ts`, rendered by `src/pages/index.astro`).
 - `/visual/<slug>`: every cover ever published, one static page each (`src/pages/visual/<slug>.astro`), so a page
   ships only its own cover's CSS and JS. Unknown slugs get the 404 page.
-- `/visual`: the reading theme switcher and the archive (reading layout): title, week and summary of each cover,
+- `/visual`: the archive (reading layout; the theme switcher that sat here is retired, V2-06): title, week and summary of each cover,
   newest first; "Visual" in the header. It was `/capas` until 2026-10-19 (owner): `/capas` and `/capas/<slug>`
   answer 301 to the new addresses (`firebase.json` redirects).
 - `/revista`: the edition home, the target of every cover. It was `/` before 3-01; the header brand and the 404 page
@@ -61,7 +61,7 @@ no client code imports it.
    `docs/prompts/weekly_cover.md`; the idea queue: `docs/prompts/cover_art.md`.
 
 ## Acceptance
-Headless Chromium has no WebGL here, so CI (`e2e/cover.spec.mjs`, `e2e/real-themes.spec.mjs`) covers, on every cover
+Headless Chromium has no WebGL here, so CI (`e2e/cover.spec.mjs`) covers, on every cover
 page, the HTML cover, entry, a context that cannot draw (WebGL broken or software; no 2D context), 320 px, the
 viewports where the art may start and axe; on `/`, drag versus tap, keys and Back; the archive; and each cover's own
 checks (Singularidade: the fidelity of the bitmap its art paints from the HTML, `#pintura`; Duas sombras: the museum

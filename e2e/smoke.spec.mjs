@@ -1,6 +1,5 @@
-// Smoke suite over the example content (1B-04): routes, copy button, reading without JS, 320 px, axe. The
-// build uses the fixture themes (tests/fixtures/themes), so pages open in the current lab slot; themes.spec.mjs
-// covers the other slots. `/` is the cover pre-page (3-01; cover.spec.mjs covers its behaviour).
+// Smoke suite over the example content (1B-04): routes, copy button, reading without JS, 320 px, axe, in the
+// default reading mode (the system's; e2e/modes.spec.mjs covers the three modes). `/` is the cover pre-page (3-01; cover.spec.mjs covers its behaviour).
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
@@ -50,7 +49,7 @@ test.describe('routes', () => {
       await expect(page.locator('h1')).toHaveCount(1);
       // The editor is named on /sobre only (owner, 2026-10-19).
       await expect(page.locator('a[rel="author"]')).toHaveCount(path === '/sobre' ? 1 : 0);
-      // The theme stylesheet is applied (it is a same-origin file the CSP must allow).
+      // The site stylesheet is applied (it is a same-origin file the CSP must allow).
       const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
       expect(bg).not.toBe('rgba(0, 0, 0, 0)');
       expect(errors).toEqual([]);

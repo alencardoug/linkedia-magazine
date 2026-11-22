@@ -12,7 +12,6 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import { BASELINE_ID, checkThemePackage, themesDir } from './themes.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRACTS_DIR = join(ROOT, 'contracts');
@@ -151,54 +150,6 @@ export function validateContent(contentDir) {
   return { errors, counts: { articles: articles.size, editions, tags } };
 }
 
-/**
- * The magazine-owned theme manifest (D-025): schema, slot rules and the files of every slotted lab theme
- * (scripts/themes.mjs), so the switcher (1C-01) can trust it. Default: `<themes dir>/manifest.json`.
- * @param {string} [path]
- * @returns {string[]} errors (pt-BR)
- */
-export function validateThemes(path = join(themesDir(), 'manifest.json')) {
-  const ajv = new Ajv2020({ allErrors: true, strict: true });
-  addFormats(ajv);
-  const validate = ajv.compile(JSON.parse(readFileSync(join(CONTRACTS_DIR, 'theme_manifest.schema.json'), 'utf8')));
-  const where = relative(ROOT, path) || basename(path);
-  let manifest;
-  try {
-    manifest = JSON.parse(readFileSync(path, 'utf8'));
-  } catch (err) {
-    return [`${where}: JSON inválido ou ausente (${err.message})`];
-  }
-  if (!validate(manifest)) return (validate.errors ?? []).map((e) => `${where}: ${e.instancePath || '(raiz)'} ${e.message}`);
-  const errors = [];
-  const byId = new Map(manifest.themes.map((t) => [t.id, t]));
-  if (byId.size !== manifest.themes.length) errors.push(`${where}: id de tema repetido`);
-  if (byId.get('minimal-dark')?.status !== 'active') errors.push(`${where}: minimal-dark ausente ou inativo`);
-  for (const slot of ['current_theme_id', 'previous_theme_id']) {
-    const id = manifest[slot];
-    if (id !== null && byId.get(id)?.status !== 'active') errors.push(`${where}: ${slot} "${id}" não é um tema ativo`);
-  }
-  if (manifest.current_theme_id === null && manifest.previous_theme_id !== null) {
-    errors.push(`${where}: previous_theme_id sem current_theme_id`);
-  }
-  if (manifest.current_theme_id !== null && manifest.current_theme_id === manifest.previous_theme_id) {
-    errors.push(`${where}: previous_theme_id igual a current_theme_id`);
-  }
-  const slotted = new Set([manifest.current_theme_id, manifest.previous_theme_id]);
-  for (const theme of manifest.themes) {
-    if ((theme.kind === 'baseline') !== (theme.id === BASELINE_ID)) errors.push(`${where}: kind errado para ${theme.id}`);
-    if (theme.kind === 'baseline' && theme.enhancement) errors.push(`${where}: o baseline não tem enhancement (só CSS)`);
-    if (theme.kind === 'lab' && theme.status === 'active' && !slotted.has(theme.id)) {
-      errors.push(`${where}: ${theme.id} está ativo mas não ocupa um slot`);
-    }
-  }
-  if (errors.length) return errors;
-  const dir = dirname(path);
-  for (const theme of manifest.themes.filter((t) => slotted.has(t.id))) {
-    errors.push(...checkThemePackage(dir, theme).map((e) => `${where}: ${e}`));
-  }
-  return errors;
-}
-
 function parseDir(argv) {
   const i = argv.indexOf('--dir');
   if (i !== -1) {
@@ -211,7 +162,7 @@ function parseDir(argv) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const dir = parseDir(process.argv.slice(2));
   const { errors: contentErrors, counts } = validateContent(dir);
-  const errors = [...contentErrors, ...validateThemes()];
+  const errors = contentErrors;
   if (errors.length) {
     console.error(`Conteúdo inválido em ${dir}:`);
     for (const e of errors) console.error(`  - ${e}`);

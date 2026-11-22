@@ -17,7 +17,7 @@ contracts/*.schema.json               (verbatim copy of the engine's contracts/p
 
 Files are canonical JSON: UTF-8, sorted keys, 2-space indent, trailing newline. Article ids are stable UUIDs; slugs are sanitized, unique and immutable once exported. Source URLs, attributions, alt texts and long descriptions are public. Never exported: internal preferences, rejected candidates, cost/usage logs, raw prompts, model output before enrichment, uncertainties notes, session identifiers, traces, unpublished article bodies, credentials, absolute local paths.
 
-Themes are not part of the export: the magazine owns `themes/manifest.json` and theme code; the engine only reads `current_theme_id` from that manifest to stamp `edition.visual_theme_id`.
+Themes are not part of the export. The weekly themes and `themes/manifest.json` are retired (V2-06, D-081): the v1 engine finds no manifest and stamps `edition.visual_theme_id` as `null`; the field is legacy and optional in both contract versions.
 
 ## Publishing transaction
 1. Generate and gate the selected articles in the engine; only `validated` articles proceed.

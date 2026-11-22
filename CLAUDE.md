@@ -4,8 +4,8 @@ Caixa de correio: ao iniciar a sessão, leia @alinhamento.md; se houver aviso de
 
 # Claude Code notes
 - STATUS and the NEXT task live in `../linkedia-engine/docs/STATUS.md`; update it there when a magazine task is done.
-- Prefer zero client JS; vanilla TypeScript for small interactions; React only inside a lab theme that needs it, lazy-loaded.
-- Preserve the minimal dark baseline and every historical route; never couple a theme change with an unrelated task.
+- Prefer zero client JS; vanilla TypeScript for small interactions; heavy libraries only inside a cover that needs them, lazy-loaded.
+- Preserve the three reading modes (`docs/VISUAL_LAB.md`) and every historical route; never couple a palette change with an unrelated task.
 - Use `content/examples/` (or `LINKEDIA_CONTENT_DIR`) for tests; never put fixtures under `content/articles` or `content/editions`.
 
 ## Effort gate (owner rule, D-039)

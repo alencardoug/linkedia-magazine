@@ -1,17 +1,14 @@
 ---
-// Shared page shell. Markup is semantic and theme-agnostic with stable data-* hooks; the look comes from the
-// active theme's CSS (baseline `minimal-dark`, 1B-02; lab themes of the manifest's slots, 1C-01). Once a lab
-// theme exists, <html> names the three slots, the current one is the default, and a tiny inline script applies
-// the reader's stored slot before the first paint (its hash is in the CSP) and ThemeRuntime starts the slot's
-// enhancement on every page; the switcher itself lives only on `/visual` (owner, 2026-10-19). The footer carries
-// the AI note only where `aiNote` is set (`/revista`; each article has its own note); the editor is named on `/sobre` only.
-// Cover pages (`/`, `/visual/<slug>`) do not use this shell: they have their own (CoverPage.astro, 3-01).
-import '../../themes/minimal-dark/theme.css';
-import 'virtual:linkedia-themes/styles';
-import slots from 'virtual:linkedia-themes/slots';
-import ThemeRuntime from '../components/ThemeRuntime.astro';
+// Shared page shell. Markup is semantic with stable data-* hooks; the look comes from src/styles/site.css, in one
+// of three reading modes (V2-06, D-081): the system's light or dark by default, black only when picked. `/modo.js`
+// is a classic same-origin script, blocking in <head>, that applies the stored pick before the first paint (no
+// inline script, so the CSP needs no hash); the discreet header button (src/lib/mode.ts) cycles light → dark →
+// black. Without JS the system mode applies and the button stays hidden. The footer carries the AI note only where
+// `aiNote` is set (`/revista`; each article has its own note); the editor is named on `/sobre` only.
+// Cover pages (`/`, `/visual/<slug>`) and art-directed specials do not use this shell (CoverPage.astro,
+// SpecialLayout.astro): cover art keeps its own palette.
+import '../styles/site.css';
 import { AI_NOTE } from '../lib/site';
-import { THEME_INIT_SCRIPT } from '../lib/theme-init';
 
 interface Props {
   title: string;
@@ -25,22 +22,15 @@ const {
   aiNote = false,
 } = Astro.props;
 const pageTitle = title === 'Linkedia' ? title : `${title} — Linkedia`;
-const lab = slots.current !== null;
 ---
 
 <!doctype html>
-<html
-  lang="pt-BR"
-  data-theme={slots.current?.id ?? slots.baseline.id}
-  data-theme-baseline={lab ? slots.baseline.id : undefined}
-  data-theme-previous={slots.previous?.id}
-  data-theme-current={slots.current?.id}
->
+<html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    {lab && <script is:inline set:html={THEME_INIT_SCRIPT} />}
+    <script is:inline src="/modo.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="description" content={description} />
     <title>{pageTitle}</title>
   </head>
@@ -53,6 +43,14 @@ const lab = slots.current !== null;
         <a href="/visual">Visual</a>
         <a href="/sobre">Sobre</a>
       </nav>
+      <button type="button" data-mode-toggle aria-describedby="modo-proximo" hidden>
+        <svg data-mode-icon="light" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+        <svg data-mode-icon="dark" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>
+        <svg data-mode-icon="black" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"></circle></svg>
+        <span class="visually-hidden">Modo de leitura: </span><span data-mode-label>Escuro</span>
+      </button>
+      <span id="modo-proximo" class="visually-hidden" data-mode-next></span>
+      <span class="visually-hidden" aria-live="polite" data-mode-status></span>
     </header>
     <main id="conteudo">
       <slot />
@@ -64,6 +62,10 @@ const lab = slots.current !== null;
         </footer>
       )
     }
-    {lab && <ThemeRuntime />}
+    <script>
+      import { initModeToggle } from '../lib/mode';
+
+      initModeToggle();
+    </script>
   </body>
 </html>

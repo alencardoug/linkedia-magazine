@@ -1,0 +1,237 @@
+// Reading modes (V2-06, D-081) on the example build, served with firebase.json (CSP included): light/dark from the
+// system until the reader picks, black only when picked; the stored pick painted from the first frame (no flash,
+// checked on the first frame and on a real screenshot); the header button by keyboard and screen reader; invalid or
+// blocked storage; other tabs; no JS; covers and art-directed specials untouched; axe and 320 px in the three modes.
+// Replaces e2e/themes.spec.mjs and e2e/real-themes.spec.mjs (the retired weekly themes, 1C-01/1C-03).
+import { join } from 'node:path';
+import { expect, test } from '@playwright/test';
+import { LEGACY_THEME_KEY, MODE_KEY } from '../src/lib/mode.ts';
+import { axeBlocking, layoutShift, pixel, presetMode, watchErrors } from './helpers.mjs';
+
+const ARTICLE = '/materias/exemplo-de-materia-linkedia';
+const NOT_FOUND = '/pagina-que-nao-existe';
+const BG = { light: 'rgb(251, 250, 248)', dark: 'rgb(17, 18, 20)', black: 'rgb(0, 0, 0)' };
+const LABEL = { light: 'Claro', dark: 'Escuro', black: 'Preto' };
+const NEXT = { light: 'escuro', dark: 'preto', black: 'claro' };
+const toggle = (page) => page.getByRole('button', { name: /^Modo de leitura:/ });
+const background = (page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+
+/** Records, before any page script, the mode attribute when <body> first exists and the colours of the first frame. */
+const recordFirstFrame = (page) =>
+  page.addInitScript(() => {
+    // Init scripts may run before <html> exists: watch the document and read the root lazily.
+    const seen = (window.__firstFrame = {});
+    new MutationObserver((_, observer) => {
+      if (!document.body) return;
+      seen.modeAtBody = document.documentElement.getAttribute('data-mode');
+      observer.disconnect();
+    }).observe(document, { childList: true, subtree: true });
+    requestAnimationFrame(() => {
+      seen.mode = document.documentElement.getAttribute('data-mode');
+      seen.bg = document.body ? getComputedStyle(document.body).backgroundColor : null;
+    });
+  });
+
+test.describe('no flash on load', () => {
+  // [system scheme, stored pick, mode on screen]
+  const CASES = [
+    ['light', null, 'light'],
+    ['dark', null, 'dark'],
+    ['dark', 'light', 'light'],
+    ['light', 'dark', 'dark'],
+    ['light', 'black', 'black'],
+    ['dark', 'black', 'black'],
+  ];
+  for (const [system, pick, mode] of CASES) {
+    test(`${system} system, ${pick ?? 'no'} pick: ${mode} from the first frame`, async ({ page }, testInfo) => {
+      const errors = watchErrors(page);
+      await page.emulateMedia({ colorScheme: system });
+      if (pick) await presetMode(page, pick);
+      await recordFirstFrame(page);
+      await page.goto(ARTICLE);
+      const first = await page.evaluate(() => window.__firstFrame);
+      expect(first).toEqual({ modeAtBody: pick, mode: pick, bg: BG[mode] });
+      expect(await background(page)).toBe(BG[mode]);
+      // What is painted, read from a screenshot: the page margin and the header band.
+      expect(await pixel(page, 2, 2)).toBe(BG[mode]);
+      const shot = join(testInfo.project.outputDir, 'screenshots', 'modos', `${system}-${pick ?? 'sem-escolha'}.png`);
+      await testInfo.attach(`${system} system, ${pick ?? 'no'} pick`, { body: await page.screenshot({ path: shot }), contentType: 'image/png' });
+      expect(errors).toEqual([]);
+    });
+  }
+});
+
+test.describe('the mode button', () => {
+  test('cycles by keyboard, announces the new mode, remembers it on every reading page', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/revista');
+    const button = toggle(page);
+    await expect(button).toBeVisible();
+    await expect(button).toHaveAccessibleName('Modo de leitura: Escuro');
+    await expect(button).toHaveAccessibleDescription('Muda para o modo preto.');
+    await expect(page.locator('html')).not.toHaveAttribute('data-mode');
+    // Reached with Tab after the skip link and the navigation.
+    for (let i = 0; i < 6; i++) await page.keyboard.press('Tab');
+    await expect(button).toBeFocused();
+    const html = page.locator('html');
+    const status = page.locator('[data-mode-status]');
+    for (const [key, mode] of [['Enter', 'black'], ['Space', 'light'], ['Enter', 'dark']]) {
+      await page.keyboard.press(key);
+      await expect(html).toHaveAttribute('data-mode', mode);
+      await expect(button).toHaveAccessibleName(`Modo de leitura: ${LABEL[mode]}`);
+      await expect(button).toHaveAccessibleDescription(`Muda para o modo ${NEXT[mode]}.`);
+      await expect(button).toHaveAttribute('data-current', mode);
+      await expect(status).toHaveText(`Modo ${LABEL[mode].toLowerCase()} ativado.`);
+      await expect(button).toBeFocused();
+      expect(await background(page)).toBe(BG[mode]);
+      expect(await page.evaluate((k) => localStorage.getItem(k), MODE_KEY)).toBe(mode);
+    }
+    await page.keyboard.press('Enter'); // black
+    for (const path of ['/visual', ARTICLE, '/sobre']) {
+      await page.goto(path);
+      await expect(html).toHaveAttribute('data-mode', 'black');
+      await expect(toggle(page)).toHaveAccessibleName('Modo de leitura: Preto');
+    }
+    expect(errors).toEqual([]);
+  });
+
+  test('follows the system without a pick, never turns black by itself, and holds a pick against the system', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto(ARTICLE);
+    const html = page.locator('html');
+    await expect(toggle(page)).toHaveAccessibleName('Modo de leitura: Claro');
+    expect(await background(page)).toBe(BG.light);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(toggle(page)).toHaveAccessibleName('Modo de leitura: Escuro');
+    expect(await background(page)).toBe(BG.dark);
+    await expect(html).not.toHaveAttribute('data-mode');
+    await toggle(page).click(); // dark → black
+    await expect(html).toHaveAttribute('data-mode', 'black');
+    await page.emulateMedia({ colorScheme: 'light' });
+    await expect(toggle(page)).toHaveAccessibleName('Modo de leitura: Preto');
+    expect(await background(page)).toBe(BG.black);
+  });
+
+  test('ignores invalid stored values and clears the retired theme key', async ({ page }) => {
+    for (const bad of ['current', 'preto', 'auto', '', 'DARK']) {
+      await page.addInitScript(([k, v, legacy]) => {
+        localStorage.setItem(k, v);
+        localStorage.setItem(legacy, 'current');
+      }, [MODE_KEY, bad, LEGACY_THEME_KEY]);
+      await page.emulateMedia({ colorScheme: 'dark' });
+      await page.goto('/sobre');
+      await expect(page.locator('html'), bad).not.toHaveAttribute('data-mode');
+      await expect(toggle(page)).toHaveAccessibleName('Modo de leitura: Escuro');
+      expect(await background(page)).toBe(BG.dark);
+      expect(await page.evaluate((k) => localStorage.getItem(k), LEGACY_THEME_KEY)).toBeNull();
+    }
+  });
+
+  test('a tampered attribute is not a pick', async ({ page }) => {
+    await page.addInitScript(() =>
+      new MutationObserver((_, o) => {
+        if (!document.body) return;
+        document.documentElement.setAttribute('data-mode', 'neon');
+        o.disconnect();
+      }).observe(document, { childList: true, subtree: true }),
+    );
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/sobre');
+    await expect(page.locator('html')).not.toHaveAttribute('data-mode');
+    await expect(toggle(page)).toHaveAccessibleName('Modo de leitura: Claro');
+  });
+
+  test('works with storage blocked: the pick lasts for the page view', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.addInitScript(() => {
+      const blocked = () => {
+        throw new DOMException('blocked', 'SecurityError');
+      };
+      Object.defineProperty(window, 'localStorage', { get: blocked, configurable: true });
+    });
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/revista');
+    await expect(toggle(page)).toHaveAccessibleName('Modo de leitura: Claro');
+    await toggle(page).click();
+    await expect(page.locator('html')).toHaveAttribute('data-mode', 'dark');
+    await toggle(page).click();
+    await expect(page.locator('html')).toHaveAttribute('data-mode', 'black');
+    expect(await background(page)).toBe(BG.black);
+    await page.reload();
+    await expect(page.locator('html')).not.toHaveAttribute('data-mode');
+    expect(errors).toEqual([]);
+  });
+
+  test('a pick in another tab reaches this one', async ({ context }) => {
+    const [a, b] = [await context.newPage(), await context.newPage()];
+    for (const p of [a, b]) {
+      await p.emulateMedia({ colorScheme: 'light' });
+      await p.goto('/revista');
+    }
+    await toggle(a).click();
+    await expect(b.locator('html')).toHaveAttribute('data-mode', 'dark');
+    await expect(toggle(b)).toHaveAccessibleName('Modo de leitura: Escuro');
+  });
+});
+
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('reads in the system mode with the button hidden', async ({ page }) => {
+    for (const system of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: system });
+      await page.goto(ARTICLE);
+      await expect(page.locator('html')).not.toHaveAttribute('data-mode');
+      expect(await background(page)).toBe(BG[system]);
+      await expect(page.locator('[data-mode-toggle]')).toBeHidden();
+      await expect(toggle(page)).toHaveCount(0);
+      await expect(page.locator('h1')).toBeVisible();
+    }
+  });
+});
+
+test.describe('pages with their own palette', () => {
+  test.beforeEach(({ page }) => presetMode(page, 'black'));
+
+  test('/visual is the gallery only; covers and art-directed specials ignore the pick', async ({ page }) => {
+    await page.goto('/visual');
+    await expect(page.getByRole('group', { name: 'Tema visual' })).toHaveCount(0);
+    await expect(page.getByText('Tema de leitura')).toHaveCount(0);
+    await expect(page.locator('[data-cover-item]').first()).toBeVisible();
+    for (const path of ['/', '/visual/sismograma', '/especiais/governanca-de-ia', '/especiais/perguntar-ao-banco']) {
+      await page.goto(path);
+      await expect(page.locator('html'), path).not.toHaveAttribute('data-mode');
+      await expect(page.locator('[data-mode-toggle]'), path).toHaveCount(0);
+    }
+  });
+});
+
+// Every kind of reading page in the three modes: axe at 1100 px; at 320 px no horizontal scroll and no layout shift
+// when the button appears; a screenshot of each (attached; CI uploads them).
+const ROUTES = ['/revista', '/edicoes', '/edicoes/2026-10-14', ARTICLE, '/categorias/ia-na-pratica', '/especiais/dez-layouts-governanca-de-ia', '/sobre', '/visual', NOT_FOUND];
+const shotName = (route) => route.slice(1).replaceAll('/', '_');
+for (const mode of ['light', 'dark', 'black']) {
+  test.describe(`mode ${mode}`, () => {
+    test.beforeEach(({ page }) => presetMode(page, mode));
+
+    for (const route of ROUTES) {
+      test(`${route}: axe, 320 px`, async ({ page }, testInfo) => {
+        const errors = watchErrors(page, route === NOT_FOUND ? /status of 404/ : undefined);
+        await page.setViewportSize({ width: 1100, height: 900 });
+        await page.goto(route);
+        await expect(page.locator('html')).toHaveAttribute('data-mode', mode);
+        await expect(toggle(page)).toBeVisible();
+        expect(await axeBlocking(page)).toEqual([]);
+        await page.setViewportSize({ width: 320, height: 640 });
+        await page.goto(route);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+        expect(await layoutShift(page)).toBeLessThan(0.1);
+        expect(await axeBlocking(page)).toEqual([]);
+        const path = join(testInfo.project.outputDir, 'screenshots', mode, `${shotName(route)}-320.png`);
+        await testInfo.attach(`${mode} ${route} 320px`, { body: await page.screenshot({ path, fullPage: true }), contentType: 'image/png' });
+        expect(errors).toEqual([]);
+      });
+    }
+  });
+}

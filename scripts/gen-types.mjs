@@ -9,7 +9,7 @@ import { compile } from 'json-schema-to-typescript';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUTPUTS = {
-  'contracts.d.ts': { article: 'Article', edition: 'Edition', tag_catalog: 'TagCatalog', theme_manifest: 'ThemeManifest' },
+  'contracts.d.ts': { article: 'Article', edition: 'Edition', tag_catalog: 'TagCatalog' },
   'contracts.v2.d.ts': { 'article.v2': 'ArticleV2', 'edition.v2': 'EditionV2' },
 };
 

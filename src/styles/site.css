@@ -1,8 +1,42 @@
-/* minimal-dark: the permanent baseline (D-025, docs/VISUAL_LAB.md). CSS only, readable without JS. Tokens are
-   CSS custom properties; other themes override them under their own :root[data-theme="…"]. Contrast on --bg:
-   --fg 15.0:1, --muted 7.5:1, --accent 8.9:1; on --surface 13.7, 6.8, 8.1 (WCAG AA needs 4.5:1). */
+/* Linkedia reading pages (V2-06, D-081; was the `minimal-dark` baseline theme, 1B-02). CSS only, readable without
+   JS. Three reading modes share one set of token names: the system's light or dark when the reader has no pick
+   (`prefers-color-scheme`), and `:root[data-mode="light|dark|black"]` once they pick one (public/modo.js applies it
+   before the first paint). Black is never automatic. WCAG contrast on --bg / --surface:
+   light  fg 16.2/14.6, muted 7.0/6.3, accent 6.2/5.6, warning 5.2/4.7, focus 5.8/5.2, --on-focus on --focus 6.0;
+   dark   fg 15.1/13.7, muted 7.5/6.8, accent 8.9/8.1, warning 11.5/10.5, focus 13.0/11.8, --on-focus 13.0;
+   black  fg 16.9/15.3, muted 8.4/7.6, accent 10.0/9.0, warning 12.9/11.7, focus 14.6/13.2, --on-focus 14.6. */
 :root,
-:root[data-theme='minimal-dark'] {
+:root[data-mode='light'] {
+  color-scheme: light;
+  --bg: #fbfaf8;
+  --surface: #f0eee9;
+  --border: #d3cfc7;
+  --fg: #1c1d1f;
+  --muted: #5a564f;
+  --accent: #1d5bb8;
+  --accent-strong: #123f85;
+  --warning: #9a5b00;
+  --focus: #a34800;
+  --on-focus: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode]) {
+    color-scheme: dark;
+    --bg: #111214;
+    --surface: #1a1c1f;
+    --border: #33363b;
+    --fg: #e8e6e3;
+    --muted: #a7a39d;
+    --accent: #8ab4f8;
+    --accent-strong: #b8d1fb;
+    --warning: #f2c46d;
+    --focus: #ffd166;
+    --on-focus: #111214;
+  }
+}
+
+:root[data-mode='dark'] {
   color-scheme: dark;
   --bg: #111214;
   --surface: #1a1c1f;
@@ -13,6 +47,24 @@
   --accent-strong: #b8d1fb;
   --warning: #f2c46d;
   --focus: #ffd166;
+  --on-focus: #111214;
+}
+
+:root[data-mode='black'] {
+  color-scheme: dark;
+  --bg: #000000;
+  --surface: #0f1012;
+  --border: #2e3035;
+  --fg: #e8e6e3;
+  --muted: #a7a39d;
+  --accent: #8ab4f8;
+  --accent-strong: #b8d1fb;
+  --warning: #f2c46d;
+  --focus: #ffd166;
+  --on-focus: #000000;
+}
+
+:root {
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Code', 'Liberation Mono', Menlo, Consolas, monospace;
   --measure: 68ch;
@@ -58,11 +110,17 @@ main,
   padding: var(--space-3);
 }
 
+/* Header: the navigation (it wraps inside its own box), then the discreet mode button, always top right (V2-06). */
 [data-site-header] {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
   border-bottom: 1px solid var(--border);
 }
 
 [data-site-header] nav {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -172,7 +230,7 @@ sup[data-cites] {
   z-index: 10;
   padding: var(--space-2) var(--space-3);
   background: var(--focus);
-  color: #111214;
+  color: var(--on-focus);
   font-weight: 700;
 }
 
@@ -375,52 +433,75 @@ button:hover {
   margin-bottom: var(--space-2);
 }
 
-/* Theme switcher (1C-01): rendered only once lab themes exist; hidden until its script runs. The [hidden] rule
-   keeps a theme's display value from showing a control that cannot work. */
+/* `hidden` always wins over a rule's display value (the mode button is hidden until its script runs). */
 [hidden] {
   display: none !important;
 }
 
-/* On /visual the switcher sits near the top: until its script shows it, it keeps its room (invisible, also to
-   screen readers), so the page does not shift when it appears. */
-[data-theme-switcher][hidden] {
-  display: block !important;
+/* Until its script shows it, the button keeps its room (invisible, also to screen readers): no shift when it appears. */
+[data-mode-toggle][hidden] {
+  display: inline-flex !important;
   visibility: hidden;
 }
 
-[data-theme-switcher] {
-  margin: var(--space-3) 0 0;
-  padding: var(--space-2) var(--space-3) var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-[data-theme-switcher] legend {
-  padding: 0 var(--space-1);
-}
-
-[data-theme-option] {
-  display: flex;
+[data-mode-toggle] {
+  flex: none;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) 0;
-  cursor: pointer;
-}
-
-[data-theme-option] input {
-  width: 1.1rem;
-  height: 1.1rem;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: 6.25rem;
   margin: 0;
-  accent-color: var(--accent);
-}
-
-[data-theme-option]:has(input:disabled) {
+  padding: var(--space-1) var(--space-2);
+  border-color: var(--border);
   color: var(--muted);
-  cursor: default;
 }
 
-[data-theme-status] {
-  margin: var(--space-2) 0 0;
+[data-mode-toggle]:hover {
+  color: var(--fg);
+}
+
+[data-mode-toggle] svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[data-mode-toggle] [data-mode-icon='black'] {
+  fill: currentColor;
+}
+
+[data-mode-toggle] [data-mode-icon] {
+  display: none;
+}
+
+/* Narrow screens: the icon alone (the name, "Modo de leitura: …", stays for screen readers). */
+@media (max-width: 30rem) {
+  [data-mode-toggle] {
+    min-width: 0;
+    padding: var(--space-2);
+  }
+
+  [data-mode-label] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+[data-mode-toggle][data-current='light'] [data-mode-icon='light'],
+[data-mode-toggle][data-current='dark'] [data-mode-icon='dark'],
+[data-mode-toggle][data-current='black'] [data-mode-icon='black'] {
+  display: block;
 }
 
 @media (prefers-reduced-motion: reduce) {

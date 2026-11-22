@@ -71,8 +71,8 @@ jobs:
           if-no-files-found: error
 
   e2e:
-    # Full path. Browser suites served by the Hosting emulator with firebase.json: smoke (1B-04) and switcher (1C-01)
-    # on the example content + fixture themes, then the real slotted themes on the production build (1C-03).
+    # Full path. Browser suites served by the Hosting emulator with firebase.json: one build of the example content
+    # (smoke 1B-04, reading modes V2-06, covers, specials, redirects), then the v2 fixture content smoke (V2-05).
     needs: changes
     if: needs.changes.outputs.mode == 'full'
     runs-on: ubuntu-latest
@@ -91,7 +91,7 @@ jobs:
       - if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: theme-screenshots
+          name: mode-screenshots
           path: test-results/screenshots
           if-no-files-found: ignore
           retention-days: 14
