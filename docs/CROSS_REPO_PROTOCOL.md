@@ -30,7 +30,7 @@ Themes are not part of the export: the magazine owns `themes/manifest.json` and 
 The development checkout pulls content commits from GitHub like any other commit. A manual edit of public content goes through a reviewed PR and does not flow back into the engine DB; prefer engine-side corrections for published articles.
 
 ## Canonical metadata
-`schema_version`, `edition_date` (America/Sao_Paulo), `channel`, namespaced tags from the catalog, sources with canonical HTTPS URLs and dates, `editorial_metadata` (content version, generation time, `ai_generated`, model when reported, opaque `run_ref`, `supersedes_article_id`), edition `visual_theme_id`.
+`schema_version` (1.0.0 or 2.0.0; the validator picks `contracts/*.schema.json` or `contracts/*.v2.schema.json`), `edition_date` (America/Sao_Paulo), `channel` (v1) or `editoria` plus per-article `published_at` and edition `updated_at` (v2, V2-05), namespaced tags from the catalog, sources with canonical HTTPS URLs and dates, `editorial_metadata` (content version, generation time, `ai_generated`, model when reported, opaque `run_ref`, `supersedes_article_id`), edition `visual_theme_id`.
 
 ## Safety invariant
 No credentials, absolute local paths, hidden reasoning or private transcripts may ever be exported. The public build may not fetch the private DB or start the Python engine. Only the public repo's CI holds Firebase deploy credentials.

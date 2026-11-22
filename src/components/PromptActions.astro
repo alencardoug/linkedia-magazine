@@ -1,8 +1,8 @@
 ---
 // "Saber mais" and other prompts the reader can copy (PUBLIC_EXPERIENCE: accessible prompts). Without JS the
 // prompt is selectable text inside <details>; with JS a copy button appears and announces the result.
-import type { PromptAction } from '../types/contracts';
-import { PROMPT_KIND_LABELS } from '../lib/labels';
+import type { PromptAction } from '../types/contracts.v2';
+import { knownLabel, PROMPT_KIND_LABELS } from '../lib/labels';
 
 interface Props {
   actions: PromptAction[];
@@ -18,7 +18,7 @@ const { actions } = Astro.props;
       <div data-prompt-action data-kind={a.kind}>
         <details>
           <summary>
-            {a.label} <span class="meta">({PROMPT_KIND_LABELS[a.kind] ?? 'Prompt'})</span>
+            {a.label} <span class="meta">({knownLabel(PROMPT_KIND_LABELS, a.kind, 'Prompt')})</span>
           </summary>
           <p id={`prompt-${i}`} data-prompt-text>
             {a.prompt}

@@ -3,8 +3,8 @@
 import type { EditionWithArticles } from '../../lib/content';
 import Base from '../../layouts/Base.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
-import { loadContent } from '../../lib/content';
-import { publishedLabel } from '../../lib/labels';
+import { loadContent, showsArticleTimes } from '../../lib/content';
+import { localParts, publishedLabel, updatedLabel } from '../../lib/labels';
 
 export function getStaticPaths() {
   return loadContent().editions.map((entry) => ({ params: { date: entry.edition.edition_date }, props: { entry } }));
@@ -15,6 +15,10 @@ interface Props {
 }
 const { edition, articles } = Astro.props.entry;
 const [lead, ...rest] = articles;
+const updated = updatedLabel(edition);
+// Several batches on one day (v2): each card shows its own time.
+const timeOf = (a: (typeof articles)[number]) =>
+  showsArticleTimes(articles) && a.published_at ? localParts(a.published_at, edition.timezone).time : undefined;
 ---
 
 <Base title={edition.title}>
@@ -22,10 +26,11 @@ const [lead, ...rest] = articles;
     <h1 id="edicao" class="visually-hidden">{edition.title}</h1>
     <p class="meta">
       <time datetime={edition.published_at}>{publishedLabel(edition)}</time>
+      {updated && <span data-edition-updated>· <time datetime={edition.updated_at}>{updated}</time></span>}
     </p>
     {edition.summary && <p>{edition.summary}</p>}
-    {lead && <ArticleCard article={lead} lead />}
-    {rest.map((a) => <ArticleCard article={a} />)}
+    {lead && <ArticleCard article={lead} lead time={timeOf(lead)} />}
+    {rest.map((a) => <ArticleCard article={a} time={timeOf(a)} />)}
     <p><a href="/edicoes">Todas as edições</a></p>
   </section>
 </Base>

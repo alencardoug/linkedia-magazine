@@ -14,6 +14,11 @@
         "type": 301
       },
       {
+        "regex": "^/categorias/(?:engenharia|conhecimento)-de-ia(?:\\.html)?/?$",
+        "destination": "/categorias/ia-na-pratica",
+        "type": 301
+      },
+      {
         "regex": "^/especiais/governanca-de-projetos(?:\\.html|/|/index\\.html)?$",
         "destination": "https://governaproj.web.app/",
         "type": 302

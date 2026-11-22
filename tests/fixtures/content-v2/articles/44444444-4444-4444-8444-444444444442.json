@@ -1,0 +1,57 @@
+{
+  "schema_version": "2.0.0",
+  "article_id": "44444444-4444-4444-8444-444444444442",
+  "slug": "china-prompts-livres",
+  "edition_date": "2026-11-21",
+  "published_at": "2026-11-21T09:00:00-03:00",
+  "locale": "pt-BR",
+  "editoria": "china",
+  "title": "China: prompts sem Saber mais",
+  "summary": "Um resumo presente.",
+  "read_minutes": 6,
+  "tags": [],
+  "sources": [
+    {
+      "source_id": "s1",
+      "title": "Relatório de referência",
+      "url": "https://example.org/relatorio",
+      "publisher": "Example Org",
+      "published_at": "2026-11-20",
+      "accessed_at": "2026-11-21T07:30:00-03:00"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Corpo com fonte.",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "prompt_actions": [
+    {
+      "kind": "lab",
+      "label": "Teste você mesmo",
+      "prompt": "Monte um experimento."
+    },
+    {
+      "label": "Sem tipo",
+      "prompt": "Um prompt sem kind."
+    },
+    {
+      "kind": "constructor",
+      "label": "Tipo estranho",
+      "prompt": "Kind fora do mapa."
+    }
+  ],
+  "editorial_metadata": {
+    "content_version": 1,
+    "generated_at": "2026-11-21T08:00:00-03:00",
+    "reviewed_sources": true,
+    "ai_generated": true,
+    "model": "claude-opus-5-5",
+    "run_ref": null,
+    "supersedes_article_id": null
+  }
+}

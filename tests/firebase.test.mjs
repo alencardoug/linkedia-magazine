@@ -34,12 +34,22 @@ describe('firebase.json', () => {
     expect(hosting.cleanUrls).toBe(true);
     expect(hosting.trailingSlash).toBe(false);
     expect(hosting.rewrites).toBeUndefined(); // static files only, no SPA fallback
-    // The only redirects: the old /capas addresses (D-069) and one short link the owner asked for (D-072),
-    // with or without .html or a trailing slash, then the project guide's move to its own site (V2-02b, 302 while
-    // validating; tests/governaproj-redirect.test.mjs).
-    const [archive, cover, meta, ...gproj] = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
-    expect(hosting.redirects).toHaveLength(6);
-    expect([archive, cover, meta].every((r) => r.type === 301)).toBe(true);
+    // The only redirects: the old /capas addresses (D-069), one short link the owner asked for (D-072) and the two
+    // v1 category slugs merged into "IA na prática" (V2-05, D-084), with or without .html or a trailing slash, then
+    // the project guide's move to its own site (V2-02b, 302 while validating; tests/governaproj-redirect.test.mjs).
+    const [archive, cover, meta, categories, ...gproj] = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
+    expect(hosting.redirects).toHaveLength(7);
+    expect([archive, cover, meta, categories].every((r) => r.type === 301)).toBe(true);
+    expect(categories.destination).toBe('/categorias/ia-na-pratica');
+    for (const slug of ['engenharia-de-ia', 'conhecimento-de-ia']) {
+      for (const path of [`/categorias/${slug}`, `/categorias/${slug}/`, `/categorias/${slug}.html`]) {
+        expect(categories.re.test(path), path).toBe(true);
+      }
+    }
+    // No loop and no other category: the target and the kept or new slugs are served as pages.
+    for (const path of ['/categorias/ia-na-pratica', '/categorias/lideranca-de-ia', '/categorias/engenharia-de-iax', '/categorias/x/engenharia-de-ia']) {
+      expect(hosting.redirects.some((r) => new RegExp(r.regex).test(path)), path).toBe(false);
+    }
     expect(gproj.every((r) => r.destination.startsWith('https://governaproj.web.app/'))).toBe(true);
     for (const path of ['/capas', '/capas/', '/capas.html']) expect(archive.re.test(path), path).toBe(true);
     for (const path of ['/capas/x', '/capas/x/', '/capas/x.html']) {

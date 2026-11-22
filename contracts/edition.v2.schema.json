@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linkedia.web.app/contracts/edition.v2.schema.json",
+  "title": "Linkedia Daily Edition (v2)",
+  "description": "One file per published date: content/editions/YYYY-MM-DD.json. article_ids order is display order; the first article is the lead story. Several publication batches may add articles to the same day: published_at keeps the first batch's time and updated_at the latest; each v2 article carries its own published_at.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "edition_date",
+    "title",
+    "article_ids",
+    "published_at",
+    "updated_at",
+    "timezone"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "edition_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 120
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 400
+    },
+    "article_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "published_at": {
+      "description": "First publication of this edition (export time declared by the engine).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "description": "Latest batch added to this edition; equals published_at for a single batch.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "timezone": {
+      "const": "America/Sao_Paulo"
+    },
+    "visual_theme_id": {
+      "description": "Legacy (v1 reading themes, retired by D-081); optional.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

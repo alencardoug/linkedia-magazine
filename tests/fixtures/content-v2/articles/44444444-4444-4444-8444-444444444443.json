@@ -1,0 +1,44 @@
+{
+  "schema_version": "2.0.0",
+  "article_id": "44444444-4444-4444-8444-444444444443",
+  "slug": "novidade-do-segundo-lote",
+  "edition_date": "2026-11-21",
+  "published_at": "2026-11-21T18:30:00-03:00",
+  "locale": "pt-BR",
+  "editoria": "latest_news",
+  "title": "Novidade publicada no segundo lote",
+  "summary": "Entrou no mesmo dia, mais tarde.",
+  "read_minutes": 2,
+  "tags": [
+    "topic:agentes"
+  ],
+  "sources": [
+    {
+      "source_id": "s1",
+      "title": "Relatório de referência",
+      "url": "https://example.org/relatorio",
+      "publisher": "Example Org",
+      "published_at": "2026-11-20",
+      "accessed_at": "2026-11-21T07:30:00-03:00"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Notícia curta.",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "prompt_actions": [],
+  "editorial_metadata": {
+    "content_version": 1,
+    "generated_at": "2026-11-21T17:50:00-03:00",
+    "reviewed_sources": true,
+    "ai_generated": true,
+    "model": "claude-opus-5-5",
+    "run_ref": null,
+    "supersedes_article_id": null
+  }
+}

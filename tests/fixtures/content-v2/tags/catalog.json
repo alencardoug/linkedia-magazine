@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "tags": [
+    {
+      "key": "topic:agentes",
+      "kind": "topic",
+      "label": "Agentes"
+    },
+    {
+      "key": "topic:saude-digital",
+      "kind": "topic",
+      "label": "Saúde digital"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "article_id": "33333333-3333-4333-8333-333333333331",
+  "slug": "materia-v1-conhecimento",
+  "edition_date": "2026-11-20",
+  "locale": "pt-BR",
+  "channel": "ai_knowledge",
+  "title": "Uma matéria v1 de conhecimento",
+  "summary": "Resumo da matéria v1, mapeada para IA na prática.",
+  "read_minutes": 4,
+  "tags": [
+    "topic:agentes"
+  ],
+  "sources": [
+    {
+      "source_id": "s1",
+      "title": "Relatório de referência",
+      "url": "https://example.org/relatorio",
+      "publisher": "Example Org",
+      "published_at": "2026-11-20",
+      "accessed_at": "2026-11-21T07:30:00-03:00"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Texto v1 com fonte.",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "prompt_actions": [
+    {
+      "kind": "read_more",
+      "label": "Saber mais",
+      "prompt": "Explique em detalhes o tema desta matéria v1."
+    }
+  ],
+  "editorial_metadata": {
+    "content_version": 1,
+    "generated_at": "2026-11-20T08:00:00-03:00",
+    "reviewed_sources": true,
+    "ai_generated": true,
+    "model": null,
+    "run_ref": null,
+    "supersedes_article_id": null
+  }
+}

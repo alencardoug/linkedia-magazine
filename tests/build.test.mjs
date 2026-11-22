@@ -13,6 +13,10 @@ import { SPECIALS, specialHref } from '../src/lib/specials';
 import { THEME_INIT_SCRIPT } from '../src/lib/theme-init';
 
 const ROOT = resolve(import.meta.dirname, '..');
+// The six editorias (D-079, D-084): one category page each, filled or not.
+const CATEGORY_PAGES = ['ia-na-pratica', 'lideranca-de-ia', 'marketing', 'saude', 'china', 'novidades-de-ia'].map(
+  (slug) => `categorias/${slug}.html`,
+);
 const EXAMPLES = join(ROOT, 'content/examples');
 const FIXTURE_THEMES = join(ROOT, 'tests/fixtures/themes');
 // Breaks out of text (tags) and of a quoted attribute (`"` + event handler).
@@ -178,9 +182,7 @@ describe('static build', () => {
         'edicoes.html',
         'edicoes/2026-10-14.html',
         'materias/exemplo-de-materia-linkedia.html',
-        'categorias/engenharia-de-ia.html',
-        'categorias/lideranca-de-ia.html',
-        'categorias/conhecimento-de-ia.html',
+        ...CATEGORY_PAGES,
         'especiais/governanca-de-ia.html',
         'especiais/perguntar-ao-banco.html',
         'especiais/dez-layouts-governanca-de-ia.html',
@@ -447,7 +449,7 @@ describe('static build', () => {
   it('ships three slots with lab themes: pre-paint script, runtime everywhere, switcher on /visual, lazy enhancement', async () => {
     const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
     const pages = htmlFiles(out);
-    expect(pages).toHaveLength(12 + COVERS.length + ART_DIRECTED.length);
+    expect(pages).toHaveLength(9 + CATEGORY_PAGES.length + COVERS.length + ART_DIRECTED.length);
     for (const page of pages.filter((p) => !isCover(p) && !ART_DIRECTED.includes(p))) {
       const html = read(out, page);
       expect(html, page).toContain(
@@ -513,9 +515,7 @@ describe('static build', () => {
         'visual.html',
         ...COVERS.map((c) => `visual/${c.slug}.html`),
         'edicoes.html',
-        'categorias/engenharia-de-ia.html',
-        'categorias/lideranca-de-ia.html',
-        'categorias/conhecimento-de-ia.html',
+        ...CATEGORY_PAGES,
         'especiais/governanca-de-ia.html',
         'especiais/perguntar-ao-banco.html',
         'especiais/dez-layouts-governanca-de-ia.html',

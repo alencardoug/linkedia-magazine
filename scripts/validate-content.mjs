@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // Validates exported content against contracts/ and cross-file references (D-029). Runs as `prebuild`.
+// Articles and editions pick their schema by `schema_version` (V2-05): 1.0.0 → `*.schema.json` (v1, byte-identical
+// to the engine's copy), 2.0.0 → `*.v2.schema.json`. An edition lists articles of its own version only.
 //
 // Layout of a content dir (default `content`, or `--dir <path>`, or env LINKEDIA_CONTENT_DIR):
 //   articles/{article_id}.json · editions/{YYYY-MM-DD}.json · tags/catalog.json
@@ -19,8 +21,15 @@ function compileValidators() {
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   addFormats(ajv);
   const load = (name) => ajv.compile(JSON.parse(readFileSync(join(CONTRACTS_DIR, `${name}.schema.json`), 'utf8')));
-  return { article: load('article'), edition: load('edition'), catalog: load('tag_catalog') };
+  return {
+    article: { '1.0.0': load('article'), '2.0.0': load('article.v2') },
+    edition: { '1.0.0': load('edition'), '2.0.0': load('edition.v2') },
+    catalog: load('tag_catalog'),
+  };
 }
+
+const VERSIONS = ['1.0.0', '2.0.0'];
+const time = (iso) => Date.parse(iso);
 
 function jsonFiles(dir) {
   if (!existsSync(dir)) return [];
@@ -40,14 +49,23 @@ export function validateContent(contentDir) {
   const errors = [];
   const rel = (path) => relative(dir, path) || basename(path);
 
-  // Parse + schema-validate one file; returns the document only when it is valid.
-  const check = (path, validate) => {
+  // Parse + schema-validate one file; returns the document only when it is valid. `validate` is one validator or a
+  // map schema_version → validator.
+  const check = (path, validators) => {
     let doc;
     try {
       doc = JSON.parse(readFileSync(path, 'utf8'));
     } catch (err) {
       errors.push(`${rel(path)}: JSON inválido (${err.message})`);
       return null;
+    }
+    let validate = validators;
+    if (typeof validators !== 'function') {
+      validate = Object.hasOwn(validators, doc?.schema_version) ? validators[doc.schema_version] : undefined;
+      if (!validate) {
+        errors.push(`${rel(path)}: schema_version desconhecida (${JSON.stringify(doc?.schema_version)}; aceitas: ${VERSIONS.join(', ')})`);
+        return null;
+      }
     }
     if (!validate(doc)) {
       for (const e of validate.errors ?? []) errors.push(`${rel(path)}: ${e.instancePath || '(raiz)'} ${e.message}`);
@@ -86,8 +104,25 @@ export function validateContent(contentDir) {
     if (basename(path) !== `${edition.edition_date}.json`) {
       errors.push(`${where}: o nome do arquivo deve ser ${edition.edition_date}.json`);
     }
+    const v2 = edition.schema_version === '2.0.0';
+    if (v2 && time(edition.updated_at) < time(edition.published_at)) errors.push(`${where}: updated_at anterior a published_at`);
     for (const id of edition.article_ids) {
-      if (!articles.has(id)) errors.push(`${where}: matéria inexistente "${id}"`);
+      const entry = articles.get(id);
+      if (!entry) {
+        errors.push(`${where}: matéria inexistente "${id}"`);
+        continue;
+      }
+      const { article } = entry;
+      if (article.schema_version !== edition.schema_version) {
+        errors.push(`${where}: matéria "${id}" na versão ${article.schema_version}, edição na ${edition.schema_version}`);
+        continue;
+      }
+      if (!v2) continue;
+      if (article.edition_date !== edition.edition_date) errors.push(`${where}: matéria "${id}" com edition_date ${article.edition_date}`);
+      const at = time(article.published_at);
+      if (at < time(edition.published_at) || at > time(edition.updated_at)) {
+        errors.push(`${where}: published_at da matéria "${id}" fora de [published_at, updated_at] da edição`);
+      }
     }
   }
 

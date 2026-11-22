@@ -1,20 +1,23 @@
 ---
-import type { Article } from '../types/contracts';
-import { CHANNEL_LABELS, CHANNEL_SLUGS } from '../lib/labels';
+import type { Article } from '../lib/content';
+import { EDITORIA_LABELS, editoriaHref } from '../lib/labels';
 
 interface Props {
   article: Article;
   lead?: boolean;
+  /** "hh:mm" of the story's own batch, shown when its edition was published in several batches (V2-05). */
+  time?: string | undefined;
 }
-const { article, lead = false } = Astro.props;
+const { article, lead = false, time } = Astro.props;
 const Title = lead ? 'h2' : 'h3';
 ---
 
-<article data-card data-lead={lead ? 'true' : undefined} data-channel={article.channel}>
+<article data-card data-lead={lead ? 'true' : undefined} data-editoria={article.editoria}>
   <p class="meta">
-    <a href={`/categorias/${CHANNEL_SLUGS[article.channel]}`}>{CHANNEL_LABELS[article.channel]}</a>
+    <a href={editoriaHref(article.editoria)}>{EDITORIA_LABELS[article.editoria]}</a>
     · {article.read_minutes} min de leitura
+    {time && article.published_at && <span data-article-time>· publicada às <time datetime={article.published_at}>{time}</time></span>}
   </p>
   <Title><a href={`/materias/${article.slug}`}>{article.title}</a></Title>
-  <p>{article.summary}</p>
+  {article.summary && <p>{article.summary}</p>}
 </article>

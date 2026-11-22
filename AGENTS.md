@@ -9,7 +9,7 @@ Status and tasks for this repository are tracked in the owner's private engine c
 - Public UI and content: Brazilian Portuguese (pt-BR). Code, tests, docs, theme names, commits: English.
 - Static only: no server, no client-side data API, no analytics, no cookies, no third-party fonts or CDNs.
 - Content is data: render every text field escaped; never inject or execute model-produced HTML/JS/JSX; code samples are escaped text.
-- `contracts/*.schema.json` are copied from the engine on every export — change them there, not here. Exception: `theme_manifest.schema.json` is owned here.
+- `contracts/{article,edition,tag_catalog}.schema.json` (v1) are copied from the engine on every export — change them there, not here; they are frozen (D-079). The v2 files `contracts/*.v2.schema.json` (V2-05) are never touched by the v1 exporter; they live here until `linkedia-studio` mirrors them (V2-07, byte-equality check). The validator picks the schema by `schema_version`. Exception: `theme_manifest.schema.json` is owned here.
 - The build fails on invalid content (`scripts/validate-content.mjs`, run as `prebuild`).
 - Accessibility: keyboard, screen readers, `prefers-reduced-motion`, 320 px layouts, AA contrast; full article reading without JS.
 - Themes: `minimal-dark` is the permanent baseline; experiments follow the theme contract in `docs/VISUAL_LAB.md`; the switcher has exactly three slots once experiments exist (two fixed — baseline and Broadsheet — and the weekly current) and lives on `/visual` only.

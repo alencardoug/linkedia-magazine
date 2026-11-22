@@ -2,8 +2,8 @@
 // One article block, rendered as escaped text only (Astro escapes every {expression}); model output is never
 // injected as HTML. Code and diagram specs are text in <pre><code> (D-027), focusable so a keyboard can scroll a
 // long line; images load only from allowed hosts, else their text fallback.
-import type { Block } from '../types/contracts';
-import { CALLOUT_LABELS, imageAllowed } from '../lib/labels';
+import type { Block } from '../types/contracts.v2';
+import { CALLOUT_LABELS, imageAllowed, knownLabel } from '../lib/labels';
 import Cites from './Cites.astro';
 
 interface Props {
@@ -49,7 +49,7 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
   block.type === 'callout' && (
     <aside data-block="callout" data-variant={block.variant ?? 'note'}>
       <p>
-        <strong>{CALLOUT_LABELS[block.variant ?? 'note'] ?? 'Nota'}:</strong> {block.text}
+        <strong>{block.label ?? knownLabel(CALLOUT_LABELS, block.variant ?? 'note', 'Nota')}:</strong> {block.text}
         <Cites ids={block.source_ids} />
       </p>
     </aside>

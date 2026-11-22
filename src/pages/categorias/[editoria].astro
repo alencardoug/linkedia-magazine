@@ -1,0 +1,27 @@
+---
+// `/categorias/{editoria}`: published articles of one of the six editorias (D-079, D-084), newest edition first.
+// v1 articles are listed under their mapped editoria (src/lib/content.ts); the two retired v1 slugs 301 here.
+import Base from '../../layouts/Base.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { type Article, EDITORIAS, type Editoria, loadContent, publishedArticles } from '../../lib/content';
+import { EDITORIA_LABELS, EDITORIA_SLUGS } from '../../lib/labels';
+
+export function getStaticPaths() {
+  const all = publishedArticles(loadContent());
+  return EDITORIAS.map((editoria) => ({
+    params: { editoria: EDITORIA_SLUGS[editoria] },
+    props: { editoria, articles: all.filter((a) => a.editoria === editoria) },
+  }));
+}
+
+interface Props {
+  editoria: Editoria;
+  articles: Article[];
+}
+const { editoria, articles } = Astro.props;
+---
+
+<Base title={EDITORIA_LABELS[editoria]}>
+  <h1>{EDITORIA_LABELS[editoria]}</h1>
+  {articles.length === 0 ? <p class="meta">Nenhuma matéria publicada nesta categoria ainda.</p> : articles.map((a) => <ArticleCard article={a} />)}
+</Base>

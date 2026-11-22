@@ -1,12 +1,11 @@
 ---
 // `/materias/{slug}`: article permalink (D-034). Every field is escaped text; AI disclosure + sources (D-028).
-import type { Article } from '../../types/contracts';
 import Base from '../../layouts/Base.astro';
 import Block from '../../components/Block.astro';
 import PromptActions from '../../components/PromptActions.astro';
 import Sources from '../../components/Sources.astro';
-import { loadContent, publishedArticles } from '../../lib/content';
-import { CHANNEL_LABELS, CHANNEL_SLUGS, longDate } from '../../lib/labels';
+import { type Article, editionOf, loadContent, publishedArticles } from '../../lib/content';
+import { EDITORIA_LABELS, editoriaHref, localParts, longDate } from '../../lib/labels';
 
 export function getStaticPaths() {
   return publishedArticles(loadContent()).map((article) => ({ params: { slug: article.slug }, props: { article } }));
@@ -16,19 +15,24 @@ interface Props {
   article: Article;
 }
 const { article } = Astro.props;
-const tags = loadContent().tags;
+const content = loadContent();
+const tags = content.tags;
+// v2 (V2-05): the story's own publication time, in its edition's time zone. v1 articles show the date only.
+const timezone = editionOf(content, article)?.timezone ?? 'America/Sao_Paulo';
+const time = article.published_at ? localParts(article.published_at, timezone).time : undefined;
 ---
 
 <Base title={article.title} description={article.summary}>
-  <article data-article={article.article_id} data-channel={article.channel}>
+  <article data-article={article.article_id} data-editoria={article.editoria}>
     <header>
       <p class="meta">
-        <a href={`/categorias/${CHANNEL_SLUGS[article.channel]}`}>{CHANNEL_LABELS[article.channel]}</a>
-        · <a href={`/edicoes/${article.edition_date}`}><time datetime={article.edition_date}>{longDate(article.edition_date)}</time></a>
+        <a href={editoriaHref(article.editoria)}>{EDITORIA_LABELS[article.editoria]}</a>
+        · <a href={`/edicoes/${article.edition_date}`}><time datetime={article.edition_date}>{longDate(article.edition_date)}</time></a
+        >{time && article.published_at && <span data-article-time>, às <time datetime={article.published_at}>{time}</time></span>}
         · {article.read_minutes} min de leitura
       </p>
       <h1>{article.title}</h1>
-      <p data-summary>{article.summary}</p>
+      {article.summary && <p data-summary>{article.summary}</p>}
     </header>
     {article.blocks.map((block) => <Block block={block} />)}
     <footer>
@@ -45,7 +49,7 @@ const tags = loadContent().tags;
       </p>
     </footer>
   </article>
-  <PromptActions actions={article.prompt_actions} />
+  {article.prompt_actions && article.prompt_actions.length > 0 && <PromptActions actions={article.prompt_actions} />}
   <Sources sources={article.sources} />
   <p><a href={`/edicoes/${article.edition_date}`}>Voltar à edição</a></p>
 </Base>

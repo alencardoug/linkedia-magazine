@@ -4,11 +4,18 @@
 import Base from '../layouts/Base.astro';
 import '../covers/view-transition.css';
 import ArticleCard from '../components/ArticleCard.astro';
-import { loadContent } from '../lib/content';
-import { publishedLabel } from '../lib/labels';
+import { loadContent, showsArticleTimes } from '../lib/content';
+import { localParts, publishedLabel, updatedLabel } from '../lib/labels';
 
 const latest = loadContent().editions[0];
 const [lead, ...rest] = latest?.articles ?? [];
+// The newest edition by date (a static build: after midnight it is still the last published day, labelled with
+// its real date). Several batches on that day (v2): each card shows its own time.
+const updated = latest ? updatedLabel(latest.edition) : '';
+const timeOf = (a: (typeof rest)[number]) =>
+  latest && showsArticleTimes(latest.articles) && a.published_at
+    ? localParts(a.published_at, latest.edition.timezone).time
+    : undefined;
 ---
 
 <Base title="Linkedia" aiNote>
@@ -18,10 +25,15 @@ const [lead, ...rest] = latest?.articles ?? [];
         <h1 id="edicao" class="visually-hidden">{latest.edition.title}</h1>
         <p class="meta">
           <time datetime={latest.edition.published_at}>{publishedLabel(latest.edition)}</time>
+          {updated && (
+            <span data-edition-updated>
+              · <time datetime={latest.edition.updated_at}>{updated}</time>
+            </span>
+          )}
         </p>
         {latest.edition.summary && <p>{latest.edition.summary}</p>}
-        {lead && <ArticleCard article={lead} lead />}
-        {rest.map((a) => <ArticleCard article={a} />)}
+        {lead && <ArticleCard article={lead} lead time={timeOf(lead)} />}
+        {rest.map((a) => <ArticleCard article={a} time={timeOf(a)} />)}
         <p>
           <a href="/edicoes">Edições anteriores</a>
         </p>
