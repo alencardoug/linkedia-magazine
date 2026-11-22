@@ -245,13 +245,27 @@ test.describe('motion and forced colours', () => {
     }
   });
 
-  test('forced colours: the brand and the drop cap stay painted', async ({ page }) => {
+  test('forced colours: the brand and the drop caps stay painted', async ({ page }) => {
     await page.emulateMedia({ forcedColors: 'active' });
     for (const mode of ['light', 'dark']) {
       await presetMode(page, mode);
       await page.goto('/revista');
       const brand = await page.locator('[data-brand] strong').evaluate((e) => getComputedStyle(e).color);
       expect(brand, mode).not.toBe('rgba(0, 0, 0, 0)');
+    }
+    // Drop caps exist only in the light look (Broadsheet): under forced colours they keep their float and take
+    // the system text colour, never the forced background.
+    await presetMode(page, 'light');
+    const dropCaps = { '/edicoes/2026-11-20': '[data-card][data-lead] > p:last-child', [ARTICLE]: "[data-article] > header + p[data-block='paragraph']" };
+    for (const [path, selector] of Object.entries(dropCaps)) {
+      await page.goto(path);
+      const cap = await page.locator(selector).first().evaluate((e) => {
+        const letter = getComputedStyle(e, '::first-letter');
+        return { float: letter.float, color: letter.color, text: getComputedStyle(e).color, bg: getComputedStyle(document.body).backgroundColor };
+      });
+      expect(cap.float, path).toBe('left');
+      expect(cap.color, path).toBe(cap.text);
+      expect(cap.color, path).not.toBe(cap.bg);
     }
   });
 });
