@@ -13,8 +13,11 @@ export interface Special {
   date: string;
   /** Reading time, for text pages only (a gallery has none). */
   readMinutes?: number;
-  /** A self-contained page from `public/` with its own shell (no magazine header, theme or footer). */
-  standalone?: boolean;
+  /**
+   * The canonical URL of a guide that lives on its own site (V2-02b): `/edicoes` links there instead of
+   * `/especiais/<slug>`, and the magazine serves no page for it (the old URLs redirect in `firebase.json`).
+   */
+  href?: string;
   /** An art-directed Astro page on `SpecialLayout.astro`: own fonts, palette and light/dark choice, no weekly theme. */
   artDirected?: boolean;
 }
@@ -31,14 +34,14 @@ export const SPECIALS: readonly Special[] = [
     artDirected: true,
   },
   {
-    // Standalone interactive guide (owner, 2026-11-10: listed right below the AI guide): its own shell and code,
-    // a static snapshot in `public/especiais/` made by `scripts/snapshot-governanca-de-projetos.mjs`.
+    // Interactive guide (owner, 2026-11-10: listed right below the AI guide), on its own site since V2-02b
+    // (repo gproj). `/especiais/governanca-de-projetos*` redirects there; only the old `assets/<hash>/` stays here.
     slug: 'governanca-de-projetos',
     title: 'Guia Governança de Projetos: da intenção ao valor entregue',
     summary:
       'Guia interativo de governança de projetos com mapa de decisão e checklist de prontidão.',
     date: '2026-11-10',
-    standalone: true,
+    href: 'https://governaproj.web.app/',
   },
   {
     // NL→SQL comparison (owner, 2026-11-11: listed below the two guides), art-directed in S6 "Camadas de Vidro".
@@ -58,6 +61,9 @@ export const SPECIALS: readonly Special[] = [
     date: '2026-10-25',
   },
 ];
+
+/** Where `/edicoes` links a special. */
+export const specialHref = (s: Special): string => s.href ?? `/especiais/${s.slug}`;
 
 export function special(slug: string): Special {
   const found = SPECIALS.find((s) => s.slug === slug);

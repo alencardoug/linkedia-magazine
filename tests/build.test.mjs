@@ -9,7 +9,7 @@ import { build } from 'astro';
 import { afterAll, describe, expect, it } from 'vitest';
 import { validateContent } from '../scripts/validate-content.mjs';
 import { COVERS, CURRENT_COVER } from '../src/covers/registry';
-import { SPECIALS } from '../src/lib/specials';
+import { SPECIALS, specialHref } from '../src/lib/specials';
 import { THEME_INIT_SCRIPT } from '../src/lib/theme-init';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -70,11 +70,8 @@ const read = (out, page) => readFileSync(join(out, page), 'utf8');
 // Cover pages (3-01): the current cover at `/` and every cover in the archive.
 const COVER_PAGES = ['index.html', ...COVERS.map((c) => `visual/${c.slug}.html`)];
 const isCover = (page) => COVER_PAGES.includes(page);
-// Standalone special (owner, 2026-11-10): a snapshot in `public/` with its own shell, CSS and modules.
-const STANDALONE_PAGES = ['especiais/governanca-de-projetos.html', 'especiais/governanca-de-projetos/guia-completo.html'];
 // Art-directed specials (3-22): Astro pages on their own shell (SpecialLayout.astro).
 const ART_DIRECTED = SPECIALS.filter((s) => s.artDirected).map((s) => `especiais/${s.slug}.html`);
-const STANDALONE_ASSETS = /^\/especiais\/governanca-de-projetos\/assets\/[0-9a-f]{16}\/[\w/.-]+\.(?:m?js|css)$/;
 
 function htmlFiles(dir, prefix = '') {
   return readdirSync(join(dir, prefix), { withFileTypes: true }).flatMap((e) =>
@@ -185,7 +182,6 @@ describe('static build', () => {
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
         'especiais/governanca-de-ia.html',
-        ...STANDALONE_PAGES,
         'especiais/perguntar-ao-banco.html',
         'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
@@ -201,26 +197,6 @@ describe('static build', () => {
       expect(html.includes('rel="author"'), page).toBe(page === 'sobre.html');
       expect(html.includes('Textos gerados com IA'), page).toBe(AI_NOTE_PAGES.includes(page));
       expect(html.includes('data-site-footer'), page).toBe(AI_NOTE_PAGES.includes(page));
-      if (STANDALONE_PAGES.includes(page)) {
-        // Its own shell: no magazine theme or code, no inline code (CSP), only its own hashed files, and every
-        // same-origin reference resolves in the build (clean URLs: `x` is served from `x.html`).
-        expect(html, page).toMatch(/^<!doctype html>\s*<html lang="pt-BR">/i);
-        expect(html, page).not.toContain('data-theme="minimal-dark"');
-        expect(html, page).not.toContain('/_astro/');
-        expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
-        const scripts = [...html.matchAll(/<script([^>]*)>/g)].map((m) => m[1].match(/\ssrc="([^"]+)"/)?.[1]);
-        expect(scripts.length, page).toBeGreaterThan(0);
-        for (const src of scripts) expect(src, page).toMatch(STANDALONE_ASSETS);
-        const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g)].map((m) => m[1]);
-        expect(styles.length, page).toBeGreaterThan(0);
-        for (const href of styles) expect(href, page).toMatch(STANDALONE_ASSETS);
-        const refs = [...html.matchAll(/\s(?:href|src)="([^"#]*)(?:#[^"]*)?"/g)].map((m) => m[1]).filter(Boolean);
-        expect(refs.filter((r) => !/^(?:\/|https:)/.test(r)), page).toEqual([]); // nothing relative to the URL
-        for (const ref of refs.filter((r) => r.startsWith('/'))) {
-          expect(existsSync(join(out, ref)) || existsSync(join(out, `${ref}.html`)), `${page} → ${ref}`).toBe(true);
-        }
-        continue;
-      }
       expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
       if (ART_DIRECTED.includes(page)) {
         // Its own shell (3-22): no weekly theme or switcher, then only the page's own bundled files; no inline code.
@@ -323,8 +299,8 @@ describe('static build', () => {
     expect(editions).not.toContain('matéria(s)');
     // Special content (D-075): listed first under its own heading, then the daily archive under another.
     for (const s of SPECIALS) {
-      expect(editions).toContain(`<a href="/especiais/${s.slug}">${s.title}</a>`);
-      expect(editions.indexOf(`/especiais/${s.slug}`)).toBeLessThan(editions.indexOf('data-archive'));
+      expect(editions).toContain(`<a href="${specialHref(s)}">${s.title}</a>`);
+      expect(editions.indexOf(specialHref(s))).toBeLessThan(editions.indexOf('data-archive'));
     }
     expect(editions).toMatch(/<h2 id="especiais"[^>]*>Conteúdos especiais<\/h2>[\s\S]*<h2 id="por-data"[^>]*>Edições diárias<\/h2>/);
     const special = read(out, 'especiais/governanca-de-ia.html');
@@ -340,23 +316,19 @@ describe('static build', () => {
     const outside = [...special.matchAll(/<a href="https:[^"]*"([^>]*)>/g)].map((m) => m[1]);
     expect(outside.length).toBeGreaterThan(0);
     for (const attrs of outside) expect(attrs).toContain('rel="noopener noreferrer"');
-    // The project guide (owner, 2026-11-10): right below the AI guide, a slashless canonical, modules that link to
-    // the reading page and the JSON by their served URLs, and a reading page that links back.
+    // The project guide (owner, 2026-11-10): right below the AI guide, linked at its own site (V2-02b). The magazine
+    // keeps only the old snapshot's hashed modules and CSS (open or cached old pages), no page and no JSON.
     const ai = editions.indexOf('/especiais/governanca-de-ia"');
-    const projects = editions.indexOf('/especiais/governanca-de-projetos"');
+    const projects = editions.indexOf('"https://governaproj.web.app/"');
     expect(projects).toBeGreaterThan(ai);
     expect(projects).toBeLessThan(editions.indexOf('/especiais/dez-layouts-governanca-de-ia"'));
-    const gproj = read(out, 'especiais/governanca-de-projetos.html');
-    expect(gproj).toContain('<link rel="canonical" href="https://linkedia.web.app/especiais/governanca-de-projetos">');
-    expect(gproj).toContain('<meta property="og:url" content="https://linkedia.web.app/especiais/governanca-de-projetos">');
-    expect(gproj).toContain('href="/especiais/governanca-de-projetos/guia-completo"');
-    expect(read(out, 'especiais/governanca-de-projetos/guia-completo.html')).toContain('href="/especiais/governanca-de-projetos"');
-    const moduleDir = gproj.match(/src="\/(especiais\/governanca-de-projetos\/assets\/[0-9a-f]{16})\/app\.mjs"/)[1];
-    for (const view of ['biblioteca', 'metodo']) {
-      expect(read(out, `${moduleDir}/views/${view}.mjs`)).toContain('href="/especiais/governanca-de-projetos/guia-completo"');
-    }
-    expect(read(out, `${moduleDir}/views/biblioteca.mjs`)).toContain('href="/especiais/governanca-de-projetos/conteudo.json"');
-    expect(JSON.parse(read(out, 'especiais/governanca-de-projetos/conteudo.json')).stations.length).toBeGreaterThan(0);
+    expect(editions).not.toContain('href="/especiais/governanca-de-projetos');
+    expect(existsSync(join(out, 'especiais/governanca-de-projetos.html'))).toBe(false);
+    const legacy = readdirSync(join(out, 'especiais/governanca-de-projetos'), { recursive: true, withFileTypes: true })
+      .filter((e) => e.isFile())
+      .map((e) => join(e.parentPath, e.name).slice(out.length + 1));
+    expect(legacy.length).toBeGreaterThan(0);
+    for (const f of legacy) expect(f).toMatch(/^especiais\/governanca-de-projetos\/assets\/00211cee06d28832\/[\w/-]+\.(?:m?js|css)$/);
     // The NL→SQL special (owner, 2026-11-11): below the two guides, before the showcase; one h1, every in-page link
     // lands, every outside link without referrer or opener, the AI note.
     const nl = editions.indexOf('/especiais/perguntar-ao-banco"');
@@ -475,8 +447,8 @@ describe('static build', () => {
   it('ships three slots with lab themes: pre-paint script, runtime everywhere, switcher on /visual, lazy enhancement', async () => {
     const out = await buildSite(EXAMPLES, FIXTURE_THEMES);
     const pages = htmlFiles(out);
-    expect(pages).toHaveLength(12 + COVERS.length + STANDALONE_PAGES.length + ART_DIRECTED.length);
-    for (const page of pages.filter((p) => !isCover(p) && !STANDALONE_PAGES.includes(p) && !ART_DIRECTED.includes(p))) {
+    expect(pages).toHaveLength(12 + COVERS.length + ART_DIRECTED.length);
+    for (const page of pages.filter((p) => !isCover(p) && !ART_DIRECTED.includes(p))) {
       const html = read(out, page);
       expect(html, page).toContain(
         '<html lang="pt-BR" data-theme="lab-2099-w02" data-theme-baseline="minimal-dark" ' +
@@ -545,7 +517,6 @@ describe('static build', () => {
         'categorias/lideranca-de-ia.html',
         'categorias/conhecimento-de-ia.html',
         'especiais/governanca-de-ia.html',
-        ...STANDALONE_PAGES,
         'especiais/perguntar-ao-banco.html',
         'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',

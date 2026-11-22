@@ -23,9 +23,10 @@ test.describe('especial NL→SQL (S6)', () => {
 
     await page.goto('/edicoes');
     const hrefs = await page.locator('[data-specials] a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-    const at = (slug) => hrefs.indexOf(`/especiais/${slug}`);
-    expect(at('perguntar-ao-banco')).toBe(at('governanca-de-projetos') + 1);
-    expect(at('governanca-de-projetos')).toBeGreaterThan(at('governanca-de-ia'));
+    const at = (href) => hrefs.indexOf(href);
+    // The project guide links to its own site (V2-02b).
+    expect(at('/especiais/perguntar-ao-banco')).toBe(at('https://governaproj.web.app/') + 1);
+    expect(at('https://governaproj.web.app/')).toBeGreaterThan(at('/especiais/governanca-de-ia'));
   });
 
   test.describe('without JS', () => {

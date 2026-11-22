@@ -35,10 +35,12 @@ describe('firebase.json', () => {
     expect(hosting.trailingSlash).toBe(false);
     expect(hosting.rewrites).toBeUndefined(); // static files only, no SPA fallback
     // The only redirects: the old /capas addresses (D-069) and one short link the owner asked for (D-072),
-    // with or without .html or a trailing slash.
-    const [archive, cover, meta] = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
-    expect(hosting.redirects).toHaveLength(3);
-    expect(hosting.redirects.every((r) => r.type === 301)).toBe(true);
+    // with or without .html or a trailing slash, then the project guide's move to its own site (V2-02b, 302 while
+    // validating; tests/governaproj-redirect.test.mjs).
+    const [archive, cover, meta, ...gproj] = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
+    expect(hosting.redirects).toHaveLength(6);
+    expect([archive, cover, meta].every((r) => r.type === 301)).toBe(true);
+    expect(gproj.every((r) => r.destination.startsWith('https://governaproj.web.app/'))).toBe(true);
     for (const path of ['/capas', '/capas/', '/capas.html']) expect(archive.re.test(path), path).toBe(true);
     for (const path of ['/capas/x', '/capas/x/', '/capas/x.html']) {
       expect(path.replace(cover.re, cover.destination.replace(':1', '$1')), path).toBe('/visual/x');

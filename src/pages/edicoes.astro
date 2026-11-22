@@ -3,7 +3,7 @@
 import Base from '../layouts/Base.astro';
 import { loadContent } from '../lib/content';
 import { longDate } from '../lib/labels';
-import { SPECIALS } from '../lib/specials';
+import { SPECIALS, specialHref } from '../lib/specials';
 
 const { editions } = loadContent();
 ---
@@ -16,7 +16,7 @@ const { editions } = loadContent();
       {
         SPECIALS.map((s) => (
           <li>
-            <a href={`/especiais/${s.slug}`}>{s.title}</a>
+            <a href={specialHref(s)}>{s.title}</a>
             <p class="meta">{s.summary}</p>
           </li>
         ))

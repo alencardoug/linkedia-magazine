@@ -12,6 +12,21 @@
         "regex": "^/materias/meta-volta-aos-0013(?:\\.html)?/?$",
         "destination": "/materias/meta-volta-aos-pesos-abertos-o-que-muda-para-quem-escolhe-modelo",
         "type": 301
+      },
+      {
+        "regex": "^/especiais/governanca-de-projetos(?:\\.html|/|/index\\.html)?$",
+        "destination": "https://governaproj.web.app/",
+        "type": 302
+      },
+      {
+        "regex": "^/especiais/governanca-de-projetos/guia-completo(?:\\.html)?/?$",
+        "destination": "https://governaproj.web.app/guia-completo",
+        "type": 302
+      },
+      {
+        "regex": "^/especiais/governanca-de-projetos/conteudo\\.json$",
+        "destination": "https://governaproj.web.app/conteudo.json",
+        "type": 302
       }
     ],
     "headers": [
