@@ -56,7 +56,9 @@ no client code imports it.
    (entry gestures, adaptive quality) into the package instead of importing another cover's, and add the copy to the
    parameterised tests in `tests/covers.test.mjs`. A Canvas 2D cover has no renderer module (pass `null` there) and
    goes live in headless Chromium: add its slug to `CANVAS_2D` in `e2e/cover.spec.mjs`, so the generic checks expect
-   its art on and test a missing 2D context instead of a broken WebGL one.
+   its art on and test a missing 2D context instead of a broken WebGL one. CI runs the cover suite only when a cover or
+   shared file changes (`docs/DEPLOYMENT.md`, V2-06c); a cover that imports a file outside `src/covers/`, `src/lib/`
+   or `src/styles/` must add it to `COVER_FILES` in `scripts/ci/classify-changes.mjs`.
 5. `npm run check && npm test && npm run e2e`, then the acceptance below. The routine and its prompt:
    `docs/prompts/weekly_cover.md`; the idea queue: `docs/prompts/cover_art.md`.
 

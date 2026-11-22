@@ -8,6 +8,8 @@
 # articles a changed edition or catalog entry alters, and the entry, on the built dist); anything else, or anything unclear, runs `build` + the full `e2e`. `build` always runs
 # and fails if the classification failed, so the required check `build` keeps reporting. Deploy needs the suite
 # its mode selected and refuses any commit that is no longer the head of main (a re-run of an old run).
+# Cover suite (V2-06c): on the full path `e2e` skips e2e/cover.spec.mjs only when `changes` reports covers=false
+# (every changed path is a known reading-only one); a missing or other value runs it.
 name: Build and deploy
 
 on:
@@ -29,6 +31,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       mode: ${{ steps.classify.outputs.mode }}
+      covers: ${{ steps.classify.outputs.covers }}
       files: ${{ steps.classify.outputs.files }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -88,6 +91,8 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
+        env:
+          LINKEDIA_SKIP_COVERS: ${{ needs.changes.outputs.covers == 'false' && '1' || '' }}
       - if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

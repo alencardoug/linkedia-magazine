@@ -9,15 +9,18 @@
 // The weekly-theme suites and their production-build run (1C-01/1C-03) are retired (V2-06).
 // `npm run e2e:content` (LINKEDIA_E2E=content) runs only the fast-path smoke on an existing production dist
 // (V2-01, e2e/content-smoke.spec.mjs; CI's content-only path).
+// LINKEDIA_SKIP_COVERS=1 (V2-06c) leaves out e2e/cover.spec.mjs: CI sets it only when the change classifier proved
+// that no cover or shared file changed (scripts/ci/classify-changes.mjs). Any other value runs the covers.
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 5000;
 const SUITES = { content: 'content-smoke.spec.mjs' };
 const suite = SUITES[process.env.LINKEDIA_E2E ?? ''];
+const skipped = [...Object.values(SUITES), ...(process.env.LINKEDIA_SKIP_COVERS === '1' ? ['cover.spec.mjs'] : [])];
 
 export default defineConfig({
   testDir: 'e2e',
-  ...(suite ? { testMatch: suite } : { testIgnore: Object.values(SUITES) }),
+  ...(suite ? { testMatch: suite } : { testIgnore: skipped }),
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
