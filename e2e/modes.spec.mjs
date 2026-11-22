@@ -9,8 +9,8 @@ import { LEGACY_THEME_KEY, MODE_KEY } from '../src/lib/mode.ts';
 import { axeBlocking, layoutShift, pixel, presetMode, watchErrors } from './helpers.mjs';
 
 const ARTICLE = '/materias/exemplo-de-materia-linkedia';
-const NOT_FOUND = '/pagina-que-nao-existe';
-const BG = { light: 'rgb(251, 250, 248)', dark: 'rgb(17, 18, 20)', black: 'rgb(0, 0, 0)' };
+// The three looks (D-085): light = Broadsheet, dark = Singularidade, black = minimal-dark.
+const BG = { light: 'rgb(245, 240, 230)', dark: 'rgb(10, 13, 38)', black: 'rgb(17, 18, 20)' };
 const LABEL = { light: 'Claro', dark: 'Escuro', black: 'Preto' };
 const NEXT = { light: 'escuro', dark: 'preto', black: 'claro' };
 const toggle = (page) => page.getByRole('button', { name: /^Modo de leitura:/ });
@@ -230,9 +230,36 @@ test.describe('pages with their own palette', () => {
   });
 });
 
-// Every kind of reading page in the three modes: axe at 1100 px; at 320 px no horizontal scroll and no layout shift
-// when the button appears; a screenshot of each (attached; CI uploads them).
-const ROUTES = ['/revista', '/edicoes', '/edicoes/2026-10-14', ARTICLE, '/categorias/ia-na-pratica', '/especiais/dez-layouts-governanca-de-ia', '/sobre', '/visual', NOT_FOUND];
+// The three looks: reduced motion draws no progress rule; forced colours keep the brand and the drop cap visible.
+test.describe('motion and forced colours', () => {
+  test('reduced motion: no animation in any look, before or after scrolling', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const animations = () => page.evaluate(() => document.getAnimations().length);
+    for (const mode of ['light', 'dark', 'black']) {
+      await presetMode(page, mode);
+      await page.goto(ARTICLE);
+      await expect(page.locator('html')).toHaveAttribute('data-mode', mode);
+      expect(await animations(), mode).toBe(0);
+      await page.mouse.wheel(0, 3000);
+      expect(await animations(), mode).toBe(0);
+    }
+  });
+
+  test('forced colours: the brand and the drop cap stay painted', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    for (const mode of ['light', 'dark']) {
+      await presetMode(page, mode);
+      await page.goto('/revista');
+      const brand = await page.locator('[data-brand] strong').evaluate((e) => getComputedStyle(e).color);
+      expect(brand, mode).not.toBe('rgba(0, 0, 0, 0)');
+    }
+  });
+});
+
+// The layouts that differ, in the three modes: axe at 1100 px; at 320 px no horizontal scroll and no layout shift
+// when the button appears; screenshots at both widths (attached; CI uploads them). Every other route is checked
+// with axe and at 320 px by e2e/smoke.spec.mjs in the system default (light, Broadsheet).
+const ROUTES = ['/revista', ARTICLE, '/edicoes', '/visual'];
 const shotName = (route) => route.slice(1).replaceAll('/', '_');
 for (const mode of ['light', 'dark', 'black']) {
   test.describe(`mode ${mode}`, () => {
@@ -240,19 +267,23 @@ for (const mode of ['light', 'dark', 'black']) {
 
     for (const route of ROUTES) {
       test(`${route}: axe, 320 px`, async ({ page }, testInfo) => {
-        const errors = watchErrors(page, route === NOT_FOUND ? /status of 404/ : undefined);
+        const errors = watchErrors(page);
+        const shot = async (width) => {
+          const path = join(testInfo.project.outputDir, 'screenshots', mode, `${shotName(route)}-${width}.png`);
+          await testInfo.attach(`${mode} ${route} ${width}px`, { body: await page.screenshot({ path, fullPage: true }), contentType: 'image/png' });
+        };
         await page.setViewportSize({ width: 1100, height: 900 });
         await page.goto(route);
         await expect(page.locator('html')).toHaveAttribute('data-mode', mode);
         await expect(toggle(page)).toBeVisible();
         expect(await axeBlocking(page)).toEqual([]);
+        await shot(1100);
         await page.setViewportSize({ width: 320, height: 640 });
         await page.goto(route);
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
         expect(await layoutShift(page)).toBeLessThan(0.1);
         expect(await axeBlocking(page)).toEqual([]);
-        const path = join(testInfo.project.outputDir, 'screenshots', mode, `${shotName(route)}-320.png`);
-        await testInfo.attach(`${mode} ${route} 320px`, { body: await page.screenshot({ path, fullPage: true }), contentType: 'image/png' });
+        await shot(320);
         expect(errors).toEqual([]);
       });
     }

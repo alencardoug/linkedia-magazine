@@ -26,6 +26,18 @@ const ROUTES = [
   '/especiais/dez-layouts-governanca-de-ia',
   '/sobre',
 ];
+// Pages with their own spec for axe and 320 px (covers: cover.spec.mjs; art-directed specials: their own specs);
+// the reading-page loops below skip them so the same check does not run twice (V2-06b).
+const OWN_SPEC = new Set([
+  '/',
+  '/visual/sismograma',
+  '/visual/micelio',
+  '/visual/duas-sombras',
+  '/visual/singularidade',
+  '/especiais/governanca-de-ia',
+  '/especiais/perguntar-ao-banco',
+]);
+const READING = ROUTES.filter((r) => !OWN_SPEC.has(r));
 const PROMPT = 'Explique como avaliar criticamente uma notícia sobre inteligência artificial, com fontes e exemplos.';
 
 // Fails the test on any CSP violation or uncaught page error.
@@ -134,7 +146,7 @@ test.describe('sketch showcase (3-23)', () => {
 test.describe('320 px viewport', () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
-  for (const path of [...ROUTES, '/nao-existe']) {
+  for (const path of [...READING, '/nao-existe']) {
     test(`${path} has no horizontal scroll`, async ({ page }) => {
       await page.goto(path);
       const width = await page.evaluate(() => document.documentElement.scrollWidth);
@@ -144,7 +156,7 @@ test.describe('320 px viewport', () => {
 });
 
 test.describe('axe', () => {
-  for (const path of [...ROUTES, '/nao-existe']) {
+  for (const path of [...READING, '/nao-existe']) {
     test(`${path} has no serious or critical violations`, async ({ page }) => {
       await page.goto(path);
       const { violations } = await new AxeBuilder({ page }).analyze();

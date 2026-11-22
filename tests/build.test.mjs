@@ -446,12 +446,17 @@ describe('static build', () => {
       expect(read(out, page), page).not.toContain('/modo.js');
       expect(read(out, page), page).not.toContain('data-mode-toggle');
     }
-    // One stylesheet: light by default, the system's dark without a pick, the three explicit picks; black only on a pick.
+    // One stylesheet (D-085): black = the base (minimal-dark, #111214), only on a pick; light = Broadsheet and
+    // dark = Singularidade, each on the explicit pick and, without a pick, on the system's scheme (no JS needed).
     const css = assets(out, '.css').map((f) => read(out, `_astro/${f}`)).join('');
-    for (const m of ['light', 'dark', 'black']) expect(css).toMatch(new RegExp(`:root\\[data-mode=['"]?${m}['"]?\\]`));
-    expect(css).toMatch(/@media \(prefers-color-scheme: ?dark\)\{:root:not\(\[data-mode\]\)\{color-scheme:dark;--bg:#111214/);
-    expect(css).not.toMatch(/prefers-color-scheme[^{]*\{[^}]*#000000/);
-    expect(css).not.toMatch(/minimal-dark|lab-20\d\d|data-theme/);
+    expect(css).not.toContain('@mode');
+    expect(css).toMatch(/:root\{color-scheme:dark;--bg:#111214/);
+    expect(css).toMatch(/:root\[data-mode=['"]?light['"]?\]\{color-scheme:light;--bg:#f5f0e6/);
+    expect(css).toMatch(/:root\[data-mode=['"]?dark['"]?\]\{color-scheme:dark;--bg:#0a0d26/);
+    expect(css).toMatch(/@media \(prefers-color-scheme: ?light\)\{:root:not\(\[data-mode\]\)\{color-scheme:light;--bg:#f5f0e6/);
+    expect(css).toMatch(/@media \(prefers-color-scheme: ?dark\)\{:root:not\(\[data-mode\]\)\{color-scheme:dark;--bg:#0a0d26/);
+    expect(css).not.toMatch(/data-mode=['"]?black|prefers-color-scheme[^{]*\{[^}]*#111214/); // black is never automatic
+    expect(css).not.toMatch(/lab-20\d\d|data-theme/);
     // The button's module stays small and never ships the old runtime.
     const js = assets(out, '.js').map((f) => read(out, `_astro/${f}`));
     expect(js.join('')).not.toMatch(/data-theme|enhance\.|ThemeRuntime/);
