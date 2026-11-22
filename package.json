@@ -14,10 +14,11 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
-    "e2e": "npm run e2e:fixtures && npm run e2e:themes",
+    "e2e": "npm run e2e:fixtures && npm run e2e:content-v2 && npm run e2e:themes",
     "e2e:fixtures": "LINKEDIA_CONTENT_DIR=content/examples LINKEDIA_THEMES_DIR=tests/fixtures/themes npm run build && playwright test",
     "e2e:themes": "npm run build && LINKEDIA_E2E=themes playwright test",
     "e2e:content": "LINKEDIA_E2E=content playwright test",
+    "e2e:content-v2": "LINKEDIA_CONTENT_DIR=tests/fixtures/content-v2 LINKEDIA_THEMES_DIR=tests/fixtures/themes npm run build && LINKEDIA_E2E=content LINKEDIA_SMOKE_FILES=\"$(ls tests/fixtures/content-v2/articles/*.json tests/fixtures/content-v2/editions/*.json)\" playwright test",
     "gen:types": "node scripts/gen-types.mjs",
     "theme:rollover": "node scripts/theme-rollover.mjs"
   },

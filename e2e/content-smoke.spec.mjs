@@ -2,10 +2,13 @@
 // (scripts/ci/classify-changes.mjs). Served by the Hosting emulator from the production build (real content), so
 // it checks the exact output that deploys. LINKEDIA_SMOKE_FILES lists the changed content paths plus the unchanged
 // articles the change alters (listed by a changed edition, or tagged with a changed catalog entry), one per line.
+// `npm run e2e:content-v2` also runs it on the v2 fixture (tests/fixtures/content-v2), so v2's optional fields are
+// covered by the full suite (V2-05 review).
 // - entry: the cover answers with the CSP, links to /revista, and every same-origin asset it references loads
 //   (no graphics checks: the art is not waited for);
 // - each listed article: every exported text field (title, summary, block text, list items, quotes, code, captions,
-//   diagrams, image text, prompts, sources) appears verbatim in the page text, so any markup in it was escaped;
+//   callout labels, diagrams, image text, prompts, sources) appears verbatim in the page text, so any markup in it
+//   was escaped; an omitted v2 summary renders no summary line (V2-05);
 //   no script/iframe/object/embed in the content; every citation points at a listed source and every source links
 //   to the exported URL;
 // - the changed article, edition, category pages plus /revista and /edicoes: 200, CSP, one h1, no page errors,
@@ -19,8 +22,9 @@ const FILES = (process.env.LINKEDIA_SMOKE_FILES ?? '')
   .map((f) => f.trim())
   .filter(Boolean);
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'));
-const articles = FILES.filter((f) => f.startsWith('content/articles/')).map(read);
-const editions = FILES.filter((f) => f.startsWith('content/editions/')).map((f) => read(f).edition_date);
+// `content/…` in CI; any `…/articles/` and `…/editions/` dir for a fixture run.
+const articles = FILES.filter((f) => /(?:^|\/)articles\/[^/]+\.json$/.test(f)).map(read);
+const editions = FILES.filter((f) => /(?:^|\/)editions\/[^/]+\.json$/.test(f)).map((f) => read(f).edition_date);
 const articlePath = (a) => `/materias/${a.slug}`;
 
 function watchErrors(page) {
@@ -45,7 +49,7 @@ async function expectPage(page, path) {
 function renderedTexts(a) {
   const texts = [a.title, a.summary];
   for (const b of a.blocks) {
-    texts.push(b.text, b.attribution, b.code, b.caption, b.long_description, b.diagram_spec, b.credit, ...(b.items ?? []));
+    texts.push(b.text, b.label, b.attribution, b.code, b.caption, b.long_description, b.diagram_spec, b.credit, ...(b.items ?? []));
   }
   for (const p of a.prompt_actions ?? []) texts.push(p.label, p.prompt);
   for (const s of a.sources) texts.push(s.title, s.publisher, s.attribution);
@@ -90,7 +94,9 @@ for (const a of articles) {
   test(`article ${a.slug}: escaped text, citations and sources`, async ({ page }) => {
     await expectPage(page, articlePath(a));
     await expect(page.locator('h1')).toHaveText(a.title); // a tag in the title shows as text, not markup
-    await expect(page.getByText(a.summary, { exact: true }).first()).toBeVisible();
+    // v2 makes the summary optional: absent, no summary line (and no empty one) renders.
+    if (a.summary) await expect(page.getByText(a.summary, { exact: true }).first()).toBeVisible();
+    else await expect(page.locator('main [data-summary]')).toHaveCount(0);
     // textContent decodes entities and drops tags: an unescaped `<b>` in a field would vanish from it and fail here.
     const pageText = normalize(await page.locator('main').evaluate((m) => m.textContent ?? ''));
     for (const t of renderedTexts(a)) expect(pageText.includes(normalize(t)), `rendered as text: ${t.slice(0, 80)}`).toBe(true);
