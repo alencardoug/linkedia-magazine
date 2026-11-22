@@ -1,4 +1,4 @@
-// Reading modes (V2-06, D-081) on the example build, served with firebase.json (CSP included): light/dark from the
+// Reading modes (V2-06, D-081) on the single e2e build (example + v2 fixture content), served with firebase.json (CSP included): light/dark from the
 // system until the reader picks, black only when picked; the stored pick painted from the first frame (no flash,
 // checked on the first frame and on a real screenshot); the header button by keyboard and screen reader; invalid or
 // blocked storage; other tabs; no JS; covers and art-directed specials untouched; axe and 320 px in the three modes.
@@ -158,9 +158,32 @@ test.describe('the mode button', () => {
     await toggle(page).click();
     await expect(page.locator('html')).toHaveAttribute('data-mode', 'black');
     expect(await background(page)).toBe(BG.black);
+    // Restored from the back/forward cache with storage unreadable: this page view's pick stays.
+    await page.evaluate(() => dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+    await expect(page.locator('html')).toHaveAttribute('data-mode', 'black');
     await page.reload();
     await expect(page.locator('html')).not.toHaveAttribute('data-mode');
     expect(errors).toEqual([]);
+  });
+
+  test('a page restored from the back/forward cache follows storage again', async ({ page }) => {
+    const restore = () => page.evaluate(() => dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+    await page.emulateMedia({ colorScheme: 'light' });
+    await presetMode(page, 'black');
+    await page.goto('/revista');
+    const html = page.locator('html');
+    await expect(html).toHaveAttribute('data-mode', 'black');
+    // Cleared elsewhere, then an invalid value: no pick, so the system mode again (never a stale black).
+    for (const stored of [null, 'neon']) {
+      await page.evaluate(([k, v]) => (v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v)), [MODE_KEY, stored]);
+      await page.evaluate(() => document.documentElement.setAttribute('data-mode', 'black'));
+      await restore();
+      await expect(html).not.toHaveAttribute('data-mode');
+      await expect(toggle(page)).toHaveAccessibleName('Modo de leitura: Claro');
+    }
+    await page.evaluate((k) => localStorage.setItem(k, 'dark'), MODE_KEY);
+    await restore();
+    await expect(html).toHaveAttribute('data-mode', 'dark');
   });
 
   test('a pick in another tab reaches this one', async ({ context }) => {

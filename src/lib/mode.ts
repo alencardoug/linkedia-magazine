@@ -24,12 +24,21 @@ export function effectiveMode(pick: Mode | null, systemDark: boolean): Mode {
   return pick ?? (systemDark ? 'dark' : 'light');
 }
 
-function readPick(): Mode | null {
+/** The stored pick (`null`: none, or an invalid value), or `undefined` when storage cannot be read at all. */
+export function readPick(storage: Pick<Storage, 'getItem'> | null = null): Mode | null | undefined {
   try {
-    return parseMode(localStorage.getItem(MODE_KEY));
+    return parseMode((storage ?? localStorage).getItem(MODE_KEY));
   } catch {
-    return null;
+    return undefined;
   }
+}
+
+/**
+ * The pick to show after the page is restored from the back/forward cache: what storage says now (no pick: follow
+ * the system again); only when storage cannot be read does the pick of this page view stay.
+ */
+export function restoredPick(stored: Mode | null | undefined, onPage: Mode | null): Mode | null {
+  return stored === undefined ? onPage : stored;
 }
 
 function storePick(mode: Mode): void {
@@ -79,9 +88,9 @@ export function initModeToggle(): void {
   system.addEventListener('change', sync);
   // Another tab changed the pick, or the page came back from the back/forward cache.
   addEventListener('storage', (e) => {
-    if (e.key === MODE_KEY || e.key === null) apply(readPick());
+    if (e.key === MODE_KEY || e.key === null) apply(restoredPick(readPick(), parseMode(root.dataset.mode)));
   });
   addEventListener('pageshow', (e) => {
-    if (e.persisted) apply(readPick() ?? parseMode(root.dataset.mode));
+    if (e.persisted) apply(restoredPick(readPick(), parseMode(root.dataset.mode)));
   });
 }

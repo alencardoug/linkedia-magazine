@@ -14,10 +14,10 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
-    "e2e": "npm run e2e:fixtures && npm run e2e:content-v2",
-    "e2e:fixtures": "LINKEDIA_CONTENT_DIR=content/examples npm run build && playwright test",
+    "e2e": "npm run e2e:build && playwright test && npm run e2e:content-v2",
+    "e2e:build": "node scripts/ci/e2e-content.mjs && LINKEDIA_CONTENT_DIR=node_modules/.cache/linkedia-e2e-content npm run build",
     "e2e:content": "LINKEDIA_E2E=content playwright test",
-    "e2e:content-v2": "LINKEDIA_CONTENT_DIR=tests/fixtures/content-v2 npm run build && LINKEDIA_E2E=content LINKEDIA_SMOKE_FILES=\"$(ls tests/fixtures/content-v2/articles/*.json tests/fixtures/content-v2/editions/*.json)\" playwright test",
+    "e2e:content-v2": "LINKEDIA_E2E=content LINKEDIA_SMOKE_FILES=\"$(ls tests/fixtures/content-v2/articles/*.json tests/fixtures/content-v2/editions/*.json)\" playwright test",
     "gen:types": "node scripts/gen-types.mjs"
   },
   "dependencies": {

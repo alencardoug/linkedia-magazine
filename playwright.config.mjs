@@ -1,9 +1,11 @@
 // Browser suites against the Firebase Hosting emulator, so clean URLs, the 404 page and the headers of
 // firebase.json (CSP included) are the ones production serves; the demo- project id keeps the emulator offline
-// (no login, no real project). `npm run e2e` runs, in turn:
-// - e2e:fixtures — one build of the example content: smoke (1B-04), reading modes (V2-06, e2e/modes.spec.mjs:
-//   no flash, button, axe and 320 px in the three modes, screenshots), covers, specials and redirects;
-// - e2e:content-v2 — the v2 fixture content through the fast-path smoke (V2-05).
+// (no login, no real project). `npm run e2e` makes ONE build (V2-06) and runs two suites on it:
+// - e2e:build — scripts/ci/e2e-content.mjs merges content/examples and tests/fixtures/content-v2 into one content
+//   dir, then builds dist from it;
+// - the default suites: smoke (1B-04), reading modes (V2-06, e2e/modes.spec.mjs: no flash, button, axe and 320 px
+//   in the three modes, screenshots), covers, specials and redirects;
+// - e2e:content-v2 — the fast-path smoke on the v2 fixture's pages of that same dist (V2-05).
 // The weekly-theme suites and their production-build run (1C-01/1C-03) are retired (V2-06).
 // `npm run e2e:content` (LINKEDIA_E2E=content) runs only the fast-path smoke on an existing production dist
 // (V2-01, e2e/content-smoke.spec.mjs; CI's content-only path).

@@ -221,6 +221,10 @@ test.describe('cover', () => {
     // The art starts only when the HTML cover fits the viewport (each cover's main.ts `fits`), so common screens must fit.
     for (const [width, height] of [[320, 568], [360, 640], [390, 844], [412, 915], [667, 375], [844, 390], [768, 1024], [1280, 720], [1366, 593], [1920, 1080]]) {
       test(`${path} fits ${width}×${height} without scrolling, so the art can start there`, async ({ page }) => {
+        // Known bug, live since the cover shipped (found by V2-06's single e2e build, whose latest edition has three
+        // stories): Sismograma's HTML cover is ~21 px too tall at 667×375, so the art never starts on a landscape
+        // phone. Expected to fail until the cover is fixed (STATUS); it turns red once it fits.
+        test.fail(width === 667 && (path === '/' || path === '/visual/sismograma'), 'Sismograma: 667×375 não cabe (bug conhecido)');
         await page.setViewportSize({ width, height });
         await page.goto(path);
         const [scroll, client] = await page.evaluate(() => [

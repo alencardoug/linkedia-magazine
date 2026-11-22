@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
-import { effectiveMode, LEGACY_THEME_KEY, MODE_KEY, MODE_LABEL, MODES, nextMode, parseMode } from '../src/lib/mode';
+import { effectiveMode, LEGACY_THEME_KEY, MODE_KEY, MODE_LABEL, MODES, nextMode, parseMode, readPick, restoredPick } from '../src/lib/mode';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const BOOTSTRAP = readFileSync(join(ROOT, 'public/modo.js'), 'utf8');
@@ -43,6 +43,26 @@ describe('mode rules', () => {
     for (const bad of [null, undefined, '', 'Dark', ' dark', 'preto', 'current', 'baseline', 'lab-2026-w43', 1, {}]) {
       expect(parseMode(bad), String(bad)).toBeNull();
     }
+  });
+
+  it('reads the stored pick, telling "no pick" from "storage unreadable"', () => {
+    const storage = (value) => ({ getItem: (k) => (k === MODE_KEY ? value : 'black') });
+    expect(readPick(storage('black'))).toBe('black');
+    expect(readPick(storage(null))).toBeNull();
+    expect(readPick(storage('preto'))).toBeNull();
+    const blocked = {
+      getItem() {
+        throw new Error('SecurityError');
+      },
+    };
+    expect(readPick(blocked)).toBeUndefined();
+  });
+
+  it('after a back/forward restore, follows storage; keeps the page pick only when storage is unreadable', () => {
+    expect(restoredPick(null, 'black')).toBeNull(); // pick cleared or invalid elsewhere: follow the system again
+    expect(restoredPick('light', 'black')).toBe('light');
+    expect(restoredPick(undefined, 'black')).toBe('black');
+    expect(restoredPick(undefined, null)).toBeNull();
   });
 
   it('uses one versioned key, distinct from the retired theme slot key', () => {

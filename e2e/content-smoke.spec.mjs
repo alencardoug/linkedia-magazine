@@ -2,8 +2,8 @@
 // (scripts/ci/classify-changes.mjs). Served by the Hosting emulator from the production build (real content), so
 // it checks the exact output that deploys. LINKEDIA_SMOKE_FILES lists the changed content paths plus the unchanged
 // articles the change alters (listed by a changed edition, or tagged with a changed catalog entry), one per line.
-// `npm run e2e:content-v2` also runs it on the v2 fixture (tests/fixtures/content-v2), so v2's optional fields are
-// covered by the full suite (V2-05 review).
+// `npm run e2e:content-v2` also runs it on the v2 fixture's pages (tests/fixtures/content-v2) of the single e2e
+// build (V2-06), so v2's optional fields are covered by the full suite (V2-05 review).
 // - entry: the cover answers with the CSP, links to /revista, and every same-origin asset it references loads
 //   (no graphics checks: the art is not waited for);
 // - each listed article: every exported text field (title, summary, block text, list items, quotes, code, captions,
