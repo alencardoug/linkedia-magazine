@@ -154,7 +154,8 @@ export function classify({ event, payload, sha, git }) {
   try {
     return { ...result, affected: affectedArticles({ entries, base: range.base, head, git }) };
   } catch (err) {
-    return { ...result, mode: 'full', files: [], reason: `affected pages unresolved: ${err.message.split('\n')[0]}` };
+    const reason = `affected pages unresolved: ${err.message.split('\n')[0]}`;
+    return { mode: 'full', files: [], reason, covers: true, coversReason: reason };
   }
 }
 

@@ -111,7 +111,12 @@ describe('pages a content change alters without touching their files', () => {
   it('content that cannot be read runs full', () => {
     const before = commit('base');
     write('content/editions/2026-11-09.json', 'not json\n');
-    expect(push(before, commit('broken'))).toMatchObject({ mode: 'full', reason: expect.stringMatching(/^affected pages unresolved/) });
+    expect(push(before, commit('broken'))).toMatchObject({
+      mode: 'full',
+      reason: expect.stringMatching(/^affected pages unresolved/),
+      covers: true,
+      coversReason: expect.stringMatching(/^affected pages unresolved/),
+    });
   });
 });
 
