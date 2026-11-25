@@ -14,7 +14,7 @@ export interface Special {
   /** Reading time, for text pages only (a gallery has none). */
   readMinutes?: number;
   /**
-   * The canonical URL of a guide that lives on its own site (V2-02b): `/edicoes` links there instead of
+   * The canonical URL of a guide that lives on its own site (V2-02b, V2-13b): `/edicoes` links there instead of
    * `/especiais/<slug>`, and the magazine serves no page for it (the old URLs redirect in `firebase.json`).
    */
   href?: string;
@@ -30,8 +30,9 @@ export const SPECIALS: readonly Special[] = [
       'Guia prático para ligar políticas, riscos e decisões da empresa aos controles, testes e evidências da engenharia.',
     date: '2026-10-23',
     readMinutes: 15,
-    // 3-22 (D-076/D-077): re-staged in the S4 direction "Fio da Rastreabilidade", with a page-only dark mode.
-    artDirected: true,
+    // 3-22 (D-076/D-077): re-staged in the S4 direction "Fio da Rastreabilidade"; on its own site since V2-13b
+    // (repo gia). `/especiais/governanca-de-ia*` redirects there; only the old `esquema.js` stays here.
+    href: 'https://governaia.web.app/',
   },
   {
     // Interactive guide (owner, 2026-11-10: listed right below the AI guide), on its own site since V2-02b
@@ -59,6 +60,8 @@ export const SPECIALS: readonly Special[] = [
     summary:
       'As dez direções de arte desenhadas para a primeira tela do guia, cada uma no computador e no celular.',
     date: '2026-10-25',
+    // The guide's companion, with it on its own site since V2-13b.
+    href: 'https://governaia.web.app/dez-layouts',
   },
 ];
 

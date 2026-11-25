@@ -37,13 +37,12 @@ describe('GovernaProj redirect switch', () => {
       `${ROUTE}/qualquer`,
       `${ROUTE}/guia-completo/extra`,
       `${ROUTE}x`,
-      '/especiais/governanca-de-ia',
       '/especiais/perguntar-ao-banco',
     ]) {
       expect(match(path), path).toBeUndefined();
     }
-    // Absolute destinations only on the new origin: nothing points back at the magazine.
-    for (const r of redirects.filter((r) => r.destination.startsWith('https:'))) expect(r.destination.startsWith(`${SITE}/`)).toBe(true);
+    // Its rules point only at the new origin: nothing points back at the magazine.
+    for (const r of redirects.filter((r) => r.regex.startsWith(`^${ROUTE}`))) expect(r.destination.startsWith(`${SITE}/`)).toBe(true);
   });
 
   it('lists the guide on /edicoes at its canonical URL', () => {

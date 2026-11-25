@@ -222,7 +222,7 @@ test.describe('pages with their own palette', () => {
     await expect(page.getByRole('group', { name: 'Tema visual' })).toHaveCount(0);
     await expect(page.getByText('Tema de leitura')).toHaveCount(0);
     await expect(page.locator('[data-cover-item]').first()).toBeVisible();
-    for (const path of ['/', '/visual/sismograma', '/especiais/governanca-de-ia', '/especiais/perguntar-ao-banco']) {
+    for (const path of ['/', '/visual/sismograma', '/especiais/perguntar-ao-banco']) {
       await page.goto(path);
       await expect(page.locator('html'), path).not.toHaveAttribute('data-mode');
       await expect(page.locator('[data-mode-toggle]'), path).toHaveCount(0);

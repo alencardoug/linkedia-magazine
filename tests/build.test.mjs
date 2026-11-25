@@ -166,9 +166,7 @@ describe('static build', () => {
         'edicoes/2026-10-14.html',
         'materias/exemplo-de-materia-linkedia.html',
         ...CATEGORY_PAGES,
-        'especiais/governanca-de-ia.html',
         'especiais/perguntar-ao-banco.html',
-        'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
         '404.html',
       ].sort(),
@@ -185,24 +183,15 @@ describe('static build', () => {
       expect(html, page).not.toMatch(/<link[^>]+href="https?:/); // no third-party stylesheet or font
       if (ART_DIRECTED.includes(page)) {
         // Its own shell (3-22): no weekly theme or switcher, then only the page's own bundled files; no inline code.
-        // The AI guide (two schemes) first loads one classic same-origin script in <head> that applies the stored
-        // light/dark pick before the stylesheet; a one-scheme page (the NL→SQL special, dark) has none.
-        const scheme = page === 'especiais/governanca-de-ia.html';
-        expect(html, page).toMatch(
-          scheme
-            ? /^<!DOCTYPE html><html lang="pt-BR" data-special-layout><head><meta charset="utf-8"><script src="\/especiais\/governanca-de-ia\/esquema\.js"><\/script>/
-            : /^<!DOCTYPE html><html lang="pt-BR" data-special-layout><head><meta charset="utf-8"><meta name="viewport"/,
-        );
-        expect(html, page).toContain(`<meta name="color-scheme" content="${scheme ? 'light dark' : 'dark'}">`);
-        expect(html.includes('data-scheme-toggle'), page).toBe(scheme);
+        // The one art-directed page left (the NL→SQL special) has one dark scheme, so no scheme script or toggle;
+        // the two-scheme AI guide moved to its own site (V2-13b).
+        expect(html, page).toMatch(/^<!DOCTYPE html><html lang="pt-BR" data-special-layout><head><meta charset="utf-8"><meta name="viewport"/);
+        expect(html, page).toContain('<meta name="color-scheme" content="dark">');
+        expect(html, page).not.toContain('data-scheme-toggle');
         expect(html, page).not.toContain('data-theme');
         expect(html, page).not.toMatch(/<style[\s>]|\sstyle=/);
         const scripts = [...html.matchAll(/<script([^>]*)>/g)].map((m) => m[1]);
-        expect(scripts, page).toEqual([
-          ...(scheme ? [' src="/especiais/governanca-de-ia/esquema.js"'] : []),
-          expect.stringMatching(/^ type="module" src="\/_astro\/[\w.-]+\.js"$/),
-        ]);
-        expect(existsSync(join(out, 'especiais/governanca-de-ia/esquema.js')), page).toBe(true);
+        expect(scripts, page).toEqual([expect.stringMatching(/^ type="module" src="\/_astro\/[\w.-]+\.js"$/)]);
         expect(html, page).toContain('<a href="/revista" class="sl-brand" data-brand>');
         expect(html, page).toContain('<a href="/visual">Visual</a>');
         expect(html, page).not.toMatch(/[\p{L}.,;:]<a\s/u);
@@ -214,7 +203,7 @@ describe('static build', () => {
         expect(gz([scripts.at(-1).match(/src="\/([^"]+)"/)[1]]), page).toBeLessThanOrEqual(12 * 1024);
         const css = styles.map((f) => readFileSync(join(out, f), 'utf8')).join('');
         const fonts = [...new Set([...css.matchAll(/url\((\/_astro\/[^)]+\.woff2)\)/g)].map((m) => m[1]))];
-        expect(fonts.length, page).toBe(scheme ? 4 : 2);
+        expect(fonts.length, page).toBe(2);
         expect(fonts.reduce((n, f) => n + statSync(join(out, f)).size, 0), page).toBeLessThanOrEqual(300 * 1024);
         const preloads = [...html.matchAll(/<link rel="preload" href="([^"]+)" as="font"/g)].map((m) => m[1]);
         expect(preloads.length, page).toBe(2);
@@ -297,25 +286,20 @@ describe('static build', () => {
       expect(editions.indexOf(specialHref(s))).toBeLessThan(editions.indexOf('data-archive'));
     }
     expect(editions).toMatch(/<h2 id="especiais"[^>]*>Conteúdos especiais<\/h2>[\s\S]*<h2 id="por-data"[^>]*>Edições diárias<\/h2>/);
-    const special = read(out, 'especiais/governanca-de-ia.html');
-    expect(special).toContain('data-article="especial-governanca-de-ia"');
-    expect(special).toContain('<title>Guia Governança de IA: como implementar em ambientes corporativos');
-    expect(special).toContain('data-ai-note');
-    expect(special.match(/<h1[\s>]/g)).toHaveLength(1);
-    // Every in-page link lands on an id of the page; every outside link opens without referrer or opener.
-    const ids = new Set([...special.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
-    const anchors = [...special.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]);
-    expect(anchors.length).toBeGreaterThanOrEqual(14);
-    for (const id of anchors) expect(ids.has(id), id).toBe(true);
-    const outside = [...special.matchAll(/<a href="https:[^"]*"([^>]*)>/g)].map((m) => m[1]);
-    expect(outside.length).toBeGreaterThan(0);
-    for (const attrs of outside) expect(attrs).toContain('rel="noopener noreferrer"');
+    // The AI guide and its showcase live on their own site (V2-13b): linked there, no page left here; only the old
+    // `esquema.js` stays (an open or cached old page still loads it; tests/governaia-redirect.test.mjs).
+    const ai = editions.indexOf('"https://governaia.web.app/"');
+    const showcase = editions.indexOf('"https://governaia.web.app/dez-layouts"');
+    expect(ai).toBeGreaterThan(-1);
+    expect(editions).not.toMatch(/href="\/especiais\/(?:governanca-de-ia|dez-layouts-governanca-de-ia)/);
+    expect(existsSync(join(out, 'especiais/governanca-de-ia.html'))).toBe(false);
+    expect(existsSync(join(out, 'especiais/dez-layouts-governanca-de-ia.html'))).toBe(false);
+    expect(readdirSync(join(out, 'especiais/governanca-de-ia'))).toEqual(['esquema.js']);
     // The project guide (owner, 2026-11-10): right below the AI guide, linked at its own site (V2-02b). The magazine
     // keeps only the old snapshot's hashed modules and CSS (open or cached old pages), no page and no JSON.
-    const ai = editions.indexOf('/especiais/governanca-de-ia"');
     const projects = editions.indexOf('"https://governaproj.web.app/"');
     expect(projects).toBeGreaterThan(ai);
-    expect(projects).toBeLessThan(editions.indexOf('/especiais/dez-layouts-governanca-de-ia"'));
+    expect(projects).toBeLessThan(showcase);
     expect(editions).not.toContain('href="/especiais/governanca-de-projetos');
     expect(existsSync(join(out, 'especiais/governanca-de-projetos.html'))).toBe(false);
     const legacy = readdirSync(join(out, 'especiais/governanca-de-projetos'), { recursive: true, withFileTypes: true })
@@ -327,7 +311,7 @@ describe('static build', () => {
     // lands, every outside link without referrer or opener, the AI note.
     const nl = editions.indexOf('/especiais/perguntar-ao-banco"');
     expect(nl).toBeGreaterThan(projects);
-    expect(nl).toBeLessThan(editions.indexOf('/especiais/dez-layouts-governanca-de-ia"'));
+    expect(nl).toBeLessThan(showcase);
     const nlsql = read(out, 'especiais/perguntar-ao-banco.html');
     expect(nlsql).toContain('data-article="especial-perguntar-ao-banco"');
     expect(nlsql.match(/<h1[\s>]/g)).toHaveLength(1);
@@ -342,17 +326,8 @@ describe('static build', () => {
     for (const id of ['gcp', 'aws', 'azure', 'databricks', 'snowflake', 'claude-code', 'codex', 'gemini-cli']) {
       expect(nlsql, id).toContain(`<h4 id="${id}">`);
     }
-    // The sketch showcase (3-23, D-077): listed right after the guide; one desktop and one phone shot per sketch, small.
-    expect(editions.indexOf('/especiais/dez-layouts-governanca-de-ia')).toBeGreaterThan(editions.indexOf('/especiais/governanca-de-ia"'));
-    const layouts = read(out, 'especiais/dez-layouts-governanca-de-ia.html');
-    expect(layouts.match(/<h1[\s>]/g)).toHaveLength(1);
-    expect(layouts).toContain('href="/especiais/governanca-de-ia"');
-    const imgs = [...layouts.matchAll(/<img[^>]*data-device="(desktop|celular)"[^>]*src="([^"]+\.webp)"/g)];
-    expect(imgs.filter((m) => m[1] === 'desktop')).toHaveLength(10);
-    expect(imgs.filter((m) => m[1] === 'celular')).toHaveLength(10);
-    const bytes = imgs.map((m) => statSync(join(out, m[2])).size);
-    expect(Math.max(...bytes)).toBeLessThanOrEqual(100 * 1024);
-    expect(bytes.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(1.5 * 1024 * 1024);
+    // The sketch showcase (3-23, D-077): after the guide, last of the specials.
+    expect(showcase).toBeGreaterThan(nl);
     const cover = read(out, 'index.html');
     expect(cover).toContain(`<html lang="pt-BR" data-cover="${CURRENT_COVER}">`);
     expect(cover).toContain(`data-cover-art="${CURRENT_COVER}"`); // the page imports the registry's current cover
@@ -475,9 +450,7 @@ describe('static build', () => {
         ...COVERS.map((c) => `visual/${c.slug}.html`),
         'edicoes.html',
         ...CATEGORY_PAGES,
-        'especiais/governanca-de-ia.html',
         'especiais/perguntar-ao-banco.html',
-        'especiais/dez-layouts-governanca-de-ia.html',
         'sobre.html',
         '404.html',
       ].sort(),

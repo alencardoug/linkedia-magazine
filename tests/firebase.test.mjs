@@ -34,9 +34,14 @@ describe('firebase.json', () => {
     expect(hosting.rewrites).toBeUndefined(); // static files only, no SPA fallback
     // The only redirects: the old /capas addresses (D-069), one short link the owner asked for (D-072) and the two
     // v1 category slugs merged into "IA na prática" (V2-05, D-084), with or without .html or a trailing slash, then
-    // the project guide's move to its own site (V2-02b, 302 while validating; tests/governaproj-redirect.test.mjs).
-    const [archive, cover, meta, categories, ...gproj] = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
-    expect(hosting.redirects).toHaveLength(7);
+    // the project guide's move to its own site (V2-02b, 302 while validating; tests/governaproj-redirect.test.mjs),
+    // then the AI guide's (V2-13b, same; tests/governaia-redirect.test.mjs).
+    const rules = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
+    const [archive, cover, meta, categories] = rules;
+    const gproj = rules.slice(4, 7);
+    const gia = rules.slice(7);
+    expect(hosting.redirects).toHaveLength(9);
+    expect(gia.every((r) => r.destination.startsWith('https://governaia.web.app/'))).toBe(true);
     expect([archive, cover, meta, categories].every((r) => r.type === 301)).toBe(true);
     expect(categories.destination).toBe('/categorias/ia-na-pratica');
     for (const slug of ['engenharia-de-ia', 'conhecimento-de-ia']) {

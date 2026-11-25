@@ -32,6 +32,16 @@
         "regex": "^/especiais/governanca-de-projetos/conteudo\\.json$",
         "destination": "https://governaproj.web.app/conteudo.json",
         "type": 302
+      },
+      {
+        "regex": "^/especiais/governanca-de-ia(?:\\.html|/|/index\\.html)?$",
+        "destination": "https://governaia.web.app/",
+        "type": 302
+      },
+      {
+        "regex": "^/especiais/dez-layouts-governanca-de-ia(?:\\.html)?/?$",
+        "destination": "https://governaia.web.app/dez-layouts",
+        "type": 302
       }
     ],
     "headers": [
