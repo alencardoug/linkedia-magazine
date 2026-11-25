@@ -1,5 +1,5 @@
 // GovernaIA redirect switch (V2-13b) on the Hosting emulator: the old URLs of the AI guide and its showcase answer
-// 302 with the new page in `Location`, a browser keeps the fragment across the redirect, and the old `esquema.js`
+// 301 with the new page in `Location`, a browser keeps the fragment across the redirect, and the old `esquema.js`
 // (loaded by an old page opened or cached before the switch) is still served with 200 and a JavaScript MIME type.
 // The new site is never contacted: its pages are stubbed in the browser.
 import { createHash } from 'node:crypto';
@@ -9,10 +9,10 @@ import { OLD_TO_NEW, ROUTE, SCHEME_SCRIPT, SCHEME_SCRIPT_SHA256, SHOWCASE, SITE 
 // A JavaScript MIME type (production serves text/javascript, the emulator application/javascript).
 const JS = /^(?:text|application)\/javascript\b/;
 
-test('every old URL redirects (302) to its page on the new site; unknown paths stay 404', async ({ request }) => {
+test('every old URL redirects (301) to its page on the new site; unknown paths stay 404', async ({ request }) => {
   for (const [from, to] of Object.entries(OLD_TO_NEW)) {
     const res = await request.get(from, { maxRedirects: 0 });
-    expect(res.status(), from).toBe(302);
+    expect(res.status(), from).toBe(301);
     expect(res.headers().location, from).toBe(to);
   }
   for (const path of [`${ROUTE}/qualquer`, `${SHOWCASE}/extra`]) {

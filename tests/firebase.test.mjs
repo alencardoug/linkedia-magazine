@@ -34,7 +34,7 @@ describe('firebase.json', () => {
     expect(hosting.rewrites).toBeUndefined(); // static files only, no SPA fallback
     // The only redirects: the old /capas addresses (D-069), one short link the owner asked for (D-072) and the two
     // v1 category slugs merged into "IA na prática" (V2-05, D-084), with or without .html or a trailing slash, then
-    // the project guide's move to its own site (V2-02b, 302 while validating; tests/governaproj-redirect.test.mjs),
+    // the project guide's move to its own site (V2-02b, 301 since the owner accepted it on 2026-11-25; tests/governaproj-redirect.test.mjs),
     // then the AI guide's (V2-13b, same; tests/governaia-redirect.test.mjs).
     const rules = hosting.redirects.map((r) => ({ ...r, re: new RegExp(r.regex) }));
     const [archive, cover, meta, categories] = rules;

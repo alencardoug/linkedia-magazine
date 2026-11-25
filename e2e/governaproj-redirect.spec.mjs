@@ -1,4 +1,4 @@
-// GovernaProj redirect switch (V2-02b) on the Hosting emulator: the old URLs answer 302 with the new page in
+// GovernaProj redirect switch (V2-02b) on the Hosting emulator: the old URLs answer 301 with the new page in
 // `Location`, a browser keeps the fragment across the redirect, and an old page (the pre-switch snapshot HTML, served
 // here as a fixture with the production headers) still loads every module and stylesheet from the kept
 // `assets/<hash>/`. The new site is never contacted: its pages are stubbed in the browser.
@@ -20,10 +20,10 @@ const HEADERS = Object.fromEntries(
 const JS = /^(?:text|application)\/javascript\b/;
 const MIME = { mjs: JS, js: JS, css: /^text\/css\b/ };
 
-test('every old URL redirects (302) to its page on the new site; unknown paths stay 404', async ({ request }) => {
+test('every old URL redirects (301) to its page on the new site; unknown paths stay 404', async ({ request }) => {
   for (const [from, to] of Object.entries(OLD_TO_NEW)) {
     const res = await request.get(from, { maxRedirects: 0 });
-    expect(res.status(), from).toBe(302);
+    expect(res.status(), from).toBe(301);
     expect(res.headers().location, from).toBe(to);
   }
   expect((await request.get(`${ROUTE}/qualquer`, { maxRedirects: 0 })).status()).toBe(404);

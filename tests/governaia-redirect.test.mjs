@@ -21,11 +21,11 @@ const files = (dir) =>
     .map((e) => join(e.parentPath, e.name).slice(ROOT.length + 1));
 
 describe('GovernaIA redirect switch', () => {
-  it('sends every mapped old URL to its page on the new site, temporarily while validating', () => {
+  it('sends every mapped old URL to its page on the new site, permanently (owner accepted the switch, 2026-11-25)', () => {
     for (const [from, to] of Object.entries(OLD_TO_NEW)) {
       const rule = match(from);
       expect(rule?.destination, from).toBe(to);
-      expect(rule.type, from).toBe(302);
+      expect(rule.type, from).toBe(301);
     }
   });
 
