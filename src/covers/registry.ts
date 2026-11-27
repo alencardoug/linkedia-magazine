@@ -22,6 +22,15 @@ export interface CoverMeta {
 
 export const COVERS: readonly CoverMeta[] = [
   {
+    slug: 'transe',
+    title: 'Transe',
+    weekId: '2026-W48',
+    summary:
+      'Grupos de pontos atravessam o papel, giram ao redor do ponteiro e se juntam para formar LinkedIA. ' +
+      'Na entrada, a rede se espalha e um clarão parte do centro.',
+    credit: 'rede de partículas simulada em tempo real no seu aparelho, em código escrito por IA, sem imagens',
+  },
+  {
     slug: 'sismograma',
     title: 'Sismograma',
     weekId: '2026-W47',
@@ -31,6 +40,7 @@ export const COVERS: readonly CoverMeta[] = [
     credit:
       'linhas elásticas simuladas em tempo real (molas, ruído coerente e ondas) no seu aparelho, em código escrito ' +
       'por IA, sem imagens',
+    edition: '2026-11-09',
   },
   {
     slug: 'micelio',
@@ -71,7 +81,7 @@ export const COVERS: readonly CoverMeta[] = [
 ];
 
 /** The cover shown at `/`. */
-export const CURRENT_COVER = 'sismograma';
+export const CURRENT_COVER = 'transe';
 
 export function coverBySlug(slug: string): CoverMeta {
   const cover = COVERS.find((c) => c.slug === slug);

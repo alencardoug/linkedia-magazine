@@ -19,7 +19,7 @@ const PAGES = [
 ];
 const HINT_HTML = 'Clique ou toque em qualquer lugar para entrar.';
 /** Covers drawn with Canvas 2D: their art runs in headless Chromium, so their pages go live in these specs. */
-const CANVAS_2D = new Set(['sismograma']);
+const CANVAS_2D = new Set(['sismograma', 'transe']);
 
 test.describe('cover', () => {
   for (const [path, slug] of PAGES) {
@@ -209,7 +209,7 @@ test.describe('cover', () => {
     expect((await page.goto('/capas/nao-existe'))?.status()).toBe(404); // redirected, then the 404 page
   });
 
-  for (const [path] of PAGES) {
+  for (const [path, slug] of PAGES) {
     test(`${path} at 320 px: no horizontal scroll, no serious axe violation, the entry link visible`, async ({ page }) => {
       await page.setViewportSize({ width: 320, height: 640 });
       await page.goto(path);
@@ -224,9 +224,10 @@ test.describe('cover', () => {
         // Known bug, live since the cover shipped (found by V2-06's single e2e build, whose latest edition has three
         // stories): Sismograma's HTML cover is ~21 px too tall at 667×375, so the art never starts on a landscape
         // phone. Expected to fail until the cover is fixed (STATUS); it turns red once it fits.
-        test.fail(width === 667 && (path === '/' || path === '/visual/sismograma'), 'Sismograma: 667×375 não cabe (bug conhecido)');
         await page.setViewportSize({ width, height });
         await page.goto(path);
+        test.fail(width === 667 && slug === 'sismograma' && await page.locator('.sg-hl').count() > 0,
+          'Sismograma: 667×375 não cabe com manchetes (bug conhecido)');
         const [scroll, client] = await page.evaluate(() => [
           [document.body.scrollWidth, document.body.scrollHeight],
           [document.documentElement.clientWidth, document.documentElement.clientHeight],
@@ -241,6 +242,111 @@ test.describe('cover', () => {
       expect(await axeBlocking(page)).toEqual([]);
     });
   }
+});
+
+test.describe('Transe', () => {
+  const PATH = '/visual/transe';
+  const live = (page) => expect(page.locator('html')).toHaveAttribute('data-art', 'live');
+  const snapshot = (page) => page.locator('[data-canvas]').evaluate((canvas) => canvas.toDataURL());
+  const fixedTime = new Date('2026-11-27T15:00:00Z');
+
+  test('bursts first, lights the centre next, and opens the edition', async ({ page }) => {
+    await page.clock.install({ time: fixedTime });
+    await page.clock.pauseAt(new Date(fixedTime.getTime() + 1000));
+    await page.goto(PATH);
+    await live(page);
+    const sample = () => page.locator('[data-canvas]').evaluate((canvas) => {
+      const ctx = canvas.getContext('2d');
+      const pixel = (x, y) => [...ctx.getImageData(Math.floor(canvas.width * x), Math.floor(canvas.height * y), 1, 1).data];
+      return { centre: pixel(0.5, 0.5), corner: pixel(0.02, 0.02) };
+    });
+    const opening = await snapshot(page);
+    await page.mouse.click(110, 90);
+    await expect(page.locator('html')).toHaveAttribute('data-leaving', '');
+    await page.clock.runFor(130);
+    expect(await snapshot(page)).not.toBe(opening);
+    expect((await sample()).centre[0]).toBeLessThan(225);
+    await page.clock.runFor(250);
+    const flash = await sample();
+    expect(flash.centre[0]).toBeGreaterThan(245);
+    expect(flash.centre[3]).toBeGreaterThan(220);
+    expect(flash.corner[3]).toBeLessThan(flash.centre[3]);
+    await page.clock.runFor(600);
+    await expect(page).toHaveURL(ENTERED);
+  });
+
+  test('opens by the deadline when animation frames stop', async ({ page }) => {
+    await page.clock.install({ time: fixedTime });
+    await page.clock.pauseAt(new Date(fixedTime.getTime() + 1000));
+    await page.addInitScript(() => { window.requestAnimationFrame = () => 1; });
+    await page.goto(PATH);
+    await live(page);
+    await page.mouse.click(110, 90);
+    await expect(page.locator('html')).toHaveAttribute('data-leaving', '');
+    await page.clock.runFor(850);
+    await expect(page).toHaveURL(/\/visual\/transe$/);
+    await page.clock.runFor(150);
+    await expect(page).toHaveURL(ENTERED);
+  });
+
+  test('rests on the name after inactivity and wakes on pointer movement', async ({ page }) => {
+    await page.clock.install({ time: fixedTime });
+    await page.clock.pauseAt(new Date(fixedTime.getTime() + 1000));
+    await page.goto(PATH);
+    await live(page);
+    await page.mouse.move(640, 360);
+    await page.clock.fastForward(120_100);
+    await expect(page.locator('html')).toHaveAttribute('data-rest', '');
+    expect(await page.locator('h1').textContent()).toBe('LinkedIA');
+    const still = await snapshot(page);
+    await page.clock.runFor(250);
+    expect(await snapshot(page)).toBe(still);
+    await page.mouse.move(700, 390);
+    await page.clock.runFor(200);
+    await expect(page.locator('html')).not.toHaveAttribute('data-rest', /.*/);
+    expect(await snapshot(page)).not.toBe(still);
+  });
+
+  test('a held touch stays on the cover; a brief tap enters', async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    try {
+      await page.goto(PATH);
+      await live(page);
+      const cdp = await context.newCDPSession(page);
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 130, y: 180 }] });
+      await page.waitForTimeout(650);
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await expect(page).toHaveURL(/\/visual\/transe$/);
+      await page.touchscreen.tap(210, 330);
+      await expect(page).toHaveURL(ENTERED);
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('with reduced motion it shows a still frame and enters immediately', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(PATH);
+    await live(page);
+    await expect(page.locator('html')).toHaveAttribute('data-rest', '');
+    await page.mouse.click(110, 90);
+    await expect(page).toHaveURL(ENTERED);
+  });
+
+  test('with JavaScript disabled, edition text and the entry link work', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    try {
+      const page = await context.newPage();
+      await page.goto(PATH);
+      await expect(page.locator('time')).toBeVisible();
+      await expect(page.locator('.transe-edition li').first()).toBeVisible();
+      await page.getByRole('link', { name: /Entrar na revista/ }).click();
+      await expect(page).toHaveURL(ENTERED);
+    } finally {
+      await context.close();
+    }
+  });
 });
 
 test.describe('Sismograma', () => {
@@ -264,10 +370,17 @@ test.describe('Sismograma', () => {
     expect(lines).toBeGreaterThanOrEqual(15);
     expect(lines).toBeLessThanOrEqual(25);
     await expect(page.locator('.sg-work')).toContainText(`${lines} linhas respiram`);
-    await expect(page.locator('.sg-work time')).toHaveAttribute('datetime', /^\d{4}-\d{2}-\d{2}$/);
+    const edition = COVERS.find((cover) => cover.slug === 'sismograma').edition;
+    const available = (await page.request.get(`/edicoes/${edition}`)).ok();
+    if (available) {
+      await expect(page.locator('.sg-work time')).toHaveAttribute('datetime', edition);
+      await expect(page.locator('.sg-hl')).not.toHaveCount(0);
+    } else {
+      await expect(page.locator('.sg-work time')).toHaveCount(0);
+      await expect(page.locator('.sg-empty')).toHaveText('Nenhuma edição publicada ainda.');
+    }
     await expect(page.locator('[data-room]')).toHaveAttribute('aria-hidden', 'true');
     await expect(page.locator('[data-chart]')).toHaveAttribute('aria-hidden', 'true');
-    await expect(page.locator('.sg-hl')).not.toHaveCount(0);
   });
 
   test('the sheet is plotted and keeps moving; a second look differs from the first', async ({ page }) => {

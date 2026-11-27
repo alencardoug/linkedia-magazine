@@ -8,6 +8,7 @@ const ROUTES = [
   '/',
   '/revista',
   '/visual',
+  '/visual/transe',
   '/visual/sismograma',
   '/visual/micelio',
   '/visual/duas-sombras',
@@ -28,6 +29,7 @@ const ROUTES = [
 // the reading-page loops below skip them so the same check does not run twice (V2-06b).
 const OWN_SPEC = new Set([
   '/',
+  '/visual/transe',
   '/visual/sismograma',
   '/visual/micelio',
   '/visual/duas-sombras',

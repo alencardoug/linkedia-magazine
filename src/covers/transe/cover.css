@@ -1,0 +1,213 @@
+html[data-cover='transe'] {
+  color-scheme: light;
+  --cover-bg: #eae6a7;
+  --cover-ink: #221810;
+  --cover-fine: #51482b;
+  --cover-link: #3d311c;
+  --cover-focus: var(--cover-ink);
+  --cover-font: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+  --cover-mono: var(--cover-font);
+}
+
+html[data-cover='transe'] .transe {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(4rem, 1fr) auto auto;
+  gap: 0.75rem;
+  padding: clamp(0.75rem, 3vh, 1.7rem) clamp(1rem, 5vw, 4.5rem) 0.3rem;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html[data-cover='transe'] .transe-sheet {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--cover-bg);
+}
+
+html[data-cover='transe'] .transe-sheet::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(to bottom, rgba(40, 32, 10, 0.048) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 48% 45%, transparent 30%, rgba(40, 32, 10, 0.06) 100%);
+}
+
+html[data-cover='transe'] :is(.transe-grain, .transe-canvas) {
+  position: absolute;
+  opacity: 0;
+}
+
+html[data-cover='transe'] .transe-grain {
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+}
+
+html[data-cover='transe'] .transe-canvas {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+html[data-cover='transe'] :is(.transe-folio, .transe-label, .transe-edition, .transe-actions) {
+  position: relative;
+  z-index: 3;
+  pointer-events: none;
+}
+
+html[data-cover='transe'] :where(.transe p, .transe ul, .transe h1, .transe h2) {
+  margin: 0;
+}
+
+html[data-cover='transe'] .transe-folio {
+  grid-row: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.2rem;
+  font-size: 0.65rem;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+html[data-cover='transe'] .transe-folio p + p {
+  text-align: right;
+}
+
+html[data-cover='transe'] .transe-label {
+  grid-row: 3;
+  padding-bottom: 0.5rem;
+}
+
+html[data-cover='transe'] .transe-kicker {
+  margin-bottom: 0.45rem;
+  font-size: 0.62rem;
+  line-height: 1.5;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+html[data-cover='transe'] .transe-label h1 {
+  margin: 0 0 0.6rem -0.16rem;
+  font-size: clamp(2rem, 5vw, 3.0625rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.08em;
+}
+
+html[data-cover='transe'] .transe-work {
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+}
+
+html[data-cover='transe'] .transe-work cite {
+  font-style: normal;
+}
+
+html[data-cover='transe'] .transe-caption {
+  max-width: 31ch;
+  color: var(--cover-fine);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+html[data-cover='transe'] .transe-edition {
+  grid-row: 2;
+  align-self: center;
+  max-width: 60ch;
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+html[data-cover='transe'] .transe-edition h2 {
+  font-size: 0.8rem;
+}
+
+html[data-cover='transe'] .transe-edition ul {
+  padding-inline-start: 1.1rem;
+}
+
+html[data-cover='transe'] .transe-edition li {
+  margin-block: 0.25rem;
+}
+
+html[data-cover='transe'] .transe-actions {
+  grid-row: 4;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.2rem 1rem;
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+html[data-cover='transe'] .transe-enter {
+  pointer-events: auto;
+  color: var(--cover-link);
+  font-weight: 700;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+html[data-cover='transe'] .transe-enter::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  cursor: pointer;
+}
+
+html[data-cover='transe'][data-art='live'] body {
+  touch-action: pinch-zoom;
+}
+
+html[data-cover='transe'][data-art='live'] .transe-grain {
+  opacity: 0.9;
+}
+
+html[data-cover='transe'][data-art='live'] .transe-canvas {
+  opacity: 1;
+}
+
+/* The full edition text stays in the document and accessibility tree while the live art is visible. */
+html[data-cover='transe'][data-art='live'] .transe-edition {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+html[data-cover='transe'][data-leaving] .transe-sheet {
+  z-index: 5;
+}
+
+@media (max-width: 28rem), (max-height: 27rem) {
+  html[data-cover='transe'] .transe {
+    gap: 0.4rem;
+  }
+
+  html[data-cover='transe'] .transe-folio {
+    gap: 0.65rem;
+    font-size: 0.58rem;
+  }
+
+  html[data-cover='transe'] .transe-kicker {
+    letter-spacing: 0.045em;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-cover='transe'] .transe-sheet {
+    display: none;
+  }
+}

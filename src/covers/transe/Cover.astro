@@ -1,0 +1,50 @@
+---
+import './cover.css';
+import type { EditionWithArticles } from '../../lib/content';
+import { longDate } from '../../lib/labels';
+
+interface Props {
+  latest: EditionWithArticles | undefined;
+}
+const { latest } = Astro.props;
+const date = latest?.edition.edition_date;
+const articles = latest?.articles ?? [];
+const lead = articles.slice(0, 3);
+const more = articles.length - lead.length;
+---
+
+<main class="transe" data-transe data-cover-art="transe">
+  <div class="transe-sheet" data-room aria-hidden="true">
+    <canvas class="transe-grain" data-grain></canvas>
+    <canvas class="transe-canvas" data-canvas></canvas>
+  </div>
+  <header class="transe-folio">
+    <p>Observatório de inteligência artificial</p>
+    {date && <p><time datetime={date}>{longDate(date)}</time></p>}
+  </header>
+  <div class="transe-label" data-label>
+    <p class="transe-kicker">Revista diária · inteligência artificial</p>
+    <h1>LinkedIA</h1>
+    <p class="transe-work"><cite>Transe</cite></p>
+    <p class="transe-caption">A mesma rede se desfaz, se reconhece e volta a mudar.</p>
+  </div>
+  <section class="transe-edition" aria-labelledby="transe-edition-heading">
+    <h2 id="transe-edition-heading">Nesta edição</h2>
+    {lead.length > 0 ? (
+      <ul>
+        {lead.map((article) => <li>{article.title}</li>)}
+      </ul>
+    ) : <p>Nenhuma edição publicada ainda.</p>}
+    {more > 0 && <p>+ {more} {more === 1 ? 'matéria' : 'matérias'}</p>}
+  </section>
+  <p class="transe-actions">
+    <span data-hint>Clique ou toque em qualquer lugar para entrar.</span>
+    <a class="transe-enter" href="/revista" draggable="false" data-enter>Entrar na revista <span aria-hidden="true">→</span></a>
+  </p>
+</main>
+
+<script>
+  import { boot } from './main';
+
+  boot();
+</script>

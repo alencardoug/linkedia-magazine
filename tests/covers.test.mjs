@@ -8,6 +8,7 @@ import * as entrySingularidade from '../src/covers/singularidade/controller';
 import * as entryDuasSombras from '../src/covers/duas-sombras/controller';
 import * as entryMicelio from '../src/covers/micelio/controller';
 import * as entrySismograma from '../src/covers/sismograma/controller';
+import * as entryTranse from '../src/covers/transe/controller';
 import {
   BIRTH_DELAY_MS,
   BIRTH_MS,
@@ -25,6 +26,7 @@ import * as qualitySingularidade from '../src/covers/singularidade/quality';
 import * as qualityDuasSombras from '../src/covers/duas-sombras/quality';
 import * as qualityMicelio from '../src/covers/micelio/quality';
 import * as qualitySismograma from '../src/covers/sismograma/quality';
+import * as qualityTranse from '../src/covers/transe/quality';
 import { isSoftwareRenderer as softwareSingularidade } from '../src/covers/singularidade/renderer';
 import { isSoftwareRenderer as softwareDuasSombras } from '../src/covers/duas-sombras/renderer';
 import { isSoftwareRenderer as softwareMicelio } from '../src/covers/micelio/renderer';
@@ -76,6 +78,7 @@ for (const [cover, { EntryController, LONG_PRESS_MS, TAP_SLOP_PX }] of [
   ['duas-sombras', entryDuasSombras],
   ['micelio', entryMicelio],
   ['sismograma', entrySismograma],
+  ['transe', entryTranse],
 ]) {
   describe(`entry controller (${cover})`, () => {
     it('lets the link navigate natively without live art, and plays the exit with it', () => {
@@ -218,6 +221,7 @@ for (const [cover, { calibratedScale, createQuality, initialScale, MAX_SCALE, MI
   ['duas-sombras', qualityDuasSombras, softwareDuasSombras],
   ['micelio', qualityMicelio, softwareMicelio],
   ['sismograma', qualitySismograma, null], // Canvas 2D: no WebGL renderer to refuse; the scale drives its point density
+  ['transe', qualityTranse, null],
 ]) {
   describe(`adaptive quality (${cover})`, () => {
     it('starts from a pixel budget within the scale limits', () => {
